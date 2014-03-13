@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2014 deib-polimi
+    Contact: deib-polimi <marco.miglierina@polimi.it>
+
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+
+           http://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
+-->
+<monitoringRules
+	xmlns="http://www.modaclouds.eu/xsd/1.0/monitoring_rules_schema"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.modaclouds.eu/xsd/1.0/monitoring_rules_schema ../monitoringrules/monitoring_rules_schema.xsd">
+	<monitoringRule id="mr_1" label="CPU Utilization Rule"
+		metricName="cpu_utilization" relatedQosConstraintId="qs_1" timeStep="60"
+		timeWindow="60" startEnabled="true" samplingProbability="1"
+		samplingTime="5">
+		<monitoredTargets>
+			<monitoredTarget id="tr_1" />
+		</monitoredTargets>
+		<metricAggregation groupingCategoryName="region"
+			aggregateFunction="average" />
+		<condition>METRIC &gt;= 0.6</condition>
+		<actions>
+			<action name="notify_violation" />
+		</actions>
+	</monitoringRule>
+	<monitoringRule id="mr_2" label="Percentile Monitoring Rule"
+		metricName="response_time" relatedQosConstraintId="qs_2" timeStep="60"
+		startEnabled="true" timeWindow="60" samplingProbability="1"
+		samplingTime="5">
+		<monitoredTargets>
+			<monitoredTarget id="tr_2" />
+		</monitoredTargets>
+		<metricAggregation groupingCategoryName="cloud_provider"
+			aggregateFunction="percentile">
+			<parameter>95</parameter>
+		</metricAggregation>
+		<condition>METRIC &gt;= 1</condition>
+		<actions>
+			<action name="notify_violation" />
+		</actions>
+	</monitoringRule>
+	<monitoringRule id="mr_3" label="Gold Percentile Monitoring Rule"
+		parentMonitoringRuleId="mr_2" samplingProbability="1" samplingTime="5">
+		<monitoredTargets>
+			<monitoredTarget id="tr_3" />
+		</monitoredTargets>
+		<metricAggregation inherited="true" />
+		<condition>METRIC &gt;= 0.3</condition>
+		<actions inherited="true" />
+	</monitoringRule>
+	<monitoringRule id="mr_4" label="Unhealthy Cloud"
+		timeStep="60" startEnabled="true" timeWindow="300"
+		samplingProbability="1" samplingTime="5">
+		<monitoredTargets />
+		<metricAggregation />
+		<condition>maxOccurrence(mr_1,0) &amp;&amp; minOccurrence(mr_3,3)</condition>
+		<actions>
+			<action name="notify_violation" />
+		</actions>
+	</monitoringRule>
+	<monitoringRule id="mr_5" label="Frontend average response time"
+		metricName="response_time" relatedQosConstraintId="qs_3" startEnabled="true"
+		timeStep="60" timeWindow="60" samplingProbability="1" samplingTime="5">
+		<monitoredTargets>
+			<monitoredTarget id="tr_3" />
+		</monitoredTargets>
+		<metricAggregation groupingCategoryName="cloud_provider"
+			aggregateFunction="average" />
+		<condition>METRIC &gt;= 300</condition>
+		<actions>
+			<action name="notify_violation" />
+		</actions>
+	</monitoringRule>
+	<monitoringRule id="mr_6"
+		label="Fine grain frontend average response time"
+		parentMonitoringRuleId="mr_5" startEnabled="false"
+		samplingProbability="1" samplingTime="5">
+		<monitoredTargets inherited="true" />
+		<metricAggregation inherited="true"
+			groupingCategoryName="method" />
+		<condition>parentCondition</condition>
+		<actions>
+			<action name="notify_violation" />
+		</actions>
+	</monitoringRule>
+	<monitoringRule id="mr_7" label="Enable fine grain RT"
+		timeWindow="300" startEnabled="true" timeStep="60"
+		samplingProbability="1" samplingTime="5">
+		<condition>minOccurrence(mr_5,5)</condition>
+		<actions>
+			<action targetRuleID="mr_6" name="enable_monitoring_rule" />
+		</actions>
+	</monitoringRule>
+	<monitoringRule id="mr_8" label="Disable fine grain RT"
+		timeWindow="300" startEnabled="true" timeStep="60"
+		samplingProbability="1" samplingTime="5">
+		<condition>maxOccurrence(mr_5,0)</condition>
+		<actions>
+			<action targetRuleID="mr_6" name="disable_monitoring_rule" />
+		</actions>
+	</monitoringRule>
+	<monitoringRule id="mr_9" label="ResponseTime"
+		metricName="response_time" relatedQosConstraintId="qs_10"
+		startEnabled="true" timeStep="60" timeWindow="60" samplingProbability="1"
+		samplingTime="10">
+		<monitoredTargets>
+			<monitoredTarget id="_GdmYEMhsEeKON4DtRoKCMw" />
+		</monitoredTargets>
+		<metricAggregation groupingCategoryName="cloud_provider"
+			aggregateFunction="average" />
+		<condition>METRIC &gt; 2000</condition>
+		<actions>
+			<action name="notify_violation" />
+			<action name="set_sampling_probability" targetRuleID="mr_8">
+				<parameter>1.0</parameter>
+			</action>
+		</actions>
+	</monitoringRule>
+</monitoringRules>
