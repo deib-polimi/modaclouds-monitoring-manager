@@ -1,18 +1,17 @@
 /**
- * Copyright 2014 deib-polimi
- * Contact: deib-polimi <marco.miglierina@polimi.it>
+ * Copyright 2014 deib-polimi Contact: deib-polimi <marco.miglierina@polimi.it>
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
@@ -42,94 +41,109 @@ import org.slf4j.LoggerFactory;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
+import java.util.UUID;
 
 public class RuleManager {
 
-	private Logger logger = LoggerFactory
-			.getLogger(RuleManager.class.getName());
+    private Logger logger = LoggerFactory
+            .getLogger(RuleManager.class.getName());
 
-	private Map<String, CSquery> queries;
-	private Map<String, MonitoringRule> rules;
-	private Map<String, List<String>> ruleQueriesMap;
-	private String knowledgeBaseURL;
-	private RuleValidator validator;
+    private Map<String, CSquery> installedQueries;
+    private Map<String, MonitoringRule> installedRules;
+    private Map<String, List<String>> ruleQueriesMap;
+    private RuleValidator validator;
 
-	public RuleManager(String knowledgeBaseURL) throws ConfigurationException,
-			JAXBException {
-		queries = new HashMap<String, CSquery>();
-		rules = new HashMap<String, MonitoringRule>();
-		ruleQueriesMap = new HashMap<String, List<String>>();
-		this.knowledgeBaseURL = knowledgeBaseURL;
-		validator = new RuleValidator();
-	}
+    public RuleManager() throws ConfigurationException,
+            JAXBException {
+        installedQueries = new HashMap<String, CSquery>();
+        installedRules = new HashMap<String, MonitoringRule>();
+        ruleQueriesMap = new HashMap<String, List<String>>();
+        validator = new RuleValidator();
+    }
 
-	public void installRule(MonitoringRule rule) {
-		try {
-			CSquery query = CSquery.createDefaultQuery(rule.getId());
-			query.setNsPrefix("xsd", XSD.getURI())
-					.setNsPrefix("rdf", RDF.getURI())
-					.setNsPrefix("rdfs", RDFS.getURI())
-					.setNsPrefix("mo", MO.getURI());
+    public List<String> installRule(MonitoringRule rule) {
+        List<String> queriesIds = new ArrayList<String>();
+        try {
+            CSquery query = CSquery.createDefaultQuery(rule.getId());
+            query.setNsPrefix("xsd", XSD.getURI())
+                    .setNsPrefix("rdf", RDF.getURI())
+                    .setNsPrefix("rdfs", RDFS.getURI())
+                    .setNsPrefix("mo", MO.getURI());
 
-			for (Action a : rule.getActions().getActions()) {
-				switch (a.getName()) {
-				case "notify_violation":
-					query.construct(graph
-							.add(CSquery.BLANK_NODE, MO.hasMetric,
-									"mo:" + rule.getMetricName() + "_violation")
-							.add(MO.isAbout, QueryVars.TARGET)
-							.add(MO.hasValue, QueryVars.OUTPUT));
-					break;
-				case "enable_monitoring_rule":
+            for (Action a : rule.getActions().getActions()) {
+                switch (a.getName()) {
+                    case "notify_violation":
+                        query.construct(graph
+                                .add(CSquery.BLANK_NODE, MO.hasMetric,
+                                        "mo:" + rule.getMetricName() + "_violation")
+                                .add(MO.isAbout, QueryVars.TARGET)
+                                .add(MO.hasValue, QueryVars.OUTPUT));
+                        break;
+                    case "enable_monitoring_rule":
 
-					break;
-				case "disable_monitoring_rule":
+                        break;
+                    case "disable_monitoring_rule":
 
-					break;
-				case "set_sampling_probability":
+                        break;
+                    case "set_sampling_probability":
 
-					break;
-				case "set_sampling_time":
+                        break;
+                    case "set_sampling_time":
 
-					break;
+                        break;
 
-				default:
-					break;
-				}
-			}
+                    default:
+                        break;
+                }
+            }
 
-			String sourceStreamURI = MO.getStreamsURI() + rule.getMetricName();
+            String sourceStreamURI = MO.getStreamsURI() + rule.getMetricName();
 
-			query.fromStream(sourceStreamURI, rule.getTimeWindow() + "s",
-					rule.getTimeStep() + "s");
-			query.from(knowledgeBaseURL);
+            query.fromStream(sourceStreamURI, rule.getTimeWindow() + "s",
+                    rule.getTimeStep() + "s");
+            query.from(MO.getKnowledgeBaseURL());
 
-			MonitoringMetricAggregation aggregation = rule
-					.getMetricAggregation();
-			if (aggregation != null && !aggregation.isInherited()) {
-				String computation;
-				switch (aggregation.getAggregateFunction()) {
-				case "average":
-					computation = Aggregation.AVERAGE;
-					break;
-				default:
-					throw new MalformedQueryException("Aggregate function " + aggregation.getAggregateFunction() + " does not exist");
-				}
-				query.where(select.add(QueryVars.OUTPUT, QueryVars.INPUT, computation));
-			}
-		} catch (MalformedQueryException e) {
-			logger.error("Cannot install rule, bug found", e);
-			e.printStackTrace();
-		}
-	}
+            MonitoringMetricAggregation aggregation = rule
+                    .getMetricAggregation();
+            if (aggregation != null && !aggregation.isInherited()) {
+                String computation;
+                switch (aggregation.getAggregateFunction()) {
+                    case "average":
+                        computation = Aggregation.AVERAGE;
+                        break;
+                    default:
+                        throw new MalformedQueryException("Aggregate function " + aggregation.getAggregateFunction() + " does not exist");
+                }
+                query.where(select.add(QueryVars.OUTPUT, QueryVars.INPUT, computation));
+            }
 
-	public void installRules(MonitoringRules rules) {
+            String queryId = UUID.randomUUID().toString();
+            installedQueries.put(queryId, query);
+            installedRules.put(rule.getId(), rule);
+            queriesIds.add(queryId);
 
-		List<CSquery> queries = new ArrayList<CSquery>();
+            ruleQueriesMap.put(rule.getId(), queriesIds);
 
-		for (MonitoringRule rule : rules.getMonitoringRules()) {
-			installRule(rule);
-		}
+        } catch (MalformedQueryException e) {
+            logger.error("Cannot install rule, bug found", e);
+            e.printStackTrace();
 
-	}
+        }
+        return queriesIds;
+    }
+
+    public List<String> installRules(MonitoringRules rules) {
+
+        List<String> queriesIds = new ArrayList<String>();
+
+        for (MonitoringRule rule : rules.getMonitoringRules()) {
+            queriesIds.addAll(installRule(rule));
+        }
+        return queriesIds;
+    }
+
+    public CSquery getQuery(String queryId) {
+        return installedQueries.get(queryId);
+    }
+
 }
