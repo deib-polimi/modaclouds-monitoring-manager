@@ -16,7 +16,7 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
-public class QueryVars {
+class QueryVars {
 
 	public static final String TARGET = "?target";
 	public static final String OUTPUT = "?output_value";

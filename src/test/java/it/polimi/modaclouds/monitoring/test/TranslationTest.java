@@ -58,9 +58,9 @@ public class TranslationTest {
         }
     }
 
-    private void validateQuery(CSquery query) {
+    private void validateQuery(String query) {
         try {
-            t.translate(query.toString());
+            t.translate(query);
         } catch (TranslationException e) {
             e.printStackTrace();
             fail();
@@ -68,6 +68,7 @@ public class TranslationTest {
             System.err
                     .println("Parsing was successful, the following exception was raised after parsing: "
                             + e.getClass().getName());
+            e.printStackTrace();
         }
     }
 

@@ -16,6 +16,7 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
+import com.hp.hpl.jena.vocabulary.OWLResults;
 import it.polimi.csparqool.Aggregation;
 import it.polimi.csparqool.CSquery;
 import it.polimi.csparqool.MalformedQueryException;
@@ -128,7 +129,6 @@ public class RuleManager {
         } catch (MalformedQueryException e) {
             logger.error("Cannot install rule, bug found", e);
             e.printStackTrace();
-
         }
         return queriesIds;
     }
@@ -143,8 +143,8 @@ public class RuleManager {
         return queriesIds;
     }
 
-    public CSquery getQuery(String queryId) {
-        return installedQueries.get(queryId);
+    public String getQuery(String queryId) {
+        return installedQueries.get(queryId).toString();
     }
 
 }
