@@ -21,10 +21,10 @@
 	xmlns="http://www.modaclouds.eu/xsd/2.0/aggregate_functions_schema"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.modaclouds.eu/xsd/2.0/aggregate_functions_schema ../commons/aggregate_functions_schema.xsd">
-	<aggregateFunction numOfArguments="0">average</aggregateFunction>
-	<aggregateFunction numOfArguments="1">percentile</aggregateFunction>
-	<aggregateFunction numOfArguments="1">whitebox_prediction</aggregateFunction>
-	<aggregateFunction numOfArguments="1">blackbox_prediction</aggregateFunction>
-	<aggregateFunction numOfArguments="0">max</aggregateFunction>
-	<aggregateFunction numOfArguments="0">min</aggregateFunction>
+	<aggregateFunction numOfArguments="0">Average</aggregateFunction>
+	<aggregateFunction numOfArguments="1">Percentile</aggregateFunction>
+	<aggregateFunction numOfArguments="1">WhiteboxPrediction</aggregateFunction>
+	<aggregateFunction numOfArguments="1">BlackboxPrediction</aggregateFunction>
+	<aggregateFunction numOfArguments="0">Max</aggregateFunction>
+	<aggregateFunction numOfArguments="0">Min</aggregateFunction>
 </aggregateFunctions>

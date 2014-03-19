@@ -17,16 +17,20 @@
        limitations under the License.
 
 -->
-<groupingCategories xmlns="http://www.modaclouds.eu/xsd/2.0/grouping_categories_schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.modaclouds.eu/xsd/2.0/grouping_categories_schema ../monitoringrules/grouping_categories_schema.xsd" default="cloud_provider">
-	<groupingCategory name="cloud_provider"/>
-	<groupingCategory name="region"/>
-	<groupingCategory name="location"/>
-	<groupingCategory name="zone"/>
-	<groupingCategory name="method"/>
-	<groupingCategory name="component"/>
-	<groupingCategory name="external_component"/>
-	<groupingCategory name="internal_component"/>
-	<groupingCategory name="paas_service"/>
-	<groupingCategory name="vm"/>
-	<groupingCategory name="all"/>
+<groupingCategories
+	xmlns="http://www.modaclouds.eu/xsd/2.0/grouping_categories_schema"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.modaclouds.eu/xsd/2.0/grouping_categories_schema ../monitoringrules/grouping_categories_schema.xsd"
+	default="CloudProvider">
+	<groupingCategory name="CloudProvider" />
+	<groupingCategory name="Region" />
+	<groupingCategory name="Location" />
+	<groupingCategory name="Zone" />
+	<groupingCategory name="Method" />
+	<groupingCategory name="Component" />
+	<groupingCategory name="ExternalComponent" />
+	<groupingCategory name="InternalComponent" />
+	<groupingCategory name="PaaSService" />
+	<groupingCategory name="VM" />
+	<groupingCategory name="all" />
 </groupingCategories>

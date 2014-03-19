@@ -16,10 +16,14 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+
 class QueryVars {
 
 	public static final String TARGET = "?target";
 	public static final String OUTPUT = "?output_value";
 	public static final String INPUT = "?input";
+	public static final String COMPONENT = "?component";
+	public static final String EXTERNAL_COMPONENT = "?external_component";
 
 }

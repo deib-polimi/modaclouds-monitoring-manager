@@ -1,4 +1,4 @@
-modaclouds-monitoring-manager
+The MODAClouds Monitoring Manager
 =============================
 
-The Manager of MODAClouds Monitoring Platform
+Click [here](http://deib-polimi.github.io/modaclouds-monitoring-manager/) to see the Javadoc.

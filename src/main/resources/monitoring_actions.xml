@@ -19,10 +19,10 @@
 -->
 <availableActions xmlns="http://www.modaclouds.eu/xsd/2.0/actions_schema"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.modaclouds.eu/xsd/2.0/actions_schema ../monitoringrules/actions_schema.xsd" default="notify_violation">
-	<availableAction numOfArguments="0" name="notify_violation"/>
-	<availableAction numOfArguments="0" name="enable_monitoring_rule"/>
-	<availableAction numOfArguments="0" name="disable_monitoring_rule"/>
-	<availableAction numOfArguments="1" name="set_sampling_probability"/>
-	<availableAction numOfArguments="1" name="set_sampling_time"/>
+	xsi:schemaLocation="http://www.modaclouds.eu/xsd/2.0/actions_schema ../monitoringrules/actions_schema.xsd" default="NotifyViolation">
+	<availableAction numOfArguments="0" name="NotifyViolation"/>
+	<availableAction numOfArguments="0" name="EnableMonitoringRule"/>
+	<availableAction numOfArguments="0" name="DisableMonitoringRule"/>
+	<availableAction numOfArguments="1" name="SetSamplingProbability"/>
+	<availableAction numOfArguments="1" name="SetSamplingTime"/>
 </availableActions>

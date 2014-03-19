@@ -1,0 +1,46 @@
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mo:      <http://www.modaclouds.eu/rdfs/1.0/monitoring/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+mo:VM
+      a       rdfs:Class ;
+      rdfs:subClassOf mo:ExternalComponent ;
+      mo:isIn mo:Location .
+
+mo:CloudProvider
+      a       rdfs:Class ;
+      mo:offers mo:ExternalComponent .
+
+mo:Zone
+      a       rdfs:Class ;
+      rdfs:subClassOf mo:Location ;
+      mo:isIn mo:Region .
+
+mo:ExternalComponent
+      a       rdfs:Class ;
+      rdfs:subClassOf mo:Component .
+
+mo:Location
+      a       rdfs:Class .
+
+mo:InternalComponent
+      a       rdfs:Class ;
+      rdfs:subClassOf mo:Component ;
+      mo:provides mo:Method ;
+      mo:requires mo:Component .
+
+mo:Region
+      a       rdfs:Class ;
+      rdfs:subClassOf mo:Location .
+
+mo:Method
+      a       rdfs:Class ;
+      mo:calls mo:Method .
+
+mo:PaaSService
+      a       rdfs:Class ;
+      rdfs:subClassOf mo:ExternalComponent .
+
+mo:Component
+      a       rdfs:Class .

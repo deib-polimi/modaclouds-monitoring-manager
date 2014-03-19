@@ -16,60 +16,75 @@
  */
 package it.polimi.modaclouds.monitoring.test;
 
-import eu.larkc.csparql.core.new_parser.utility_files.CSparqlTranslator;
-import eu.larkc.csparql.core.new_parser.utility_files.Translator;
-import eu.larkc.csparql.core.streams.formats.TranslationException;
-import it.polimi.csparqool.CSquery;
+import static org.junit.Assert.fail;
 import it.polimi.modaclouds.monitoring.monitoring_manager.RuleManager;
+import it.polimi.modaclouds.monitoring.monitoring_rules.RuleValidationException;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
 import it.polimi.modaclouds.qos_models.util.XMLHelper;
+
 import java.util.List;
+
+import org.apache.commons.lang.WordUtils;
 import org.junit.Assert;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 
+import eu.larkc.csparql.core.new_parser.ParseException;
+import eu.larkc.csparql.core.new_parser.utility_files.CSparqlTranslator;
+import eu.larkc.csparql.core.new_parser.utility_files.Translator;
+import eu.larkc.csparql.core.streams.formats.TranslationException;
+
 public class TranslationTest {
 
-    private MonitoringRules monitoringRules;
-    private Translator t;
-    private RuleManager ruleManager;
+	private MonitoringRules monitoringRules;
+	private RuleManager ruleManager;
+	
 
-    @Before
-    public void loadXMLString() {
-        t = new CSparqlTranslator();
-        try {
-            monitoringRules = XMLHelper.deserialize(getClass().getResource("/monitoring_rules_example.xml"), MonitoringRules.class);
-            ruleManager = new RuleManager();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Assert.fail();
-        }
-    }
+	@Before
+	public void init() {
+		try {
+			monitoringRules = XMLHelper.deserialize(
+					getClass().getResource("/mic_monitoring_rules_example.xml"),
+					MonitoringRules.class);
+			ruleManager = new RuleManager();
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
+	
 
-    @Test
-    public void test() {
-        for (MonitoringRule rule : monitoringRules.getMonitoringRules()) {
-            List<String> queriesIds = ruleManager.installRule(rule);
-            for (String queryId : queriesIds) {
-                validateQuery(ruleManager.getQuery(queryId));
-            }
-        }
-    }
+	@Test
+	public void test() {
+		try {
+			for (MonitoringRule rule : monitoringRules.getMonitoringRules()) {
+				List<String> queriesIds = ruleManager.installRule(rule);
+				for (String queryId : queriesIds) {
+					validateQuery(ruleManager.getQuery(queryId));
+				}
+			}
+		} catch (RuleValidationException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
 
-    private void validateQuery(String query) {
-        try {
-            t.translate(query);
-        } catch (TranslationException e) {
-            e.printStackTrace();
-            fail();
-        } catch (Exception e) {
-            System.err
-                    .println("Parsing was successful, the following exception was raised after parsing: "
-                            + e.getClass().getName());
-            e.printStackTrace();
-        }
-    }
+	public static void validateQuery(String query) {
+		Translator t = new CSparqlTranslator();
+		System.out.println(WordUtils.wrap(query, 100));
+		try {
+			t.translate(query);
+		} catch (TranslationException | ParseException e) {
+			e.printStackTrace();
+			fail();
+		} catch (Exception e) {
+			System.err
+					.println("Parsing was successful, the following exception was raised after parsing: "
+							+ e.getClass().getName());
+//			e.printStackTrace();
+		}
+	}
 
 }
