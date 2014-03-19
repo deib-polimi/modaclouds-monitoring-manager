@@ -16,7 +16,6 @@
  */
 package it.polimi.modaclouds.monitoring.test;
 
-import static org.junit.Assert.assertTrue;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
 
 import java.io.File;
@@ -28,10 +27,17 @@ import org.apache.jena.fuseki.server.SPARQLServer;
 import org.apache.jena.fuseki.server.ServerConfig;
 import org.apache.jena.riot.RDFDataMgr;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import org.restlet.Component;
+import org.restlet.data.Protocol;
+
+import polimi.deib.rsp_services_csparql.commons.Csparql_Engine;
+import polimi.deib.rsp_services_csparql.configuration.Config;
+import polimi.deib.rsp_services_csparql.server.rsp_services_csparql_server;
 
 import com.hp.hpl.jena.query.DatasetAccessor;
 import com.hp.hpl.jena.query.DatasetAccessorFactory;
@@ -48,9 +54,9 @@ public class AllTests {
 		DatasetAccessor da = DatasetAccessorFactory.createHTTP(MO
 				.getKnowledgeBaseDataURL());
 		File datasetDir = new File("target/generated-test-resources/dataset");
-		assertTrue(datasetDir.mkdirs());
-		ServerConfig config = FusekiConfig.configure(AllTests.class.getResource(
-				"/moda_fuseki_configuration.ttl").getFile());
+		datasetDir.mkdirs();
+		ServerConfig config = FusekiConfig.configure(AllTests.class
+				.getResource("/moda_fuseki_configuration.ttl").getFile());
 		fusekiServer = new SPARQLServer(config);
 		fusekiServer.start();
 		Model coreOnt = RDFDataMgr.loadModel(AllTests.class.getResource(
@@ -59,16 +65,31 @@ public class AllTests {
 				"/monitoring_core_ontology.ttl").getFile());
 		da.putModel(coreOnt);
 		da.add(micOnt);
+
+		try {
+			rsp_services_csparql_server.main(null);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.getMessage());
+
+		}
 	}
 
 	@AfterClass
 	public static void teardown() {
 		fusekiServer.stop();
 		try {
-			FileUtils.deleteDirectory(new File(
-					"target/generated-test-resources/dataset"));
-		} catch (IOException e) {
-			e.printStackTrace();
+			
+		} catch (Exception e) {
+			Assert.fail(e.getMessage());
+		} finally {
+			try {
+				FileUtils.deleteDirectory(new File(
+						"target/generated-test-resources/dataset"));
+			} catch (IOException e) {
+				Assert.fail(e.getMessage());
+			}
 		}
 	}
 

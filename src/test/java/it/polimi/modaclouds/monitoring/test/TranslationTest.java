@@ -17,6 +17,7 @@
 package it.polimi.modaclouds.monitoring.test;
 
 import static org.junit.Assert.fail;
+import it.polimi.modaclouds.monitoring.monitoring_manager.RuleInstallationException;
 import it.polimi.modaclouds.monitoring.monitoring_manager.RuleManager;
 import it.polimi.modaclouds.monitoring.monitoring_rules.RuleValidationException;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
@@ -65,7 +66,7 @@ public class TranslationTest {
 					validateQuery(ruleManager.getQuery(queryId));
 				}
 			}
-		} catch (RuleValidationException e) {
+		} catch (RuleInstallationException e) {
 			e.printStackTrace();
 			fail();
 		}

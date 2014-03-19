@@ -76,6 +76,33 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>polimi.deib</groupId>
+			<artifactId>rsp-services-api</artifactId>
+			<version>0.4.1</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>logback-classic</artifactId>
+					<groupId>ch.qos.logback</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>logback-core</artifactId>
+					<groupId>ch.qos.logback</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jena-tdb</artifactId>
+					<groupId>org.apache.jena</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.2</version>
@@ -112,7 +139,17 @@
 					<artifactId>slf4j-log4j12</artifactId>
 					<groupId>org.slf4j</groupId>
 				</exclusion>
+				<exclusion>
+					<artifactId>jena-tdb</artifactId>
+					<groupId>org.apache.jena</groupId>
+				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>polimi.deib</groupId>
+			<artifactId>rsp-services-csparql</artifactId>
+			<version>0.4.2</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-configuration</groupId>
@@ -149,6 +186,34 @@
 				<exclusion>
 					<artifactId>slf4j-log4j12</artifactId>
 					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>polimi.deib</groupId>
+			<artifactId>rsp-services-csparql</artifactId>
+			<version>0.4.2</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>jena-tdb</artifactId>
+					<groupId>org.apache.jena</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>logback-classic</artifactId>
+					<groupId>ch.qos.logback</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>logback-core</artifactId>
+					<groupId>ch.qos.logback</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>

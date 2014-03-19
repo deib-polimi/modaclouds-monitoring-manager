@@ -18,8 +18,8 @@
 The first time you want to publish your javadoc you need to create the gh-pages branch.
 Run this sequence of commands in a temporary folder:
 
-$ git clone https://github.com/user/repository.git
-$ cd repository
+$ git clone https://github.com/<user>/<repository>.git
+$ cd <repository>
 $ git checkout --orphan gh-pages
 $ git rm -rf .
 $ echo "My GitHub Page" > index.html
@@ -27,11 +27,13 @@ $ git add index.html
 $ git commit -a -m "First pages commit"
 $ git push origin gh-pages
 
-Now you can go in your project root folder and run:
+IMPORTANT: Remember to check 'github.repository.name' and 'github.user.name' properties in your pom.xml so to match your repo and user name.
+
+Then go to your project root folder and run:
 
 $ mvn clean javadoc:javadoc scm-publish:publish-scm
 
 to publish your javadoc, which will be available at
-http://user.github.io/repository/
+http://<user>.github.io/<repository>/
 
 Instructions from https://help.github.com/articles/creating-project-pages-manually

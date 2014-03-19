@@ -33,6 +33,8 @@ import it.polimi.modaclouds.qos_models.schema.MonitoringMetricAggregation;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +45,11 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import polimi.deib.csparql_rest_api.RSP_services_csparql_API;
+import polimi.deib.csparql_rest_api.exception.QueryErrorException;
+import polimi.deib.csparql_rest_api.exception.ServerErrorException;
+import polimi.deib.csparql_rest_api.exception.StreamErrorException;
 
 import com.hp.hpl.jena.query.DatasetAccessor;
 import com.hp.hpl.jena.query.DatasetAccessorFactory;
@@ -59,31 +66,52 @@ public class RuleManager {
 
 	private Logger logger = LoggerFactory
 			.getLogger(RuleManager.class.getName());
-
 	private DatasetAccessor da = DatasetAccessorFactory.createHTTP(MO
-			.getKnowledgeBaseDataURL() + "data");
+			.getKnowledgeBaseDataURL());
+	private URL ddaURL;
+	private RSP_services_csparql_API csparqlAPI;
 
-	private Map<String, String> installedQueries;
+	private Map<String, String> registeredQueries;
+	private List<String> registeredStreams;
 	private Map<String, MonitoringRule> installedRules;
 	private Map<String, List<String>> ruleQueriesMap;
 	private RuleValidator validator;
 
-	public RuleManager() throws ConfigurationException, JAXBException {
-		installedQueries = new HashMap<String, String>();
+	public RuleManager() throws MalformedURLException, ConfigurationException, JAXBException {
+		loadConfig();
+		registeredStreams = new ArrayList<String>();
+		registeredQueries = new HashMap<String, String>();
 		installedRules = new HashMap<String, MonitoringRule>();
 		ruleQueriesMap = new HashMap<String, List<String>>();
 		validator = new RuleValidator();
+		csparqlAPI = new RSP_services_csparql_API(ddaURL.toString());
+	}
+	
+	private void loadConfig() throws MalformedURLException {
+		Config config = Config.getInstance();
+		String ddaAddress = config.getDDAServerAddress();
+		int ddaPort = config.getDDAServerPort();
+		ddaAddress = cleanAddress(ddaAddress);
+		ddaURL = new URL("http://" + ddaAddress + ":" + ddaPort);
+	}
+	
+	private String cleanAddress(String address) {
+		if (address.indexOf("://") != -1) address = address.substring(address.indexOf("://")+3);
+		if (address.endsWith("/")) address = address.substring(0, address.length()-1);
+		return address;
 	}
 
 	public List<String> installRule(MonitoringRule rule)
-			throws RuleValidationException {
+			throws RuleInstallationException {
+		List<String> queriesIds = new ArrayList<String>();
 		try {
 			validator.prevalidateRule(rule, installedRules.values());
-			List<String> queriesIds = new ArrayList<String>();
 			String queryId = CSquery.escapeName(rule.getId());
-			while (installedQueries.containsKey(queryId)) {
+			while (registeredQueries.containsKey(queryId)) {
 				queryId = CSquery.generateRandomName();
 			}
+			
+			
 			CSquery query = CSquery.createDefaultQuery(queryId);
 
 			query.setNsPrefix("xsd", XSD.getURI())
@@ -149,16 +177,37 @@ public class RuleManager {
 												.getGroupingCategoryName())
 						.having(parse(rule.getCondition())));
 			}
-
-			installedQueries.put(queryId, query.getCSPARQL());
+			
+			
+			if (!registeredStreams.contains(sourceStreamURI)) {
+				logger.info("Registering stream: " + sourceStreamURI);
+				String response = csparqlAPI.registerStream(sourceStreamURI);
+				logger.info("Server response: " + response);
+				registeredStreams.add(sourceStreamURI);
+			}
+			
+			String CSPARQLquery = query.getCSPARQL();
+			String queryURI = csparqlAPI.registerQuery(queryId, CSPARQLquery);
+			logger.info("Server response, query ID: " + queryURI);
+			registeredQueries.put(queryId, CSPARQLquery);
 			installedRules.put(rule.getId(), rule);
 			queriesIds.add(queryId);
 			ruleQueriesMap.put(rule.getId(), queriesIds);
-			return queriesIds;
+			
 
-		} catch (MalformedQueryException e) {
-			throw new RuleValidationException("Internal error", e);
+		} catch (QueryErrorException | MalformedQueryException | StreamErrorException e) {
+			logger.error("Internal error", e);
+			throw new RuleInstallationException("Internal error", e);
+		} catch (ServerErrorException e) {
+			logger.error("Connection to the DDA server failed", e);
+			throw new RuleInstallationException("Connection to the DDA server failed", e);
+		} catch (RuleValidationException e) {
+			logger.error("Rule is invalid", e);
+			throw new RuleInstallationException("Rule is invalid", e);
+		} finally {
+			
 		}
+		return queriesIds;
 	}
 
 	private String parse(String condition) {
@@ -174,7 +223,7 @@ public class RuleManager {
 					"Multiple or zero monitored target is not implemented yet");
 		String targetClassName = targets.get(0).getId();
 		String targetClassURI = MO.getURI() + targetClassName;
-		body.add("?datum", MO.getProperty(MO.hasMetric), rule.getMetricName())
+		body.add("?datum", MO.getProperty(MO.hasMetric), "mo:"+rule.getMetricName())
 				.add(MO.getProperty(MO.isAbout), QueryVars.TARGET)
 				.add(MO.getProperty(MO.hasValue), QueryVars.INPUT);
 //				.add(QueryVars.TARGET, RDF.type, targetClassURI);
@@ -211,7 +260,7 @@ public class RuleManager {
 	}
 
 	public List<String> installRules(MonitoringRules rules)
-			throws RuleValidationException {
+			throws RuleValidationException, RuleInstallationException {
 
 		List<String> queriesIds = new ArrayList<String>();
 
@@ -222,7 +271,7 @@ public class RuleManager {
 	}
 
 	public String getQuery(String queryId) {
-		return installedQueries.get(queryId);
+		return registeredQueries.get(queryId);
 	}
 
 	private boolean isSubclassOf(String resourceURI, String superClassURI) {
@@ -235,5 +284,8 @@ public class RuleManager {
 
 		return qexec.execAsk();
 	}
+	
+	
+	
 
 }
