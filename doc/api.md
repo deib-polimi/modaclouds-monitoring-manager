@@ -4,6 +4,8 @@
 
 ## REST API
 
+Version 1
+
 ### Monitoring Rules
 
 - **[<code>GET</code> /monitoring-rules](rest/GET-monitoring-rules.md)**
