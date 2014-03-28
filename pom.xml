@@ -146,12 +146,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>polimi.deib</groupId>
-			<artifactId>rsp-services-csparql</artifactId>
-			<version>0.4.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>commons-configuration</groupId>
 			<artifactId>commons-configuration</artifactId>
 			<version>1.9</version>
@@ -192,30 +186,7 @@
 		<dependency>
 			<groupId>polimi.deib</groupId>
 			<artifactId>rsp-services-csparql</artifactId>
-			<version>0.4.2</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>jena-tdb</artifactId>
-					<groupId>org.apache.jena</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>slf4j-log4j12</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>logback-classic</artifactId>
-					<groupId>ch.qos.logback</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>logback-core</artifactId>
-					<groupId>ch.qos.logback</groupId>
-				</exclusion>
-			</exclusions>
+			<version>0.4.3</version>
 		</dependency>
 	</dependencies>
 

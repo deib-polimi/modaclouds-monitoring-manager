@@ -1,4 +1,6 @@
 The MODAClouds Monitoring Manager
 =============================
 
-Click [here](http://deib-polimi.github.io/modaclouds-monitoring-manager/) to see the Javadoc.
+## Documentation
+
+Take a look at the [documentation table of contents](doc/TOC.md).

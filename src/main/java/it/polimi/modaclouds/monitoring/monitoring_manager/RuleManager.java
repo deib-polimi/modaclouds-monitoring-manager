@@ -27,6 +27,7 @@ import it.polimi.modaclouds.monitoring.monitoring_rules.ConfigurationException;
 import it.polimi.modaclouds.monitoring.monitoring_rules.RuleValidationException;
 import it.polimi.modaclouds.monitoring.monitoring_rules.RuleValidator;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 import it.polimi.modaclouds.qos_models.schema.Action;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringMetricAggregation;
@@ -77,7 +78,8 @@ public class RuleManager {
 	private Map<String, List<String>> ruleQueriesMap;
 	private RuleValidator validator;
 
-	public RuleManager() throws MalformedURLException, ConfigurationException, JAXBException {
+	public RuleManager() throws MalformedURLException, ConfigurationException,
+			JAXBException {
 		loadConfig();
 		registeredStreams = new ArrayList<String>();
 		registeredQueries = new HashMap<String, String>();
@@ -86,7 +88,7 @@ public class RuleManager {
 		validator = new RuleValidator();
 		csparqlAPI = new RSP_services_csparql_API(ddaURL.toString());
 	}
-	
+
 	private void loadConfig() throws MalformedURLException {
 		Config config = Config.getInstance();
 		String ddaAddress = config.getDDAServerAddress();
@@ -94,10 +96,12 @@ public class RuleManager {
 		ddaAddress = cleanAddress(ddaAddress);
 		ddaURL = new URL("http://" + ddaAddress + ":" + ddaPort);
 	}
-	
+
 	private String cleanAddress(String address) {
-		if (address.indexOf("://") != -1) address = address.substring(address.indexOf("://")+3);
-		if (address.endsWith("/")) address = address.substring(0, address.length()-1);
+		if (address.indexOf("://") != -1)
+			address = address.substring(address.indexOf("://") + 3);
+		if (address.endsWith("/"))
+			address = address.substring(0, address.length() - 1);
 		return address;
 	}
 
@@ -110,51 +114,15 @@ public class RuleManager {
 			while (registeredQueries.containsKey(queryId)) {
 				queryId = CSquery.generateRandomName();
 			}
-			
-			
+
 			CSquery query = CSquery.createDefaultQuery(queryId);
-
-			query.setNsPrefix("xsd", XSD.getURI())
-					.setNsPrefix("rdf", RDF.getURI())
-					.setNsPrefix("rdfs", RDFS.getURI())
-					.setNsPrefix("mo", MO.getURI());
-
-			for (Action a : rule.getActions().getActions()) {
-				switch (a.getName()) {
-				case "NotifyViolation":
-					query.construct(graph
-							.add(CSquery.BLANK_NODE,
-									MO.getProperty(MO.hasMetric),
-									"mo:" + rule.getMetricName() + "Violation")
-							.add(MO.getProperty(MO.isAbout), QueryVars.TARGET)
-							.add(MO.getProperty(MO.hasValue), QueryVars.OUTPUT));
-					break;
-				case "EnableMonitoringRule":
-					throw new NotImplementedException("Action " + a.getName() + " has not been implemented yet.");
-//					break;
-				case "DisableMonitoringRule":
-					throw new NotImplementedException("Action " + a.getName() + " has not been implemented yet.");
-//					break;
-				case "SetSamplingProbability":
-					throw new NotImplementedException("Action " + a.getName() + " has not been implemented yet.");
-//					break;
-				case "SetSamplingTime":
-					throw new NotImplementedException("Action " + a.getName() + " has not been implemented yet.");
-//					break;
-
-				default:
-					throw new NotImplementedException("Action " + a.getName() + " has not been implemented yet.");
-				}
-			}
-
-			String sourceStreamURI = MO.getStreamsURI() + rule.getMetricName();
-
+			addPrefixes(query);
+			addActions(rule, query);
+			String sourceStreamURI = MO.streamsURI + rule.getMetricName();
 			query.fromStream(sourceStreamURI, rule.getTimeWindow() + "s",
 					rule.getTimeStep() + "s");
-			query.from(MO.getKnowledgeBaseDataURL()+"?graph=default");
-
+			query.from(MO.getKnowledgeBaseDataURL() + "?graph=default");
 			_graph body = createBody(rule);
-
 			MonitoringMetricAggregation aggregation = rule
 					.getMetricAggregation();
 			if (aggregation != null && !aggregation.isInherited()) {
@@ -177,15 +145,14 @@ public class RuleManager {
 												.getGroupingCategoryName())
 						.having(parse(rule.getCondition())));
 			}
-			
-			
+
 			if (!registeredStreams.contains(sourceStreamURI)) {
 				logger.info("Registering stream: " + sourceStreamURI);
 				String response = csparqlAPI.registerStream(sourceStreamURI);
 				logger.info("Server response: " + response);
 				registeredStreams.add(sourceStreamURI);
 			}
-			
+
 			String CSPARQLquery = query.getCSPARQL();
 			String queryURI = csparqlAPI.registerQuery(queryId, CSPARQLquery);
 			logger.info("Server response, query ID: " + queryURI);
@@ -193,21 +160,62 @@ public class RuleManager {
 			installedRules.put(rule.getId(), rule);
 			queriesIds.add(queryId);
 			ruleQueriesMap.put(rule.getId(), queriesIds);
-			
 
-		} catch (QueryErrorException | MalformedQueryException | StreamErrorException e) {
+		} catch (QueryErrorException | MalformedQueryException
+				| StreamErrorException e) {
 			logger.error("Internal error", e);
 			throw new RuleInstallationException("Internal error", e);
 		} catch (ServerErrorException e) {
 			logger.error("Connection to the DDA server failed", e);
-			throw new RuleInstallationException("Connection to the DDA server failed", e);
+			throw new RuleInstallationException(
+					"Connection to the DDA server failed", e);
 		} catch (RuleValidationException e) {
 			logger.error("Rule is invalid", e);
 			throw new RuleInstallationException("Rule is invalid", e);
 		} finally {
-			
+
 		}
 		return queriesIds;
+	}
+
+	private void addActions(MonitoringRule rule, CSquery query) {
+		for (Action a : rule.getActions().getActions()) {
+			switch (a.getName()) {
+			case "NotifyViolation":
+				query.construct(graph
+						.add(CSquery.BLANK_NODE, MO.hasMetric,
+								"mo:" + rule.getMetricName() + "Violation")
+						.add(MO.isAbout, QueryVars.TARGET)
+						.add(MO.hasValue, QueryVars.OUTPUT));
+				break;
+			case "EnableMonitoringRule":
+				throw new NotImplementedException("Action " + a.getName()
+						+ " has not been implemented yet.");
+				// break;
+			case "DisableMonitoringRule":
+				throw new NotImplementedException("Action " + a.getName()
+						+ " has not been implemented yet.");
+				// break;
+			case "SetSamplingProbability":
+				throw new NotImplementedException("Action " + a.getName()
+						+ " has not been implemented yet.");
+				// break;
+			case "SetSamplingTime":
+				throw new NotImplementedException("Action " + a.getName()
+						+ " has not been implemented yet.");
+				// break;
+
+			default:
+				throw new NotImplementedException("Action " + a.getName()
+						+ " has not been implemented yet.");
+			}
+		}
+	}
+
+	private void addPrefixes(CSquery query) {
+		query.setNsPrefix("xsd", XSD.getURI()).setNsPrefix("rdf", RDF.getURI())
+				.setNsPrefix("rdfs", RDFS.getURI())
+				.setNsPrefix("mo", MO.URI);
 	}
 
 	private String parse(String condition) {
@@ -222,34 +230,33 @@ public class RuleManager {
 			throw new NotImplementedException(
 					"Multiple or zero monitored target is not implemented yet");
 		String targetClassName = targets.get(0).getId();
-		String targetClassURI = MO.getURI() + targetClassName;
-		body.add("?datum", MO.getProperty(MO.hasMetric), "mo:"+rule.getMetricName())
-				.add(MO.getProperty(MO.isAbout), QueryVars.TARGET)
-				.add(MO.getProperty(MO.hasValue), QueryVars.INPUT);
+		String targetClassURI = MO.URI + targetClassName;
+		body.add("?datum", MO.hasMetric, "mo:"+rule.getMetricName())
+				.add(MO.isAbout, QueryVars.TARGET)
+				.add(MO.hasValue, QueryVars.INPUT);
 //				.add(QueryVars.TARGET, RDF.type, targetClassURI);
 
 		String groupingClass = rule.getMetricAggregation()
 				.getGroupingCategoryName();
 
-		if (isSubclassOf(targetClassURI, MO.getResource(MO.Method).toString())) {
-			if (groupingClass.equals(MO.Method)) {
+		if (isSubclassOf(targetClassURI, MO.method.toString())) {
+			if (groupingClass.equals(Vocabulary.Method)) {
 				body.add(QueryVars.TARGET, RDF.type, "?" + groupingClass).addTransitive(
 						"?" + groupingClass, RDFS.subClassOf,
-						MO.getResource(MO.Method));
-			} else if (groupingClass.equals(MO.Component)) {
+						MO.method);
+			} else if (groupingClass.equals(Vocabulary.Component)) {
 				body.add(union.add(
 						graph.add("?" + groupingClass,
-								MO.getProperty(MO.provides), QueryVars.TARGET))
+								MO.provides, QueryVars.TARGET))
 						.add(graph.add("?" + groupingClass,
-								MO.getProperty(MO.provides),
+								MO.provides,
 								QueryVars.COMPONENT).addTransitive(
 								QueryVars.COMPONENT,
-								MO.getProperty(MO.requires), QueryVars.TARGET)));
-			} else if (groupingClass.equals(MO.CloudProvider)) {
-				body.add("?" + groupingClass,
-								MO.getProperty(MO.offers), QueryVars.EXTERNAL_COMPONENT)
-								.addTransitive(QueryVars.COMPONENT, MO.getProperty(MO.requires), QueryVars.EXTERNAL_COMPONENT)
-								.add(MO.getProperty(MO.provides), QueryVars.TARGET);
+								MO.requires, QueryVars.TARGET)));
+			} else if (groupingClass.equals(Vocabulary.CloudProvider)) {
+				body.add(QueryVars.EXTERNAL_COMPONENT, MO.hasProvider, "?" + groupingClass)
+								.addTransitive(QueryVars.COMPONENT, MO.requires, QueryVars.EXTERNAL_COMPONENT)
+								.add(MO.provides, QueryVars.TARGET);
 			} else {
 				throw new NotImplementedException("Grouping class " + groupingClass + " has not been implemented yet");
 			}
@@ -275,17 +282,15 @@ public class RuleManager {
 	}
 
 	private boolean isSubclassOf(String resourceURI, String superClassURI) {
-		String queryString = "ASK " + "FROM <" + MO.getKnowledgeBaseDataURL()
-				+ "?graph=default>" + "WHERE { <" + resourceURI + "> <"
-				+ RDFS.subClassOf + "> <" + superClassURI + "> . }";
+		String queryString = "ASK " + "FROM <"
+				+ MO.getKnowledgeBaseDataURL() + "?graph=default>"
+				+ "WHERE { <" + resourceURI + "> <" + RDFS.subClassOf + "> <"
+				+ superClassURI + "> . }";
 
 		Query query = QueryFactory.create(queryString, Syntax.syntaxSPARQL_11);
 		QueryExecution qexec = QueryExecutionFactory.create(query);
 
 		return qexec.execAsk();
 	}
-	
-	
-	
 
 }

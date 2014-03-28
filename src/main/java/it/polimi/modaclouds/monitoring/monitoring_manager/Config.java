@@ -16,6 +16,8 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
+import java.io.File;
+
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -33,7 +35,14 @@ public class Config {
 		try {
 			config = new PropertiesConfiguration("monitoring_manager.properties");
 		} catch (ConfigurationException e) {
-			logger.error("Error while reading the configuration file", e);
+			try {
+				File configFile = new File(Config.class.getProtectionDomain()
+						.getCodeSource().getLocation().getPath());
+				config = new PropertiesConfiguration(configFile.getParent()
+						+ "/monitoring_manager.properties");
+			} catch (ConfigurationException e2) {
+				logger.warn("monitoring_manager.properties file not found. Continuing without it.", e2);
+			}
 		}
 	}
 			

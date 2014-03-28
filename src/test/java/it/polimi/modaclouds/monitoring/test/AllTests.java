@@ -20,6 +20,7 @@ import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.jena.fuseki.server.FusekiConfig;
@@ -32,11 +33,7 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.restlet.Component;
-import org.restlet.data.Protocol;
 
-import polimi.deib.rsp_services_csparql.commons.Csparql_Engine;
-import polimi.deib.rsp_services_csparql.configuration.Config;
 import polimi.deib.rsp_services_csparql.server.rsp_services_csparql_server;
 
 import com.hp.hpl.jena.query.DatasetAccessor;
@@ -44,29 +41,31 @@ import com.hp.hpl.jena.query.DatasetAccessorFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 
 @RunWith(Suite.class)
-@SuiteClasses({ KbTest.class, TranslationTest.class })
+@SuiteClasses({ KbTest.class, TranslationTest.class, OfbizDeploymentTest.class })
 public class AllTests {
 
 	private static SPARQLServer fusekiServer;
 
 	@BeforeClass
 	public static void init() {
-		DatasetAccessor da = DatasetAccessorFactory.createHTTP(MO
-				.getKnowledgeBaseDataURL());
-		File datasetDir = new File("target/generated-test-resources/dataset");
-		datasetDir.mkdirs();
-		ServerConfig config = FusekiConfig.configure(AllTests.class
-				.getResource("/moda_fuseki_configuration.ttl").getFile());
-		fusekiServer = new SPARQLServer(config);
-		fusekiServer.start();
-		Model coreOnt = RDFDataMgr.loadModel(AllTests.class.getResource(
-				"/mic_ontology.ttl").getFile());
-		Model micOnt = RDFDataMgr.loadModel(AllTests.class.getResource(
-				"/monitoring_core_ontology.ttl").getFile());
-		da.putModel(coreOnt);
-		da.add(micOnt);
-
 		try {
+			MO.setKnowledgeBaseURL(new URL("http://localhost:3030"));
+			DatasetAccessor da = DatasetAccessorFactory.createHTTP(MO
+					.getKnowledgeBaseDataURL());
+			File datasetDir = new File(
+					"target/generated-test-resources/dataset");
+			datasetDir.mkdirs();
+			ServerConfig config = FusekiConfig.configure(AllTests.class
+					.getResource("/moda_fuseki_configuration.ttl").getFile());
+			fusekiServer = new SPARQLServer(config);
+			fusekiServer.start();
+			Model coreOnt = RDFDataMgr.loadModel(AllTests.class.getResource(
+					"/mic_ontology.ttl").getFile());
+			Model micOnt = RDFDataMgr.loadModel(AllTests.class.getResource(
+					"/monitoring_core_ontology.ttl").getFile());
+			da.putModel(coreOnt);
+			da.add(micOnt);
+
 			rsp_services_csparql_server.main(null);
 
 		} catch (Exception e) {
@@ -80,7 +79,7 @@ public class AllTests {
 	public static void teardown() {
 		fusekiServer.stop();
 		try {
-			
+
 		} catch (Exception e) {
 			Assert.fail(e.getMessage());
 		} finally {

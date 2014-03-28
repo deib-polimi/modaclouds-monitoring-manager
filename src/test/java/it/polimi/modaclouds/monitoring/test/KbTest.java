@@ -18,6 +18,7 @@ package it.polimi.modaclouds.monitoring.test;
 
 import static org.junit.Assert.assertTrue;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 
 import org.junit.Test;
 
@@ -82,9 +83,9 @@ public class KbTest {
 	@Test
 	public void testAsk() {
 		String queryString = "ASK " + "FROM <" + MO.getKnowledgeBaseDataURL()
-				+ "?graph=default> " + "WHERE { <" + MO.getResource(MO.VM)
+				+ "?graph=default> " + "WHERE { <" + MO.vm
 				+ "> <" + RDFS.subClassOf + "> <"
-				+ MO.getResource(MO.ExternalComponent) + "> . }";
+				+ MO.externalComponent + "> . }";
 
 		Query query = QueryFactory.create(queryString, Syntax.syntaxSPARQL_11);
 
@@ -96,9 +97,9 @@ public class KbTest {
 	@Test
 	public void testSubClassTransitivity() {
 		String queryString = "ASK " + "FROM <" + MO.getKnowledgeBaseDataURL()
-				+ "?graph=default> " + "WHERE { <" + MO.getResource(MO.VM)
+				+ "?graph=default> " + "WHERE { <" + MO.vm
 				+ "> <" + RDFS.subClassOf + ">+ <"
-				+ MO.getResource(MO.Component) + "> . }";
+				+ MO.component + "> . }";
 
 		Query query = QueryFactory.create(queryString, Syntax.syntaxSPARQL_11);
 
@@ -112,21 +113,21 @@ public class KbTest {
 	@Test
 	public void testRequiresTransitivity() {
 		Model m = ModelFactory.createDefaultModel();
-		String vmInstanceURI = MO.getURI() + "ubuntu-vm";
-		String containerInstanceURI = MO.getURI() + "tomcat";
-		String appInstanceURI = MO.getURI() + "app";
+		String vmInstanceURI = MO.URI + "ubuntu-vm";
+		String containerInstanceURI = MO.URI + "tomcat";
+		String appInstanceURI = MO.URI + "app";
 
 		m.createResource(appInstanceURI).addProperty(
-				MO.getProperty(MO.requires),
+				MO.requires,
 				m.createResource(containerInstanceURI).addProperty(
-						MO.getProperty(MO.requires),
+						MO.requires,
 						m.createResource(vmInstanceURI)));
 
 		da.add(m);
 
 		String queryString = "ASK " + "FROM <" + MO.getKnowledgeBaseDataURL()
 				+ "?graph=default> " + "WHERE { <" + appInstanceURI + "> <"
-				+ MO.getProperty(MO.requires) + ">+ <" + vmInstanceURI
+				+ MO.requires + ">+ <" + vmInstanceURI
 				+ "> . }";
 		Query query = QueryFactory.create(queryString, Syntax.syntaxSPARQL_11);
 
