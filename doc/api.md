@@ -1,9 +1,11 @@
 [Documentation table of contents](TOC.md)
 
-# REST API
+# API Reference
+
+## REST API
 
 
 
-# Java API
+## Java API
 
 see the [javadoc](http://deib-polimi.github.io/modaclouds-monitoring-manager/)
