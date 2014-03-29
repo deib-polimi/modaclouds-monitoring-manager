@@ -36,7 +36,7 @@ None
 
 **Response**
 
-	**Status:** **200 OK**
+	Status: 200 OK
 
 ``` xml
 <monitoringRules

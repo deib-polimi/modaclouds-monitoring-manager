@@ -47,7 +47,7 @@ An xml object with the callback url of the observer.
 
 **Response**
 
-	**Status:** **201 Created**
+	Status: 201 Created
 
 ``` xml
 <observer id="observer-1">http://url.to.observer.1:8176/response-time</observer>
