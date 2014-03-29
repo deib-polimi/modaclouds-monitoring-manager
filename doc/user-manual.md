@@ -1,4 +1,4 @@
-[Documentation table of contents](TOC.md)
+[Documentation table of contents](TOC.md) / User Manual
 
 # Usage
 

@@ -1,26 +1,30 @@
-[Documentation table of contents](../TOC.md) / [API Reference](../api.md)
+[Documentation table of contents](../../TOC.md) / [API Reference](../../api.md) / GET-monitoring-rules
 
 # Monitoring Rules
 
-	GET monitoring-rules
+	GET /monitoring-rules
 
 ## Description
 Returns the list of installed monitoring rules.
 
 ***
 
-## Parameters
+## URL Parameters
 
 None
 
 ***
 
-## Return format
-An XML object with a list of monitoring rules, conforming to the [monitoring_rules_schema.xsd][].
+## Response
+
+**Status:** **200 OK**
+
+**Body:** An XML object with a list of monitoring rules, conforming to the [monitoring_rules_schema.xsd][].
 
 ***
 
 ## Errors
+
 None
 
 ***
@@ -30,12 +34,16 @@ None
 
 	GET v1/monitoring-rules
 
-**Return**
+**Response**
+
+	**Status:** **200 OK**
+
 ``` xml
 <monitoringRules
 	xmlns="http://www.modaclouds.eu/xsd/1.0/monitoring_rules_schema"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.modaclouds.eu/xsd/1.0/monitoring_rules_schema https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/v1.0/metamodels/monitoringrules/monitoring_rules_schema.xsd">
+	xsi:schemaLocation="http://www.modaclouds.eu/xsd/1.0/monitoring_rules_schema
+	https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/v1.0/metamodels/monitoringrules/monitoring_rules_schema.xsd">
 	<monitoringRule id="mr_1" label="CPU Utilization Rule"
 		metricName="CpuUtilization" relatedQosConstraintId="qs_1" timeStep="60"
 		timeWindow="60" startEnabled="true" samplingProbability="1"
@@ -69,4 +77,4 @@ None
 </monitoringRules>
 ```
 
-[monitoring_rules_schema.xsd]: https://github.com/deib-polimi/modaclouds-qos-models/blob/master/metamodels/monitoringrules/monitoring_rules_schema.xsd
+[monitoring_rules_schema.xsd]: https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/v1.0/metamodels/monitoringrules/monitoring_rules_schema.xsd

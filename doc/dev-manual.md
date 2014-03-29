@@ -1,3 +1,3 @@
-[Documentation table of contents](TOC.md)
+[Documentation table of contents](TOC.md) / Developer Manual
 
 # Developer Manual

@@ -1,3 +1,5 @@
+Documentation table of contents
+
 # MODAClouds Object Store API documentation
 
 * [User Manual](user-manual.md)
