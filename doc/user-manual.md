@@ -1,6 +1,6 @@
 [Documentation table of contents](TOC.md) / User Manual
 
-# Usage
+#User Manual
 
 ## Installation
 
@@ -43,6 +43,4 @@ Dependency:
 ```
 
 
-## Configuration
-
-## Code samples
+##Usage
