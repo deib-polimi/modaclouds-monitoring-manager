@@ -16,23 +16,11 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
-public class RuleInstallationException extends Exception {
+public class DDAAggregateFunction {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -2238203600032056812L;
-
-	public RuleInstallationException(String message, Exception e) {
-		super(message,e);
-	}
-
-	public RuleInstallationException(String message) {
-		super(message);
-	}
-
-	public RuleInstallationException(Exception e) {
-		super(e);
-	}
+	public static final String Average = "Average";
+	public static final String Percentile = "Percentile";
+	public static final String Min = "Min";
+	public static final String Max = "Max";
 
 }

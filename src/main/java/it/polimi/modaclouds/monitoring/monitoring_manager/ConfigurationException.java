@@ -16,22 +16,13 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
-public class RuleInstallationException extends Exception {
+public class ConfigurationException extends Exception {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -2238203600032056812L;
-
-	public RuleInstallationException(String message, Exception e) {
-		super(message,e);
-	}
-
-	public RuleInstallationException(String message) {
+	public ConfigurationException(String message) {
 		super(message);
 	}
 
-	public RuleInstallationException(Exception e) {
+	public ConfigurationException(Exception e) {
 		super(e);
 	}
 

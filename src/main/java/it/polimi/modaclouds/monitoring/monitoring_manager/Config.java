@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 deib-polimi
+ * Copyright 2014 deib-polimi
  * Contact: deib-polimi <marco.miglierina@polimi.it>
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,48 +16,137 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
+import it.polimi.modaclouds.qos_models.schema.AggregateFunctions;
+import it.polimi.modaclouds.qos_models.schema.GroupingCategories;
+import it.polimi.modaclouds.qos_models.util.XMLHelper;
+
 import java.io.File;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class Config {
 	private static Config _instance = null;
-	private static final Logger logger = LoggerFactory.getLogger(Config.class); 
-	
+	private static final Logger logger = LoggerFactory.getLogger(Config.class);
+
 	private Configuration config;
-	
-	private Config(){
-		try {
-			config = new PropertiesConfiguration("monitoring_manager.properties");
-		} catch (ConfigurationException e) {
+	private AggregateFunctions availableAggregateFunctions;
+	private GroupingCategories availableGroupingCategories;
+
+	private static final String monitoringManagerPropertiesURLName = "/monitoring_manager.properties";
+	private static final String monitoringAggregateFunctionsURLName = "/monitoring_aggregate_functions.xml";
+	private static final String monitoringGroupingCategoriesURLName = "/monitoring_grouping_categories.xml";
+
+	private Config() throws ConfigurationException {
+		URL monitoringManagerPropertiesURL = getURL(monitoringManagerPropertiesURLName);
+		URL monitoringAggregateFunctionsURL = getURL(monitoringAggregateFunctionsURLName);
+		URL monitoringGroupingCategoriesURL = getURL(monitoringGroupingCategoriesURLName);
+		if (monitoringManagerPropertiesURL != null) {
 			try {
-				File configFile = new File(Config.class.getProtectionDomain()
-						.getCodeSource().getLocation().getPath());
-				config = new PropertiesConfiguration(configFile.getParent()
-						+ "/monitoring_manager.properties");
-			} catch (ConfigurationException e2) {
-				logger.warn("monitoring_manager.properties file not found. Continuing without it.", e2);
+				config = new PropertiesConfiguration(monitoringManagerPropertiesURL);
+			} catch (Exception e) {
 			}
 		}
+		if (config == null) {
+			logger.warn("Could not load " + monitoringManagerPropertiesURLName + ".");
+		}
+		if (monitoringAggregateFunctionsURLName != null) {
+			try {
+				availableAggregateFunctions = XMLHelper.deserialize(
+						monitoringAggregateFunctionsURL, AggregateFunctions.class);
+			} catch (Exception e) {
+			}
+		}
+		if (availableAggregateFunctions == null) {
+			throw new ConfigurationException("Could not load " + monitoringAggregateFunctionsURLName + ".");
+		}
+		if (monitoringGroupingCategoriesURLName != null) {
+			try {
+				availableGroupingCategories = XMLHelper.deserialize(
+						monitoringGroupingCategoriesURL, GroupingCategories.class);
+			} catch (Exception e) {
+			}
+		}
+		if (availableGroupingCategories == null) {
+			throw new ConfigurationException("Could not load " + monitoringGroupingCategoriesURLName + ".");
+		}
 	}
-			
-	public static Config getInstance(){
-		if(_instance==null)
-			_instance=new Config();
+
+	public static Config getInstance() throws ConfigurationException {
+		if (_instance == null)
+			_instance = new Config();
 		return _instance;
 	}
-	
-	public int getDDAServerPort(){
+
+	public int getDDAServerPort() {
 		return config.getInt("dda_server.port");
 	}
-	
-	public String getDDAServerAddress(){
+
+	public String getDDAServerAddress() {
 		return config.getString("dda_server.address");
-	}	
-	
+	}
+
+	public AggregateFunctions getAvailableAggregateFunctions() {
+		return availableAggregateFunctions;
+	}
+
+	public static URL getURL(String URLName) {
+		boolean exists = false;
+		URL url = null;
+		try {
+			url = new URL(URLName);
+			HttpURLConnection.setFollowRedirects(false);
+			// note : you may also need
+			// HttpURLConnection.setInstanceFollowRedirects(false)
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			con.setRequestMethod("HEAD");
+			exists = (con.getResponseCode() == HttpURLConnection.HTTP_OK);
+		} catch (Exception e) {
+			logger.error("Error while getting URL from URLName", e);
+			exists = false;
+		}
+		if (exists)
+			return url;
+		else {
+			try {
+				String alternativeURLName = new File(Config.class
+						.getProtectionDomain().getCodeSource().getLocation()
+						.getPath()).getParent()
+						+ URLName;
+
+				url = new URL(alternativeURLName);
+				HttpURLConnection.setFollowRedirects(false);
+				// note : you may also need
+				// HttpURLConnection.setInstanceFollowRedirects(false)
+				HttpURLConnection con = (HttpURLConnection) url
+						.openConnection();
+				con.setRequestMethod("HEAD");
+				exists = (con.getResponseCode() == HttpURLConnection.HTTP_OK);
+			} catch (Exception e) {
+				logger.error("Error while getting URL from alternativeURLName",
+						e);
+				exists = false;
+			}
+		}
+		return null;
+	}
+
+	public GroupingCategories getAvailableGroupingCategories() {
+		return availableGroupingCategories;
+	}
+
+	public String getSDAServerAddress() {
+		return config.getString("sda_server.address");
+	}
+
+	public int getSDAServerPort() {
+		return config.getInt("sda_server.port");
+	}
+
 }

@@ -25,5 +25,7 @@ class QueryVars {
 	public static final String INPUT = "?input";
 	public static final String COMPONENT = "?component";
 	public static final String EXTERNAL_COMPONENT = "?external_component";
+	public static final String TIMESTAMP = "?timestamp";
+	public static final String DATUM = "?datum";
 
 }

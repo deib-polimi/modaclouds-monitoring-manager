@@ -51,7 +51,7 @@ public class KbTest {
 //		Model coreOnt = RDFDataMgr.loadModel(getClass().getResource(
 //				"/mic_ontology.ttl").getFile());
 //		Model micOnt = RDFDataMgr.loadModel(getClass().getResource(
-//				"/monitoring_core_ontology.ttl").getFile());
+//				"/monitoring_ontology.ttl").getFile());
 //		da.putModel(coreOnt);
 //		da.add(micOnt);
 //	}
@@ -83,9 +83,9 @@ public class KbTest {
 	@Test
 	public void testAsk() {
 		String queryString = "ASK " + "FROM <" + MO.getKnowledgeBaseDataURL()
-				+ "?graph=default> " + "WHERE { <" + MO.vm
+				+ "?graph=default> " + "WHERE { <" + MO.VM
 				+ "> <" + RDFS.subClassOf + "> <"
-				+ MO.externalComponent + "> . }";
+				+ MO.ExternalComponent + "> . }";
 
 		Query query = QueryFactory.create(queryString, Syntax.syntaxSPARQL_11);
 
@@ -97,9 +97,9 @@ public class KbTest {
 	@Test
 	public void testSubClassTransitivity() {
 		String queryString = "ASK " + "FROM <" + MO.getKnowledgeBaseDataURL()
-				+ "?graph=default> " + "WHERE { <" + MO.vm
+				+ "?graph=default> " + "WHERE { <" + MO.VM
 				+ "> <" + RDFS.subClassOf + ">+ <"
-				+ MO.component + "> . }";
+				+ MO.Component + "> . }";
 
 		Query query = QueryFactory.create(queryString, Syntax.syntaxSPARQL_11);
 
@@ -118,16 +118,16 @@ public class KbTest {
 		String appInstanceURI = MO.URI + "app";
 
 		m.createResource(appInstanceURI).addProperty(
-				MO.requires,
+				MO.requiredComponent,
 				m.createResource(containerInstanceURI).addProperty(
-						MO.requires,
+						MO.requiredComponent,
 						m.createResource(vmInstanceURI)));
 
 		da.add(m);
 
 		String queryString = "ASK " + "FROM <" + MO.getKnowledgeBaseDataURL()
 				+ "?graph=default> " + "WHERE { <" + appInstanceURI + "> <"
-				+ MO.requires + ">+ <" + vmInstanceURI
+				+ MO.requiredComponent + ">+ <" + vmInstanceURI
 				+ "> . }";
 		Query query = QueryFactory.create(queryString, Syntax.syntaxSPARQL_11);
 
