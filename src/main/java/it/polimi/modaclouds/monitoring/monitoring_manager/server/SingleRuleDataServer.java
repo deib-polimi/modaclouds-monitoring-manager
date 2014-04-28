@@ -14,19 +14,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package it.polimi.modaclouds.monitoring.monitoring_manager;
+package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
-import it.polimi.modaclouds.qos_models.monitoring_ontology.Component;
-import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
+import org.restlet.resource.ServerResource;
 
-public interface MonitoringPlatform {
-
-	void newInstance(Component instance);
-
-	void start();
-
-	void stop();
-
-	void installRule(MonitoringRule cpuRule) throws RuleInstallationException;
+public class SingleRuleDataServer extends ServerResource{
 
 }

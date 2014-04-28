@@ -38,18 +38,25 @@ All known errors cause the resource to return HTTP error code header together wi
 ## Example
 **Request**
 
-	PUT v1/monitoring-rules/mr_3
+	PUT v1/monitoring-rules/mr_1
 
 
 ``` xml
-<monitoringRule id="mr_3" label="Gold Percentile Monitoring Rule"
-	parentMonitoringRuleId="mr_2" samplingProbability="1" samplingTime="5">
-	<monitoredTargets>
-		<monitoredTarget id="tr_3" />
-	</monitoredTargets>
-	<metricAggregation inherited="true" />
-	<condition>METRIC &gt;= 0.3</condition>
-	<actions inherited="true" />
+<monitoringRule id="mr_1" label="CPU Utilization Rule"
+		metricName="CpuUtilization" relatedQosConstraintId="qs_1" timeStep="60"
+		timeWindow="60" startEnabled="true" samplingProbability="1"
+		samplingTime="5">
+		<monitoredTargets>
+			<monitoredTarget id="tr_1" clazz="VM"/>
+		</monitoredTargets>
+		<metricAggregation groupingCategoryName="Region"
+			aggregateFunction="Average" />
+		<condition>METRIC &gt;= 0.6</condition>
+		<actions>
+			<action name="OutputMetric">
+				<parameter name="name">CpuUtilizationViolation</parameter>
+			</action>
+		</actions>
 </monitoringRule>
 ```
 

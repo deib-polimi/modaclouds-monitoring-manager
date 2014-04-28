@@ -16,15 +16,13 @@
  */
 package it.polimi.modaclouds.monitoring.mockup;
 
-import java.math.BigInteger;
-
-import it.polimi.modaclouds.monitoring.monitoring_manager.MPServer;
-import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringPlatform;
+import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.DeterministicDataAnalyzer;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.InternalComponent;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Method;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.SDAFactory;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.VM;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 import it.polimi.modaclouds.qos_models.schema.Action;
 import it.polimi.modaclouds.qos_models.schema.Actions;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
@@ -32,6 +30,8 @@ import it.polimi.modaclouds.qos_models.schema.MonitoredTargets;
 import it.polimi.modaclouds.qos_models.schema.MonitoringMetricAggregation;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 import it.polimi.modaclouds.qos_models.schema.Parameter;
+
+import java.math.BigInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +59,7 @@ public class MPClient {
 
 	public static void main(String[] args) {
 		try {
-			MonitoringPlatform mp = new MPServer();
+			MonitoringManager mp = new MonitoringManager();
 
 			// *** MODELS @ RUNTIME *** //
 
@@ -92,12 +92,14 @@ public class MPClient {
 		mr.setStartEnabled(false);
 		mr.setSamplingProbability((float) 1);
 		mr.setTimeStep(BigInteger.valueOf(60));
+		mr.setTimeWindow(BigInteger.valueOf(60));
 
 		mr.setMetricName("CpuUtilization");
 
 		MonitoredTargets targets = new MonitoredTargets();
 		MonitoredTarget target = new MonitoredTarget();
-		target.setKlass("FrontendVM");
+		target.setId("FrontendVM");
+		target.setClazz(Vocabulary.VM);
 		targets.getMonitoredTargets().add(target);
 		mr.setMonitoredTargets(targets);
 
@@ -169,7 +171,6 @@ public class MPClient {
 		sdaVM.setUrl(sdaFactoryVMURL);
 		SDAFactory sdaFactory = new SDAFactory();
 		sdaFactory.setUrl(sdaFactoryURL);
-		;
 		sdaFactory.addRequiredComponent(sdaVM);
 
 		return sdaFactory;

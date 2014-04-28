@@ -14,13 +14,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package it.polimi.modaclouds.monitoring.monitoring_manager;
+package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
-public class DDAAggregateFunction {
+import org.restlet.resource.ServerResource;
 
-	public static final String Average = "Average";
-	public static final String Percentile = "Percentile";
-	public static final String Min = "Min";
-	public static final String Max = "Max";
+public class MultipleObserversDataServer extends ServerResource {
 
 }

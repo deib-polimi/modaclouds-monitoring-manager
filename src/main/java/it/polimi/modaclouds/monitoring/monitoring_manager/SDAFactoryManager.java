@@ -58,7 +58,7 @@ public class SDAFactoryManager {
 		for (MonitoredTarget target : rule.getMonitoredTargets()
 				.getMonitoredTargets()) {
 			monitorableResources.addAll((Set)knowledgeBase
-					.getByPropertyValue(Vocabulary.klass, target.getKlass()));
+					.getByPropertyValue(Vocabulary.klass, target.getClazz()));
 		}
 		
 		sda.setTargetResources(monitorableResources);

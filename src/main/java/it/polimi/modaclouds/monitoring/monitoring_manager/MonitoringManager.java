@@ -19,9 +19,7 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 import it.polimi.modaclouds.monitoring.kb.api.KBConnector;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Component;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
-import it.polimi.modaclouds.qos_models.monitoring_rules.RuleValidationException;
 import it.polimi.modaclouds.qos_models.schema.AggregateFunction;
-import it.polimi.modaclouds.qos_models.schema.GroupingCategories;
 import it.polimi.modaclouds.qos_models.schema.GroupingCategory;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 
@@ -33,7 +31,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MPServer implements MonitoringPlatform {
+public class MonitoringManager  {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -45,7 +43,7 @@ public class MPServer implements MonitoringPlatform {
 
 	private Config config;
 
-	public MPServer() throws InternalErrorException {
+	public MonitoringManager() throws InternalErrorException {
 		try {
 			knowledgeBase = KBConnector.getInstance();
 			config = Config.getInstance();
@@ -59,23 +57,19 @@ public class MPServer implements MonitoringPlatform {
 		}
 	}
 
-	@Override
 	public void newInstance(Component instance) {
 		knowledgeBase.add(instance);
 	}
 
-	@Override
 	public void start() {
 
 	}
 
-	@Override
 	public void stop() {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public void installRule(MonitoringRule rule)
 			throws RuleInstallationException {
 		if (installedRules.containsKey(rule.getId()))
@@ -83,7 +77,7 @@ public class MPServer implements MonitoringPlatform {
 		boolean sdaRequired = false;
 		String sdaReturnedMetric = null;
 		String aggregateFunction = null;
-		String groupingCategory = null;
+		String groupingClass = null;
 		if (rule.getMetricAggregation() != null) {
 			MonitoringRule pRule = rule;
 			while (pRule.getMetricAggregation() != null
@@ -92,7 +86,7 @@ public class MPServer implements MonitoringPlatform {
 			}
 			aggregateFunction = pRule.getMetricAggregation()
 					.getAggregateFunction();
-			groupingCategory = pRule.getMetricAggregation().getGroupingCategoryName();
+			groupingClass = pRule.getMetricAggregation().getGroupingCategoryName();
 		}
 		if (aggregateFunction != null) {
 			boolean validAggregateFunction = false;
@@ -113,20 +107,20 @@ public class MPServer implements MonitoringPlatform {
 						+ aggregateFunction + " is not valid");
 			}
 		}
-		if (groupingCategory != null) {
+		if (groupingClass != null) {
 			boolean validGroupingCategoryFunction = false;
 			List<GroupingCategory> availableGroupingCategories = config
 					.getAvailableGroupingCategories().getGroupingCategories();
 			for (GroupingCategory availableGroupingCategory : availableGroupingCategories) {
-				if (groupingCategory.equals(availableGroupingCategory.getName())) {
+				if (groupingClass.equals(availableGroupingCategory.getName())) {
 					validGroupingCategoryFunction = true;
 					break;
 				}
 			}
 			if (!validGroupingCategoryFunction) {
-				logger.error("Grouping category " + groupingCategory
+				logger.error("Grouping category " + groupingClass
 						+ " is not valid");
-				throw new RuleInstallationException("Grouping category " + groupingCategory
+				throw new RuleInstallationException("Grouping category " + groupingClass
 						+ " is not valid");
 			}
 		}
@@ -134,7 +128,7 @@ public class MPServer implements MonitoringPlatform {
 			sdaReturnedMetric = generateRandomMetricName();
 		}
 		try {
-			csparqlEngineManager.installRule(rule, aggregateFunction, groupingCategory, sdaRequired, sdaReturnedMetric);
+			csparqlEngineManager.installRule(rule, sdaRequired, sdaReturnedMetric);
 			dcFactoriesManager.installRule(rule);
 			if (sdaRequired)
 				sdaFactoryManager.installRule(rule, aggregateFunction, sdaReturnedMetric);

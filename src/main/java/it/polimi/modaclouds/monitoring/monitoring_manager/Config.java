@@ -100,15 +100,10 @@ public class Config {
 		boolean exists = false;
 		URL url = null;
 		try {
-			url = new URL(URLName);
-			HttpURLConnection.setFollowRedirects(false);
-			// note : you may also need
-			// HttpURLConnection.setInstanceFollowRedirects(false)
-			HttpURLConnection con = (HttpURLConnection) url.openConnection();
-			con.setRequestMethod("HEAD");
-			exists = (con.getResponseCode() == HttpURLConnection.HTTP_OK);
+			url = Config.class.getResource(URLName);
+			exists = new File(url.toURI()).exists();
 		} catch (Exception e) {
-			logger.error("Error while getting URL from URLName", e);
+			logger.error("Error checking if file exists from URLName", e);
 			exists = false;
 		}
 		if (exists)
@@ -120,16 +115,10 @@ public class Config {
 						.getPath()).getParent()
 						+ URLName;
 
-				url = new URL(alternativeURLName);
-				HttpURLConnection.setFollowRedirects(false);
-				// note : you may also need
-				// HttpURLConnection.setInstanceFollowRedirects(false)
-				HttpURLConnection con = (HttpURLConnection) url
-						.openConnection();
-				con.setRequestMethod("HEAD");
-				exists = (con.getResponseCode() == HttpURLConnection.HTTP_OK);
+				url = new File(alternativeURLName).toURI().toURL();
+				exists = new File(url.toURI()).exists();
 			} catch (Exception e) {
-				logger.error("Error while getting URL from alternativeURLName",
+				logger.error("Error checking if file exists from alternativeURLName",
 						e);
 				exists = false;
 			}
@@ -147,6 +136,10 @@ public class Config {
 
 	public int getSDAServerPort() {
 		return config.getInt("sda_server.port");
+	}
+
+	public int getMMServerPort() {
+		return config.getInt("mm_server.port");
 	}
 
 }

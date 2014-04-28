@@ -16,7 +16,7 @@ Version 1
 
 - **[<code>GET</code> /metrics](rest/metrics/GET-metrics.md)**
 - **[<code>GET</code> /metrics/:id/observers](rest/metrics/GET-metrics-id-observers.md)**
-- **[<code>POST</code> /metrics/:id/observers](rest/metrics/POST-metrics-id-observers.md)**
+- **[<code>POST</code> /metrics/:id](rest/metrics/POST-metrics-id.md)**
 - **[<code>DELETE</code> /metrics/:id/observers/:id](rest/metrics/DELETE-metrics-id-observers-id.md)**
 
 ## Java API

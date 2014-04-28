@@ -25,13 +25,15 @@
 		metricName="ResponseTime" relatedQosConstraintId="qs-e9055370-aeb9-11e3-a5e2-0800200c9a66" startEnabled="true"
 		timeStep="60" timeWindow="60" samplingProbability="1" samplingTime="5">
 		<monitoredTargets>
-			<monitoredTarget id="Login" />
+			<monitoredTarget klass="Method"/>
 		</monitoredTargets>
 		<metricAggregation groupingCategoryName="CloudProvider"
 			aggregateFunction="Average" />
 		<condition>METRIC &gt;= 300</condition>
 		<actions>
-			<action name="NotifyViolation" />
+			<action name="OutputMetric">
+				<parameter name="name">ResponseTimeViolation</parameter>
+			</action>
 		</actions>
 	</monitoringRule>
 </monitoringRules>

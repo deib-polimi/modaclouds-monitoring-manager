@@ -41,7 +41,7 @@ import com.hp.hpl.jena.query.DatasetAccessorFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 
 @RunWith(Suite.class)
-@SuiteClasses({ KbTest.class, TranslationTest.class})
+@SuiteClasses({ KbTest.class})
 public class AllTests {
 
 	private static SPARQLServer fusekiServer;
@@ -59,12 +59,9 @@ public class AllTests {
 					.getResource("/moda_fuseki_configuration.ttl").getFile());
 			fusekiServer = new SPARQLServer(config);
 			fusekiServer.start();
-			Model coreOnt = RDFDataMgr.loadModel(AllTests.class.getResource(
-					"/mic_ontology.ttl").getFile());
-			Model micOnt = RDFDataMgr.loadModel(AllTests.class.getResource(
+			Model ontology = RDFDataMgr.loadModel(AllTests.class.getResource(
 					"/monitoring_ontology.ttl").getFile());
-			da.putModel(coreOnt);
-			da.add(micOnt);
+			da.putModel(ontology);
 
 			rsp_services_csparql_server.main(null);
 

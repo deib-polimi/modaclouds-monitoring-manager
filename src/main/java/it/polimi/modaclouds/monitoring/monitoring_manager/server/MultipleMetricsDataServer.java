@@ -14,19 +14,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package it.polimi.modaclouds.monitoring.monitoring_manager;
+package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
-import com.hp.hpl.jena.rdf.model.Resource;
+import org.restlet.resource.ServerResource;
 
-class QueryVars {
-
-	public static final String TARGET = "?target";
-	public static final String OUTPUT = "?output_value";
-	public static final String INPUT = "?input";
-	public static final String COMPONENT = "?component";
-	public static final String EXTERNAL_COMPONENT = "?external_component";
-	public static final String TIMESTAMP = "?timestamp";
-	public static final String INPUT_TIMESTAMP = "?input_timestamp";
-	public static final String DATUM = "?datum";
+public class MultipleMetricsDataServer extends ServerResource {
 
 }

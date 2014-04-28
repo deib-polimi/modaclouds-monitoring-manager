@@ -1,8 +1,8 @@
-[Documentation table of contents](../../TOC.md) / [API Reference](../../api.md) / POST-metrics-id-observers
+[Documentation table of contents](../../TOC.md) / [API Reference](../../api.md) / POST-metrics-id
 
 # Monitoring Rules
 
-	POST /metrics/:id/observers
+	POST /metrics/:id
 
 ## Description
 Attach an observer to the metric.
@@ -39,10 +39,10 @@ An xml object with the callback url of the observer.
 ## Example
 **Request**
 
-	POST v1/monitoring-rules/mr_3
+	POST v1/metrics/ResponseTime
 	
 ``` xml
-<callback_url>http://url.to.observer.1:8176/response-time</callback_url>
+<callback_url>http://url.to.observer.1:8176/ResponseTime</callback_url>
 ```
 
 **Response**
@@ -50,5 +50,5 @@ An xml object with the callback url of the observer.
 	Status: 201 Created
 
 ``` xml
-<observer id="observer-1">http://url.to.observer.1:8176/response-time</observer>
+<observer id="observer-1">http://url.to.observer.1:8176/ResponseTime</observer>
 ```
