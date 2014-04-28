@@ -26,6 +26,7 @@ import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -146,5 +147,10 @@ public class MonitoringManager  {
 
 	private String escape(String string) {
 		return string.replaceAll("[^a-zA-Z0-9]", "");
+	}
+
+	public Set<String> getMetrics() {
+		return null;
+		
 	}
 }

@@ -36,9 +36,9 @@ import java.math.BigInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MPClient {
+public class MPClient_installCPURule {
 
-	private static Logger logger = LoggerFactory.getLogger(MPClient.class
+	private static Logger logger = LoggerFactory.getLogger(MPClient_installCPURule.class
 			.getName());
 
 	// private static final String amazonFEVMURL = "http://x.x.x.x";
@@ -124,26 +124,26 @@ public class MPClient {
 
 	private static InternalComponent makeFlexiFrontendDeployment() {
 		VM flexiFrontendVM = new VM();
-		flexiFrontendVM.setKlass("FrontendVM");
+		flexiFrontendVM.setId("FrontendVM");
 		flexiFrontendVM.setUrl(flexiFEVMURL);
 		flexiFrontendVM.setCloudProvider("flexi");
 
 		VM flexiBackendVM = new VM();
-		flexiBackendVM.setKlass("BackendVM");
+		flexiBackendVM.setId("BackendVM");
 		flexiBackendVM.setUrl(flexiBEVMURL);
 		flexiBackendVM.setCloudProvider("flexi");
 
 		InternalComponent flexiJVM = new InternalComponent();
-		flexiJVM.setKlass("JVM");
+		flexiJVM.setId("JVM");
 		flexiJVM.addRequiredComponent(flexiFrontendVM);
 
 		InternalComponent flexiMySQL = new InternalComponent();
-		flexiMySQL.setKlass("MySQL");
+		flexiMySQL.setId("MySQL");
 		flexiMySQL.setUrl(flexiMySqlURL);
 		flexiJVM.addRequiredComponent(flexiBackendVM);
 
 		InternalComponent flexiFrontend = new InternalComponent();
-		flexiFrontend.setKlass("Frontend");
+		flexiFrontend.setId("Frontend");
 		flexiFrontend.setUrl(flexiFEURL);
 		flexiFrontend.addRequiredComponent(flexiJVM);
 		flexiFrontend.addRequiredComponent(flexiMySQL);

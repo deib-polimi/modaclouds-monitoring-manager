@@ -45,7 +45,7 @@ public class DCFactoriesManager {
 		for (MonitoredTarget target : rule.getMonitoredTargets()
 				.getMonitoredTargets()) {
 			Set<KBEntity> targetEntities = knowledgeBase
-					.getByPropertyValue(Vocabulary.klass, target.getClazz());
+					.getByPropertyValue(Vocabulary.id, target.getId());
 			for (KBEntity targetEntity: targetEntities) {
 				Map<String, DataCollector> targetEntityDCs = attachedDataCollectors.get(targetEntities); 
 				if (targetEntityDCs == null) {
