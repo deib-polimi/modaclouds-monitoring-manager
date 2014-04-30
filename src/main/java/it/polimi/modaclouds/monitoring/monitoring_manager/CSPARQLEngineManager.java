@@ -18,7 +18,6 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 
 import it.polimi.csparqool.CSquery;
 import it.polimi.csparqool.Function;
-import it.polimi.csparqool.FunctionArgs;
 import it.polimi.csparqool.MalformedQueryException;
 import it.polimi.csparqool._body;
 import it.polimi.csparqool._graph;
@@ -29,7 +28,6 @@ import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 import it.polimi.modaclouds.qos_models.schema.Action;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
-import it.polimi.modaclouds.qos_models.schema.Parameter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -206,14 +204,8 @@ public class CSPARQLEngineManager {
 		_body innerQueryBody = new _body();
 		addSelect(innerQueryBody, getInnerQueryRequiredVars(requiredVars), rule);
 
-		query.fromStream(
-				sourceStreamURI,
-				Util.getParameterValue(Vocabulary.timeWindow,
-						rule.getMetricAggregation())
-						+ "s",
-				Util.getParameterValue(Vocabulary.timeStep,
-						rule.getMetricAggregation())
-						+ "s")
+		query.fromStream(sourceStreamURI, rule.getTimeWindow() + "s",
+				rule.getTimeStep() + "s")
 				.from(MO.getKnowledgeBaseDataURL() + "?graph=default")
 				.where(queryBody
 						.where(innerQueryBody.where(createGraphPattern(rule)))
@@ -288,14 +280,8 @@ public class CSPARQLEngineManager {
 			tunnelQuery
 					.select(QueryVars.TARGET, QueryVars.INPUT,
 							QueryVars.TIMESTAMP)
-					.fromStream(
-							sourceStreamURI,
-							Util.getParameterValue(Vocabulary.timeWindow,
-									rule.getMetricAggregation())
-									+ "s",
-							Util.getParameterValue(Vocabulary.timeStep,
-									rule.getMetricAggregation())
-									+ "s")
+					.fromStream(sourceStreamURI, rule.getTimeWindow() + "s",
+							rule.getTimeStep() + "s")
 					.from(MO.getKnowledgeBaseDataURL() + "?graph=default")
 					.where(body
 							.select(QueryVars.TARGET, QueryVars.INPUT)
@@ -454,5 +440,4 @@ public class CSPARQLEngineManager {
 	// return qexec.execAsk();
 	// }
 
-	
 }

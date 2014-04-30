@@ -16,8 +16,31 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
+import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
+
+import org.restlet.data.Status;
+import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MultipleRulesDataServer extends ServerResource {
+	
+	private Logger logger = LoggerFactory.getLogger(MultipleRulesDataServer.class.getName());
+	
+	@Get
+	public void getMonitoringRules() {
+		try {
+			MonitoringManager manager = (MonitoringManager) getContext().getAttributes().get("csaprqlQueryTable");
+		} catch(Exception e){
+			logger.error("Error while getting monitoring rules", e);
+			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL,"Error while getting multiple queries informations");
+//			this.getResponse().setEntity(gson.toJson("Error while getting multiple queries informations"), MediaType.APPLICATION_JSON);
+		} finally{
+			this.getResponse().commit();
+			this.commit();	
+			this.release();
+		}
+	}
 
 }

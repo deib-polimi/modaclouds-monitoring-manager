@@ -95,16 +95,9 @@ public class MPClient_installCPURule {
 		
 		metric.setMetricName(Vocabulary.CpuUtilization);
 		metric.setInherited(false);
-		
-		Parameter parameter = new Parameter();
-		parameter.setName(Vocabulary.samplingProbability);
-		parameter.setValue("1");
-		metric.getParameters().add(parameter);
-		
-		parameter = new Parameter();
-		parameter.setName(Vocabulary.samplingTime);
-		parameter.setValue("10");
-		metric.getParameters().add(parameter);
+	
+		metric.getParameters().add(newParameter(Vocabulary.samplingProbability,"1"));
+		metric.getParameters().add(newParameter(Vocabulary.samplingTime,"10"));
 	
 		MonitoringMetricAggregation metricAggregation = new MonitoringMetricAggregation();
 		mr.setMetricAggregation(metricAggregation);
@@ -112,16 +105,8 @@ public class MPClient_installCPURule {
 		metricAggregation.setAggregateFunction(Function.AVERAGE);
 		metricAggregation.setGroupingClass(Vocabulary.CloudProvider);
 		
-		parameter = new Parameter();
-		parameter.setName(Vocabulary.timeStep);
-		parameter.setValue("60");
-		metricAggregation.getParameters().add(parameter);
-		
-		parameter = new Parameter();
-		parameter.setName(Vocabulary.timeWindow);
-		parameter.setValue("60");
-		metricAggregation.getParameters().add(parameter);
-		
+		mr.setTimeStep("60");
+		mr.setTimeWindow("60");
 		
 		MonitoredTargets targets = new MonitoredTargets();
 		MonitoredTarget target = new MonitoredTarget();
@@ -133,15 +118,20 @@ public class MPClient_installCPURule {
 		mr.setCondition("METRIC >= 0.6");
 
 		Actions actions = new Actions();
-		Action a = new Action();
-		a.setName(Vocabulary.OutputMetric);
-		Parameter p = new Parameter();
-		p.setName(Vocabulary.name);
-		p.setValue("CpuUtilizationViolation");
-		a.getParameters().add(p);
-		actions.getActions().add(a);
+		Action action = new Action();
+		action.setName(Vocabulary.OutputMetric);
+		action.getParameters().add(newParameter(Vocabulary.name,"CpuUtilizationViolation"));
+		actions.getActions().add(action);
 		mr.setActions(actions);
 		return mr;
+	}
+
+	private static Parameter newParameter(String parameterName,
+			String parameterValue) {
+		Parameter parameter = new Parameter();
+		parameter.setName(parameterName);
+		parameter.setValue(parameterValue);
+		return parameter;
 	}
 
 	private static InternalComponent makeFlexiFrontendDeployment() {
