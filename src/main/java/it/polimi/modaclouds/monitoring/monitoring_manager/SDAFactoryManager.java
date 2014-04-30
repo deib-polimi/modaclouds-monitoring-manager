@@ -18,7 +18,6 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 
 import it.polimi.modaclouds.monitoring.kb.api.KBConnector;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MonitorableResource;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.Parameter;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.StatisticalDataAnalyzer;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
@@ -47,10 +46,10 @@ public class SDAFactoryManager {
 			ruleSDAMap.put(rule.getId(), sda);
 		}
 		sda.setAggregateFunction(aggregateFunction);
-		sda.setPeriod(rule.getTimeStep().intValue());
-		sda.addParameter(new Parameter("window", rule.getTimeWindow().toString()));
+		sda.addParameter(Util.getParameter(Vocabulary.timeStep, rule.getMetricAggregation()));
+		sda.addParameter(Util.getParameter(Vocabulary.timeWindow, rule.getMetricAggregation()));
 		sda.setStarted(true);
-		sda.setTargetMetric(rule.getMetricName());
+		sda.setTargetMetric(rule.getCollectedMetric().getMetricName());
 		sda.setReturnedMetric(sdaReturnedMetric);
 		
 		Set<MonitorableResource> monitorableResources = new HashSet<MonitorableResource>();

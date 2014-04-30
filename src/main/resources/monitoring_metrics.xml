@@ -19,23 +19,18 @@
 -->
 <metrics xmlns="http://www.modaclouds.eu/xsd/1.0/metrics_schema"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.modaclouds.eu/xsd/1.0/metrics_schema ../commons/metrics_schema.xsd">
-	<metric defaultSamplingProbability="1.0" defaultSamplingTime="10"
-		defaultTimeStep="60" defaultTimeWindow="60">CpuUtilization</metric>
-	<metric defaultSamplingProbability="1.0" defaultSamplingTime="10"
-		defaultTimeStep="60" defaultTimeWindow="60">ResponseTime</metric>
-	<metric defaultSamplingProbability="1.0" defaultSamplingTime="10"
-		defaultTimeStep="60" defaultTimeWindow="60">AbortedConnections</metric>
-	<metric defaultSamplingProbability="1.0" defaultSamplingTime="10"
-		defaultTimeStep="60" defaultTimeWindow="60">AttemptedConnections</metric>
-	<metric defaultSamplingProbability="1.0" defaultSamplingTime="10"
-		defaultTimeStep="60" defaultTimeWindow="60">Availability</metric>
-	<metric defaultSamplingProbability="1.0" defaultSamplingTime="10"
-		defaultTimeStep="60" defaultTimeWindow="60">SuccessfulRequests</metric>
-	<metric defaultSamplingProbability="1.0" defaultSamplingTime="10"
-		defaultTimeStep="60" defaultTimeWindow="60">ThreadsRunning</metric>
-	<metric defaultSamplingProbability="1.0" defaultSamplingTime="10"
-		defaultTimeStep="60" defaultTimeWindow="60">Queries</metric>
-	<metric defaultSamplingProbability="1.0" defaultSamplingTime="10"
-		defaultTimeStep="60" defaultTimeWindow="60">SelectQueries</metric>
+	xsi:schemaLocation="http://www.modaclouds.eu/xsd/1.0/metrics_schema
+	https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/master/metamodels/commons/metrics_schema.xsd">
+	<metric name="CpuUtilization">
+		<requiredParameter>samplingTime</requiredParameter>
+		<requiredParameter>samplingProbability</requiredParameter>
+		<requiredParameter>categoryName</requiredParameter>
+		<requiredParameter>functionID</requiredParameter>
+		<requiredParameter>className</requiredParameter>
+		<requiredParameter>functionName</requiredParameter>
+	</metric>
+	<metric name="ResponseTime">
+		<requiredParameter>samplingTime</requiredParameter>
+		<requiredParameter>samplingProbability</requiredParameter>
+	</metric>
 </metrics>

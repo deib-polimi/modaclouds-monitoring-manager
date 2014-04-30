@@ -41,7 +41,7 @@ public class DCFactoriesManager {
 
 	public void installRule(MonitoringRule rule) {
 		Set<DataCollector> updatedDCs = new HashSet<DataCollector>();
-		String requiredMetric = rule.getMetricName();
+		String requiredMetric = rule.getCollectedMetric().getMetricName();
 		for (MonitoredTarget target : rule.getMonitoredTargets()
 				.getMonitoredTargets()) {
 			Set<KBEntity> targetEntities = knowledgeBase
@@ -57,8 +57,8 @@ public class DCFactoriesManager {
 					dc = new DataCollector();
 					targetEntityDCs.put(requiredMetric, dc);
 				}
-				dc.addParameter(new Parameter(Vocabulary.samplingTime, rule.getSamplingTime().toString()));
-				dc.addParameter(new Parameter(Vocabulary.samplingProbability, rule.getSamplingProbability().toString()));
+				dc.addParameter(Util.getParameter(Vocabulary.samplingTime,rule.getCollectedMetric()));
+				dc.addParameter(Util.getParameter(Vocabulary.samplingProbability,rule.getCollectedMetric()));
 				dc.setEnabled(true);
 				updatedDCs.add(dc);
 			}

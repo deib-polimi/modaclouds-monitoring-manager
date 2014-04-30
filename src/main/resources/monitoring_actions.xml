@@ -19,7 +19,7 @@
 -->
 <availableActions xmlns="http://www.modaclouds.eu/xsd/2.0/actions_schema"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.modaclouds.eu/xsd/2.0/actions_schema ../monitoringrules/actions_schema.xsd">
+	xsi:schemaLocation="http://www.modaclouds.eu/xsd/2.0/actions_schema https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/master/metamodels/monitoringrules/actions_schema.xsd">
 	<availableAction name="OutputMetric">
 		<requiredParameter>name</requiredParameter>
 	</availableAction>

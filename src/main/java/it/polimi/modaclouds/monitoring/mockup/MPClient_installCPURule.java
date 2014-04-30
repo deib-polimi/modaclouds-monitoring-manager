@@ -16,6 +16,7 @@
  */
 package it.polimi.modaclouds.monitoring.mockup;
 
+import it.polimi.csparqool.Function;
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.DeterministicDataAnalyzer;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.InternalComponent;
@@ -25,6 +26,7 @@ import it.polimi.modaclouds.qos_models.monitoring_ontology.VM;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 import it.polimi.modaclouds.qos_models.schema.Action;
 import it.polimi.modaclouds.qos_models.schema.Actions;
+import it.polimi.modaclouds.qos_models.schema.CollectedMetric;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTargets;
 import it.polimi.modaclouds.qos_models.schema.MonitoringMetricAggregation;
@@ -87,15 +89,40 @@ public class MPClient_installCPURule {
 
 		mr.setId("cpuRule");
 		mr.setLabel("CPU rule");
-		mr.setSamplingProbability((float) 1);
-		mr.setSamplingTime(BigInteger.valueOf(5));
-		mr.setStartEnabled(false);
-		mr.setSamplingProbability((float) 1);
-		mr.setTimeStep(BigInteger.valueOf(60));
-		mr.setTimeWindow(BigInteger.valueOf(60));
-
-		mr.setMetricName("CpuUtilization");
-
+		
+		CollectedMetric metric = new CollectedMetric();
+		mr.setCollectedMetric(metric);
+		
+		metric.setMetricName(Vocabulary.CpuUtilization);
+		metric.setInherited(false);
+		
+		Parameter parameter = new Parameter();
+		parameter.setName(Vocabulary.samplingProbability);
+		parameter.setValue("1");
+		metric.getParameters().add(parameter);
+		
+		parameter = new Parameter();
+		parameter.setName(Vocabulary.samplingTime);
+		parameter.setValue("10");
+		metric.getParameters().add(parameter);
+	
+		MonitoringMetricAggregation metricAggregation = new MonitoringMetricAggregation();
+		mr.setMetricAggregation(metricAggregation);
+		
+		metricAggregation.setAggregateFunction(Function.AVERAGE);
+		metricAggregation.setGroupingClass(Vocabulary.CloudProvider);
+		
+		parameter = new Parameter();
+		parameter.setName(Vocabulary.timeStep);
+		parameter.setValue("60");
+		metricAggregation.getParameters().add(parameter);
+		
+		parameter = new Parameter();
+		parameter.setName(Vocabulary.timeWindow);
+		parameter.setValue("60");
+		metricAggregation.getParameters().add(parameter);
+		
+		
 		MonitoredTargets targets = new MonitoredTargets();
 		MonitoredTarget target = new MonitoredTarget();
 		target.setId("FrontendVM");
@@ -103,18 +130,13 @@ public class MPClient_installCPURule {
 		targets.getMonitoredTargets().add(target);
 		mr.setMonitoredTargets(targets);
 
-		MonitoringMetricAggregation avg = new MonitoringMetricAggregation();
-		avg.setGroupingCategoryName("CloudProvider");
-		avg.setAggregateFunction("Average");
-		mr.setMetricAggregation(avg);
-
 		mr.setCondition("METRIC >= 0.6");
 
 		Actions actions = new Actions();
 		Action a = new Action();
-		a.setName("OutputMetric");
+		a.setName(Vocabulary.OutputMetric);
 		Parameter p = new Parameter();
-		p.setName("name");
+		p.setName(Vocabulary.name);
 		p.setValue("CpuUtilizationViolation");
 		a.getParameters().add(p);
 		actions.getActions().add(a);

@@ -87,7 +87,7 @@ public class MonitoringManager  {
 			}
 			aggregateFunction = pRule.getMetricAggregation()
 					.getAggregateFunction();
-			groupingClass = pRule.getMetricAggregation().getGroupingCategoryName();
+			groupingClass = pRule.getMetricAggregation().getGroupingClass();
 		}
 		if (aggregateFunction != null) {
 			boolean validAggregateFunction = false;
