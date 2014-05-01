@@ -45,33 +45,22 @@ None
 	xsi:schemaLocation="http://www.modaclouds.eu/xsd/1.0/monitoring_rules_schema
 	https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/v1.0/metamodels/monitoringrules/monitoring_rules_schema.xsd">
 	<monitoringRule id="mr_1" label="CPU Utilization Rule"
-		metricName="CpuUtilization" relatedQosConstraintId="qs_1" timeStep="60"
-		timeWindow="60" startEnabled="true" samplingProbability="1"
-		samplingTime="5">
+		startEnabled="true" timeStep="60" timeWindow="60">
 		<monitoredTargets>
-			<monitoredTarget id="tr_1" />
+			<monitoredTarget id="tr_1" class="VM"/>
 		</monitoredTargets>
-		<metricAggregation groupingCategoryName="Region"
-			aggregateFunction="Average" />
+		<collectedMetric inherited="false" metricName="CpuUtilization">
+			<parameter name="samplingProbability">1</parameter>
+			<parameter name="samplingTime">10</parameter>
+		</collectedMetric>
+		<metricAggregation groupingClass="Region"
+			aggregateFunction="Average">
+		</metricAggregation>
 		<condition>METRIC &gt;= 0.6</condition>
 		<actions>
-			<action name="NotifyViolation" />
-		</actions>
-	</monitoringRule>
-	<monitoringRule id="mr_2" label="Percentile Monitoring Rule"
-		metricName="ResponseTime" relatedQosConstraintId="qs_2" timeStep="60"
-		startEnabled="true" timeWindow="60" samplingProbability="1"
-		samplingTime="5">
-		<monitoredTargets>
-			<monitoredTarget id="tr_2" />
-		</monitoredTargets>
-		<metricAggregation groupingCategoryName="CloudProvider"
-			aggregateFunction="Percentile">
-			<parameter>95</parameter>
-		</metricAggregation>
-		<condition>METRIC &gt;= 1</condition>
-		<actions>
-			<action name="NotifyViolation" />
+			<action name="OutputMetric">
+				<parameter name="name">CpuUtilizationViolation</parameter>
+			</action>
 		</actions>
 	</monitoringRule>
 </monitoringRules>

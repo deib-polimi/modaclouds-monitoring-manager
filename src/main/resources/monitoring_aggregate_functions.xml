@@ -23,25 +23,15 @@
 	xsi:schemaLocation="http://www.modaclouds.eu/xsd/2.0/aggregate_functions_schema 
 	https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/master/metamodels/commons/aggregate_functions_schema.xsd">
 	<aggregateFunction name="Average" computedBy="DeterministicDataAnalyzer">
-		<requiredParameter defaultValue="60">timeWindow</requiredParameter>
-		<requiredParameter defaultValue="60">timeStep</requiredParameter>
 	</aggregateFunction>
 	<aggregateFunction name="Percentile" computedBy="DeterministicDataAnalyzer">
 		<requiredParameter>thPercentile</requiredParameter>
-		<requiredParameter defaultValue="60">timeWindow</requiredParameter>
-		<requiredParameter defaultValue="60">timeStep</requiredParameter>
 	</aggregateFunction>
 	<aggregateFunction name="Max" computedBy="DeterministicDataAnalyzer">
-		<requiredParameter defaultValue="60">timeWindow</requiredParameter>
-		<requiredParameter defaultValue="60">timeStep</requiredParameter>
 	</aggregateFunction>
 	<aggregateFunction name="Min" computedBy="DeterministicDataAnalyzer">
-		<requiredParameter defaultValue="60">timeWindow</requiredParameter>
-		<requiredParameter defaultValue="60">timeStep</requiredParameter>
 	</aggregateFunction>
 	<aggregateFunction name="ForecastingML" computedBy="StatisticalDataAnalyzer">
-		<requiredParameter>timeWindow</requiredParameter>
-		<requiredParameter>timeStep</requiredParameter>
 		<requiredParameter>otherMetric1</requiredParameter>
 		<requiredParameter>otherMetric2</requiredParameter>
 		<requiredParameter>method</requiredParameter>
@@ -50,16 +40,12 @@
 	</aggregateFunction>
 	<aggregateFunction name="ForecastingTimeSeriesAR"
 		computedBy="StatisticalDataAnalyzer">
-		<requiredParameter>timeWindow</requiredParameter>
-		<requiredParameter>timeStep</requiredParameter>
 		<requiredParameter>order</requiredParameter>
 		<requiredParameter>forecastPeriod</requiredParameter>
 		<requiredParameter>returnedMetric</requiredParameter>
 	</aggregateFunction>
 	<aggregateFunction name="ForecastingTimeSeriesARMA"
 		computedBy="StatisticalDataAnalyzer">
-		<requiredParameter>timeWindow</requiredParameter>
-		<requiredParameter>timeStep</requiredParameter>
 		<requiredParameter>autoregressive</requiredParameter>
 		<requiredParameter>integrated</requiredParameter>
 		<requiredParameter>movingAverage</requiredParameter>
@@ -67,8 +53,6 @@
 		<requiredParameter>returnedMetric</requiredParameter>
 	</aggregateFunction>
 	<aggregateFunction name="EstimationCI" computedBy="StatisticalDataAnalyzer">
-		<requiredParameter>timeWindow</requiredParameter>
-		<requiredParameter>timeStep</requiredParameter>
 		<requiredParameter>method</requiredParameter>
 		<requiredParameter>window</requiredParameter>
 		<requiredParameter>nCPU</requiredParameter>
@@ -77,8 +61,6 @@
 		<requiredParameter>returnedMetric</requiredParameter>
 	</aggregateFunction>
 	<aggregateFunction name="Correlation" computedBy="StatisticalDataAnalyzer">
-		<requiredParameter>timeWindow</requiredParameter>
-		<requiredParameter>timeStep</requiredParameter>
 		<requiredParameter>otherMetric1</requiredParameter>
 		<requiredParameter>otherMetric2</requiredParameter>
 		<requiredParameter>method</requiredParameter>

@@ -21,6 +21,7 @@ import it.polimi.modaclouds.qos_models.schema.GroupingCategories;
 import it.polimi.modaclouds.qos_models.util.XMLHelper;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -35,47 +36,68 @@ public class Config {
 	private static Config _instance = null;
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
-	private Configuration config;
+	private PropertiesConfiguration config;
 	private AggregateFunctions availableAggregateFunctions;
-	private GroupingCategories availableGroupingCategories;
+	private GroupingCategories availableGroupingClasses;
 
-	private static final String monitoringManagerPropertiesURLName = "/monitoring_manager.properties";
-	private static final String monitoringAggregateFunctionsURLName = "/monitoring_aggregate_functions.xml";
-	private static final String monitoringGroupingCategoriesURLName = "/monitoring_grouping_categories.xml";
+	private static final String monitoringManagerPropertiesFileName = "monitoring_manager.properties";
+	private static final String monitoringAggregateFunctionsFileName = "monitoring_aggregate_functions.xml";
+	private static final String monitoringGroupingClassesFileName = "monitoring_grouping_categories.xml";
 
 	private Config() throws ConfigurationException {
-		URL monitoringManagerPropertiesURL = getURL(monitoringManagerPropertiesURLName);
-		URL monitoringAggregateFunctionsURL = getURL(monitoringAggregateFunctionsURLName);
-		URL monitoringGroupingCategoriesURL = getURL(monitoringGroupingCategoriesURLName);
-		if (monitoringManagerPropertiesURL != null) {
-			try {
-				config = new PropertiesConfiguration(monitoringManagerPropertiesURL);
-			} catch (Exception e) {
-			}
+		ClassLoader cl = this.getClass().getClassLoader();
+		try {
+			config = new PropertiesConfiguration(monitoringManagerPropertiesFileName);
+			availableAggregateFunctions = XMLHelper
+					.deserialize(
+							cl.getResourceAsStream(monitoringAggregateFunctionsFileName),
+							AggregateFunctions.class);
+			availableGroupingClasses = XMLHelper
+					.deserialize(
+							cl.getResourceAsStream(monitoringGroupingClassesFileName),
+							GroupingCategories.class);
+		} catch (Exception e) {
+			throw new ConfigurationException(e);
 		}
-		if (config == null) {
-			logger.warn("Could not load " + monitoringManagerPropertiesURLName + ".");
-		}
-		if (monitoringAggregateFunctionsURLName != null) {
-			try {
-				availableAggregateFunctions = XMLHelper.deserialize(
-						monitoringAggregateFunctionsURL, AggregateFunctions.class);
-			} catch (Exception e) {
-			}
-		}
-		if (availableAggregateFunctions == null) {
-			throw new ConfigurationException("Could not load " + monitoringAggregateFunctionsURLName + ".");
-		}
-		if (monitoringGroupingCategoriesURLName != null) {
-			try {
-				availableGroupingCategories = XMLHelper.deserialize(
-						monitoringGroupingCategoriesURL, GroupingCategories.class);
-			} catch (Exception e) {
-			}
-		}
-		if (availableGroupingCategories == null) {
-			throw new ConfigurationException("Could not load " + monitoringGroupingCategoriesURLName + ".");
-		}
+
+		// URL monitoringManagerPropertiesURL =
+		// getURL(monitoringManagerPropertiesURLName);
+//		URL monitoringAggregateFunctionsURL = getURL(monitoringAggregateFunctionsURLName);
+//		URL monitoringGroupingCategoriesURL = getURL(monitoringGroupingCategoriesURLName);
+		// if (monitoringManagerPropertiesURL != null) {
+		// try {
+		// config = new PropertiesConfiguration(monitoringManagerPropertiesURL);
+		// } catch (Exception e) {
+		// }
+		// }
+		// if (config == null) {
+		// logger.warn("Could not load " + monitoringManagerPropertiesURLName +
+		// ".");
+		// }
+//		if (monitoringAggregateFunctionsURLName != null) {
+//			try {
+//				availableAggregateFunctions = XMLHelper.deserialize(
+//						monitoringAggregateFunctionsURL,
+//						AggregateFunctions.class);
+//			} catch (Exception e) {
+//			}
+//		}
+//		if (availableAggregateFunctions == null) {
+//			throw new ConfigurationException("Could not load "
+//					+ monitoringAggregateFunctionsURLName + ".");
+//		}
+//		if (monitoringGroupingCategoriesURLName != null) {
+//			try {
+//				availableGroupingClass = XMLHelper.deserialize(
+//						monitoringGroupingCategoriesURL,
+//						GroupingCategories.class);
+//			} catch (Exception e) {
+//			}
+//		}
+//		if (availableGroupingClasses == null) {
+//			throw new ConfigurationException("Could not load "
+//					+ monitoringGroupingClassesURLName + ".");
+//		}
 	}
 
 	public static Config getInstance() throws ConfigurationException {
@@ -96,38 +118,39 @@ public class Config {
 		return availableAggregateFunctions;
 	}
 
-	public static URL getURL(String URLName) {
-		boolean exists = false;
-		URL url = null;
-		try {
-			url = Config.class.getResource(URLName);
-			exists = new File(url.toURI()).exists();
-		} catch (Exception e) {
-			logger.error("Error checking if file exists from URLName", e);
-			exists = false;
-		}
-		if (exists)
-			return url;
-		else {
-			try {
-				String alternativeURLName = new File(Config.class
-						.getProtectionDomain().getCodeSource().getLocation()
-						.getPath()).getParent()
-						+ URLName;
+//	public static URL getURL(String URLName) {
+//		boolean exists = false;
+//		URL url = null;
+//		try {
+//			url = Config.class.getResource(URLName);
+//			exists = new File(url.toURI()).exists();
+//		} catch (Exception e) {
+//			logger.error("Error checking if file exists from URLName", e);
+//			exists = false;
+//		}
+//		if (exists)
+//			return url;
+//		else {
+//			try {
+//				String alternativeURLName = new File(Config.class
+//						.getProtectionDomain().getCodeSource().getLocation()
+//						.getPath()).getParent()
+//						+ URLName;
+//
+//				url = new File(alternativeURLName).toURI().toURL();
+//				exists = new File(url.toURI()).exists();
+//			} catch (Exception e) {
+//				logger.error(
+//						"Error checking if file exists from alternativeURLName",
+//						e);
+//				exists = false;
+//			}
+//		}
+//		return null;
+//	}
 
-				url = new File(alternativeURLName).toURI().toURL();
-				exists = new File(url.toURI()).exists();
-			} catch (Exception e) {
-				logger.error("Error checking if file exists from alternativeURLName",
-						e);
-				exists = false;
-			}
-		}
-		return null;
-	}
-
-	public GroupingCategories getAvailableGroupingCategories() {
-		return availableGroupingCategories;
+	public GroupingCategories getAvailableGroupingClasses() {
+		return availableGroupingClasses;
 	}
 
 	public String getSDAServerAddress() {

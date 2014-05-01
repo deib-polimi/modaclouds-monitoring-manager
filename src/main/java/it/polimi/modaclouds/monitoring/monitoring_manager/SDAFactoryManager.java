@@ -24,45 +24,53 @@ import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SDAFactoryManager {
 
 	private KBConnector knowledgeBase;
-	private Map<String, StatisticalDataAnalyzer> ruleSDAMap;
+	private Map<String, StatisticalDataAnalyzer> sdaByRuleId;
 
 	public SDAFactoryManager(KBConnector knowledgeBase) {
 		this.knowledgeBase = knowledgeBase;
-		ruleSDAMap = new HashMap<String, StatisticalDataAnalyzer>();
+		sdaByRuleId = new ConcurrentHashMap<String, StatisticalDataAnalyzer>();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void installRule(MonitoringRule rule, String aggregateFunction, String sdaReturnedMetric) {
-		StatisticalDataAnalyzer sda = ruleSDAMap.get(rule.getId());
-		if (sda==null) {
+	public void installRule(MonitoringRule rule, String aggregateFunction,
+			String sdaReturnedMetric) {
+		StatisticalDataAnalyzer sda = sdaByRuleId.get(rule.getId());
+		if (sda == null) {
 			sda = new StatisticalDataAnalyzer();
-			ruleSDAMap.put(rule.getId(), sda);
+			sdaByRuleId.put(rule.getId(), sda);
 		}
 		sda.setAggregateFunction(aggregateFunction);
 		sda.addParameter(new Parameter(Vocabulary.timeStep, rule.getTimeStep()));
-		sda.addParameter(new Parameter(Vocabulary.timeWindow, rule.getTimeWindow()));
+		sda.addParameter(new Parameter(Vocabulary.timeWindow, rule
+				.getTimeWindow()));
 		sda.setStarted(true);
 		sda.setTargetMetric(rule.getCollectedMetric().getMetricName());
 		sda.setReturnedMetric(sdaReturnedMetric);
-		
-		Set<MonitorableResource> monitorableResources = new HashSet<MonitorableResource>();
-			
+
+		Set<MonitorableResource> monitorableResources = Collections
+				.newSetFromMap(new ConcurrentHashMap<MonitorableResource, Boolean>());
+
 		for (MonitoredTarget target : rule.getMonitoredTargets()
 				.getMonitoredTargets()) {
-			monitorableResources.addAll((Set)knowledgeBase
-					.getByPropertyValue(Vocabulary.id, target.getId()));
+			monitorableResources.addAll((Set) knowledgeBase.getByPropertyValue(
+					Vocabulary.id, target.getId()));
 		}
-		
+
 		sda.setTargetResources(monitorableResources);
 		knowledgeBase.add(sda);
+	}
+
+	public void uninstallRule(MonitoringRule rule) {
+		StatisticalDataAnalyzer sda = sdaByRuleId.get(rule.getId());
+		if (sda!=null) knowledgeBase.delete(sda.getUri());
 	}
 
 }

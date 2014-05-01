@@ -17,8 +17,8 @@
 package it.polimi.modaclouds.monitoring.mockup;
 
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
-
-import java.util.Set;
+import it.polimi.modaclouds.qos_models.schema.Metric;
+import it.polimi.modaclouds.qos_models.schema.Metrics;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +32,9 @@ public class MPClient_AddObserver {
 	public static void main(String[] args) {
 		try {
 			MonitoringManager mp = new MonitoringManager();
-			Set<String> metrics = mp.getMetrics();
-			for (String metric: metrics) {
-				System.out.println(metric);
+			Metrics metrics = mp.getMetrics();
+			for (Metric metric: metrics.getMetrics()) {
+				System.out.println(metric.getName());
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);

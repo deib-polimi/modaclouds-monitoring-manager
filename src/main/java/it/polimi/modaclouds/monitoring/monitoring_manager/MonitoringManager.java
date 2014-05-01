@@ -19,20 +19,28 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 import it.polimi.modaclouds.monitoring.kb.api.KBConnector;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Component;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
+import it.polimi.modaclouds.qos_models.schema.Action;
 import it.polimi.modaclouds.qos_models.schema.AggregateFunction;
 import it.polimi.modaclouds.qos_models.schema.GroupingCategory;
+import it.polimi.modaclouds.qos_models.schema.Metric;
+import it.polimi.modaclouds.qos_models.schema.Metrics;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
+import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MonitoringManager  {
+import polimi.deib.csparql_rest_api.exception.ObserverErrorException;
+import polimi.deib.csparql_rest_api.exception.ServerErrorException;
+
+public class MonitoringManager {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -40,7 +48,7 @@ public class MonitoringManager  {
 	private CSPARQLEngineManager csparqlEngineManager;
 	private DCFactoriesManager dcFactoriesManager;
 	private SDAFactoryManager sdaFactoryManager;
-	private Map<String,MonitoringRule> installedRules;
+	private Map<String, MonitoringRule> installedRules;
 
 	private Config config;
 
@@ -48,7 +56,7 @@ public class MonitoringManager  {
 		try {
 			knowledgeBase = KBConnector.getInstance();
 			config = Config.getInstance();
-			installedRules = new HashMap<String,MonitoringRule>();
+			installedRules = new ConcurrentHashMap<String, MonitoringRule>();
 			csparqlEngineManager = new CSPARQLEngineManager();
 			dcFactoriesManager = new DCFactoriesManager(knowledgeBase);
 			sdaFactoryManager = new SDAFactoryManager(knowledgeBase);
@@ -62,19 +70,41 @@ public class MonitoringManager  {
 		knowledgeBase.add(instance);
 	}
 
-	public void start() {
-
+	public void installRules(MonitoringRules rules)
+			throws RuleInstallationException {
+		validate(rules);
+		for (MonitoringRule rule : rules.getMonitoringRules()) {
+			installRule(rule);
+		}
 	}
 
-	public void stop() {
-		// TODO Auto-generated method stub
+	private void validate(MonitoringRules rules)
+			throws RuleInstallationException {
+		for (MonitoringRule rule : rules.getMonitoringRules()) {
+			if (installedRules.containsKey(rule.getId()))
+				throw new RuleInstallationException("A rule with id "
+						+ rule.getId() + " is already installed");
+		}
+		// TODO
+	}
 
+	public void uninstallRule(String id) throws RuleDoesNotExistException,
+			FailedToUninstallRuleException {
+		MonitoringRule rule = installedRules.get(id);
+		if (rule == null)
+			throw new RuleDoesNotExistException();
+		csparqlEngineManager.uninstallRule(rule);
+		dcFactoriesManager.uninstallRule(rule);
+		sdaFactoryManager.uninstallRule(rule);
+		installedRules.remove(id);
+		
 	}
 
 	public void installRule(MonitoringRule rule)
 			throws RuleInstallationException {
 		if (installedRules.containsKey(rule.getId()))
-			throw new RuleInstallationException("A rule with id " + rule.getId() + " is already installed");
+			throw new RuleInstallationException("A rule with id "
+					+ rule.getId() + " is already installed");
 		boolean sdaRequired = false;
 		String sdaReturnedMetric = null;
 		String aggregateFunction = null;
@@ -111,7 +141,7 @@ public class MonitoringManager  {
 		if (groupingClass != null) {
 			boolean validGroupingCategoryFunction = false;
 			List<GroupingCategory> availableGroupingCategories = config
-					.getAvailableGroupingCategories().getGroupingCategories();
+					.getAvailableGroupingClasses().getGroupingCategories();
 			for (GroupingCategory availableGroupingCategory : availableGroupingCategories) {
 				if (groupingClass.equals(availableGroupingCategory.getName())) {
 					validGroupingCategoryFunction = true;
@@ -121,18 +151,20 @@ public class MonitoringManager  {
 			if (!validGroupingCategoryFunction) {
 				logger.error("Grouping category " + groupingClass
 						+ " is not valid");
-				throw new RuleInstallationException("Grouping category " + groupingClass
-						+ " is not valid");
+				throw new RuleInstallationException("Grouping category "
+						+ groupingClass + " is not valid");
 			}
 		}
 		if (sdaRequired) {
 			sdaReturnedMetric = generateRandomMetricName();
 		}
 		try {
-			csparqlEngineManager.installRule(rule, sdaRequired, sdaReturnedMetric);
+			csparqlEngineManager.installRule(rule, sdaRequired,
+					sdaReturnedMetric);
 			dcFactoriesManager.installRule(rule);
 			if (sdaRequired)
-				sdaFactoryManager.installRule(rule, aggregateFunction, sdaReturnedMetric);
+				sdaFactoryManager.installRule(rule, aggregateFunction,
+						sdaReturnedMetric);
 			installedRules.put(rule.getId(), rule);
 		} catch (Exception e) {
 			// TODO rollback
@@ -149,8 +181,27 @@ public class MonitoringManager  {
 		return string.replaceAll("[^a-zA-Z0-9]", "");
 	}
 
-	public Set<String> getMetrics() {
-		return null;
-		
+	public Metrics getMetrics() {
+		Metrics metrics = new Metrics();
+		for (String observableMetric : csparqlEngineManager.getObservableMetrics()) {
+			Metric metric = new Metric();
+			metric.setName(observableMetric);
+			metrics.getMetrics().add(metric);
+		}
+		return metrics;
+	}
+
+	public MonitoringRules getMonitoringRules() {
+		MonitoringRules rules = new MonitoringRules();
+		rules.getMonitoringRules().addAll(installedRules.values());
+		return rules;
+	}
+
+	
+
+	public String addObserver(String metricname, String callbackUrl)
+			throws MetricDoesNotExistException, ServerErrorException, ObserverErrorException {
+		String observerId = csparqlEngineManager.addObserver(metricname, callbackUrl);
+		return observerId;
 	}
 }

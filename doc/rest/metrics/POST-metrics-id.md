@@ -17,7 +17,7 @@ None
 
 ## Data Parameters
 
-An xml object with the callback url of the observer.
+the callback url of the observer.
 
 ***
 
@@ -25,13 +25,12 @@ An xml object with the callback url of the observer.
 
 **Status:** **201 Created**
 
-**Body:** An xml object with information about the registered observer.
+**Body:** the observer id.
 
 ***
 
 ## Errors
 
-* **400 Bad Request** - The body of the request is not in the correct format.
 * **404 Resource not found** - The metric does not exist.
 
 ***
@@ -41,14 +40,14 @@ An xml object with the callback url of the observer.
 
 	POST v1/metrics/ResponseTime
 	
-``` xml
-<callback_url>http://url.to.observer.1:8176/ResponseTime</callback_url>
+```
+http://url.to.observer.1:8176/ResponseTime
 ```
 
 **Response**
 
 	Status: 201 Created
 
-``` xml
-<observer id="observer-1">http://url.to.observer.1:8176/ResponseTime</observer>
+```
+observer-id
 ```

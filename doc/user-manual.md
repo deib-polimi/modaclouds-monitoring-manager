@@ -44,3 +44,24 @@ Dependency:
 
 
 ##Usage
+
+Put in the same folder of the jar the kb.properties file containing information about
+the knowledge base instance like in the example:
+
+```
+kb_server.port=3030
+kb_server.address=localhost
+```
+
+and the monitoring_manager.properties file containing information about dda, sda and
+the monitoring manager server port, like in the example:
+
+```
+dda_server.port=8175
+dda_server.address=localhost
+sda_server.port=8176
+sda_server.address=localhost
+mm_server.port=8170
+```
+
+launch the server: java -jar monitoring-manager-[version].jar

@@ -5,7 +5,8 @@
 	GET /metrics
 
 ## Description
-Returns the list of metrics available to be observed.
+Returns the list of metrics available to be observed. Only metrics that are
+created using the OutputMetric action in a monitoring rule can be observed.
 
 ***
 

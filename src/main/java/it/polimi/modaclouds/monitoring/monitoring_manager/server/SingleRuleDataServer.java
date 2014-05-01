@@ -16,8 +16,48 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
-import org.restlet.resource.ServerResource;
+import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
+import it.polimi.modaclouds.monitoring.monitoring_manager.RuleDoesNotExistException;
 
-public class SingleRuleDataServer extends ServerResource{
+import org.restlet.data.MediaType;
+import org.restlet.data.Status;
+import org.restlet.representation.Representation;
+import org.restlet.resource.Delete;
+import org.restlet.resource.ServerResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class SingleRuleDataServer extends ServerResource {
+
+	private Logger logger = LoggerFactory.getLogger(SingleRuleDataServer.class
+			.getName());
+
+	@Delete
+	public void uninstallMonitoringRule(Representation rep) {
+		try { // TODO
+			MonitoringManager manager = (MonitoringManager) getContext()
+					.getAttributes().get("manager");
+			String id = (String) this.getRequest().getAttributes().get("id");
+			manager.uninstallRule(id);
+			this.getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
+		} catch (RuleDoesNotExistException e) {
+			logger.error("The monitoring rule does not exist", e);
+			this.getResponse().setStatus(Status.CLIENT_ERROR_NOT_FOUND,
+					"The monitoring rule does not exist");
+			this.getResponse().setEntity("The monitoring rule does not exist",
+					MediaType.TEXT_PLAIN);
+		} catch (Exception e) {
+			logger.error("Error while deleting the rule", e);
+			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL,
+					e.getMessage());
+			this.getResponse().setEntity(
+					"Error while installing the rule: " + e.getMessage(),
+					MediaType.TEXT_PLAIN);
+		} finally {
+			this.getResponse().commit();
+			this.commit();
+			this.release();
+		}
+	}
 
 }

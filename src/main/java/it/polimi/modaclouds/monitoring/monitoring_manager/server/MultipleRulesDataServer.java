@@ -17,9 +17,15 @@
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
+import it.polimi.modaclouds.monitoring.monitoring_manager.RuleInstallationException;
+import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
 
+import org.restlet.data.MediaType;
 import org.restlet.data.Status;
+import org.restlet.ext.jaxb.JaxbRepresentation;
+import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
+import org.restlet.resource.Post;
 import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +37,37 @@ public class MultipleRulesDataServer extends ServerResource {
 	@Get
 	public void getMonitoringRules() {
 		try {
-			MonitoringManager manager = (MonitoringManager) getContext().getAttributes().get("csaprqlQueryTable");
+			MonitoringManager manager = (MonitoringManager) getContext().getAttributes().get("manager");
+			MonitoringRules rules = manager.getMonitoringRules();
+			this.getResponse().setStatus(Status.SUCCESS_OK);
+			this.getResponse().setEntity(new JaxbRepresentation<MonitoringRules>(rules));
 		} catch(Exception e){
 			logger.error("Error while getting monitoring rules", e);
-			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL,"Error while getting multiple queries informations");
-//			this.getResponse().setEntity(gson.toJson("Error while getting multiple queries informations"), MediaType.APPLICATION_JSON);
+			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL,e.getMessage());
+			this.getResponse().setEntity("Error while getting monitoring rules: " + e.toString(), MediaType.TEXT_PLAIN);
+		} finally{
+			this.getResponse().commit();
+			this.commit();	
+			this.release();
+		}
+	}
+	
+	@Post
+	public void installMonitoringRules(Representation rep) {
+		try {
+			MonitoringManager manager = (MonitoringManager) getContext().getAttributes().get("manager");
+			JaxbRepresentation<MonitoringRules> jaxbMonitoringRule = new JaxbRepresentation<MonitoringRules>(rep,MonitoringRules.class);
+			MonitoringRules rules = jaxbMonitoringRule.getObject();
+			manager.installRules(rules);
+			this.getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
+		} catch (RuleInstallationException e) {
+			logger.error("Error while installing monitoring rules", e);
+			this.getResponse().setStatus(Status.CLIENT_ERROR_BAD_REQUEST,e.getMessage());
+			this.getResponse().setEntity("Error while installing monitoring rules: " + e.toString(), MediaType.TEXT_PLAIN);
+		} catch(Exception e){
+			logger.error("Error while installing monitoring rules", e);
+			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL,e.getMessage());
+			this.getResponse().setEntity("Error while getting monitoring rules: " + e.toString(), MediaType.TEXT_PLAIN);
 		} finally{
 			this.getResponse().commit();
 			this.commit();	

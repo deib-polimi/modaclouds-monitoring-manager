@@ -31,10 +31,12 @@ import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
@@ -59,9 +61,11 @@ public class CSPARQLEngineManager {
 	private URL sdaURL;
 	private RSP_services_csparql_API csparqlAPI;
 
-	private Map<String, String> registeredQueries;
-	private List<String> registeredStreams;
-	private Map<String, List<String>> ruleQueriesMap;
+	private Map<String, String> registeredQueriesById;
+	private Map<String, String> registeredStreamsByRuleId;
+	private Map<String, Set<String>> registeredQueriesByRuleId;
+	private ConcurrentHashMap<String, String> queryURIByMetric;
+	private ConcurrentHashMap<String, String> metricByObserverId;
 
 	// private RuleValidator validator;
 
@@ -71,9 +75,12 @@ public class CSPARQLEngineManager {
 		} catch (Exception e) {
 			throw new ConfigurationException(e);
 		}
-		registeredStreams = new ArrayList<String>();
-		registeredQueries = new HashMap<String, String>();
-		ruleQueriesMap = new HashMap<String, List<String>>();
+
+		registeredStreamsByRuleId = new ConcurrentHashMap<String, String>();
+		registeredQueriesById = new ConcurrentHashMap<String, String>();
+		registeredQueriesByRuleId = new ConcurrentHashMap<String, Set<String>>();
+		queryURIByMetric = new ConcurrentHashMap<String, String>();
+		metricByObserverId = new ConcurrentHashMap<String, String>();
 		// validator = new RuleValidator();
 		csparqlAPI = new RSP_services_csparql_API(ddaURL.toString());
 	}
@@ -100,6 +107,39 @@ public class CSPARQLEngineManager {
 		return address;
 	}
 
+	public void uninstallRule(MonitoringRule rule)
+			throws FailedToUninstallRuleException {
+		Set<String> relatedInstalledQueries = registeredQueriesByRuleId
+				.get(rule.getId());
+		try {
+			deleteObservableMetrics(rule);
+			removeObservers(rule);
+			for (String queryId : relatedInstalledQueries) {
+				csparqlAPI.unregisterQuery(queryId);
+				registeredQueriesById.remove(queryId);
+			}
+			registeredQueriesByRuleId.remove(rule.getId());
+
+			String sourceStream = registeredStreamsByRuleId
+					.remove(rule.getId());
+			if (streamIsNotUsed(sourceStream)) {
+				try {
+					csparqlAPI.unregisterStream(sourceStream);
+				} catch (Exception e) {
+					registeredStreamsByRuleId.put(rule.getId(), sourceStream);
+					throw e;
+				}
+			}
+
+		} catch (Exception e) {
+			throw new FailedToUninstallRuleException(e);
+		}
+	}
+
+	private boolean streamIsNotUsed(String stream) {
+		return !registeredStreamsByRuleId.values().contains(stream);
+	}
+
 	public void installRule(MonitoringRule rule, boolean sdaRequired,
 			String sdaReturnedMetric) throws RuleInstallationException {
 		try {
@@ -121,14 +161,15 @@ public class CSPARQLEngineManager {
 				String csparqlTunnelQuery = tunnelQuery.getCSPARQL();
 				logger.info("Tunnel query generated:\n" + csparqlTunnelQuery);
 
-				registerStream(tunnelSourceStreamURI);
+				registerStream(tunnelSourceStreamURI, rule);
 				String tunnelQueryURI = registerQuery(tunnelQueryName,
 						csparqlTunnelQuery, rule);
 				attachObserver(tunnelQueryURI, sdaURL);
 			}
 
-			registerStream(sourceStreamURI);
-			registerQuery(queryName, csparqlQuery, rule);
+			registerStream(sourceStreamURI, rule);
+			String queryURI = registerQuery(queryName, csparqlQuery, rule);
+			addObservableMetrics(rule, queryURI);
 
 		} catch (QueryErrorException | MalformedQueryException e) {
 			logger.error("Internal error", e);
@@ -161,19 +202,26 @@ public class CSPARQLEngineManager {
 			QueryErrorException {
 		String queryURI = csparqlAPI.registerQuery(queryName, csparqlQuery);
 		logger.info("Server response, query ID: " + queryURI);
-		registeredQueries.put(queryURI, csparqlQuery);
-		List<String> queriesURIs = ruleQueriesMap.get(rule.getId());
+
+		// fix:
+		queryURI = ddaURL.toString() + "/queries/" + queryName;
+		logger.info("actual query ID (temp fix):" + queryURI);
+
+		registeredQueriesById.put(queryURI, csparqlQuery);
+		Set<String> queriesURIs = registeredQueriesByRuleId.get(rule.getId());
 		if (queriesURIs == null) {
-			queriesURIs = new ArrayList<String>();
-			ruleQueriesMap.put(rule.getId(), queriesURIs);
+			queriesURIs = Collections
+					.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+			;
+			registeredQueriesByRuleId.put(rule.getId(), queriesURIs);
 		}
 		queriesURIs.add(queryURI);
 		return queryURI;
 	}
 
-	private void registerStream(String streamURI)
+	private void registerStream(String streamURI, MonitoringRule rule)
 			throws RuleInstallationException {
-		if (!registeredStreams.contains(streamURI)) {
+		if (!registeredStreamsByRuleId.containsValue(streamURI)) {
 			logger.info("Registering stream: " + streamURI);
 			String response;
 			boolean registered = false;
@@ -190,7 +238,7 @@ public class CSPARQLEngineManager {
 			if (!registered)
 				throw new RuleInstallationException(
 						"Could not register stream " + streamURI);
-			registeredStreams.add(streamURI);
+			registeredStreamsByRuleId.put(rule.getId(), streamURI);
 		}
 	}
 
@@ -307,7 +355,7 @@ public class CSPARQLEngineManager {
 		if (suffix == null)
 			suffix = "";
 		String queryName = CSquery.escapeName(rule.getId()) + suffix;
-		while (registeredQueries.containsKey(queryName)) {
+		while (registeredQueriesById.containsKey(queryName)) {
 			queryName = CSquery.generateRandomName() + suffix;
 		}
 		return queryName;
@@ -426,7 +474,7 @@ public class CSPARQLEngineManager {
 	}
 
 	public String getQuery(String queryId) {
-		return registeredQueries.get(queryId);
+		return registeredQueriesById.get(queryId);
 	}
 
 	// private boolean isSubclassOf(String resourceURI, String superClassURI) {
@@ -439,5 +487,56 @@ public class CSPARQLEngineManager {
 	//
 	// return qexec.execAsk();
 	// }
+
+	private void deleteObservableMetrics(MonitoringRule rule) {
+		for (Action action : rule.getActions().getActions()) {
+			if (action.getName().equals(Vocabulary.OutputMetric)) {
+				String metric = Util.getParameterValue(Vocabulary.name, action);
+				queryURIByMetric.remove(metric);
+			}
+		}
+	}
+
+	private void addObservableMetrics(MonitoringRule rule, String queryURI) {
+		for (Action action : rule.getActions().getActions()) {
+			if (action.getName().equals(Vocabulary.OutputMetric)) {
+				String metric = Util.getParameterValue(Vocabulary.name, action);
+				queryURIByMetric.put(metric, queryURI);
+			}
+		}
+	}
+
+	public String addObserver(String metricname, String callbackUrl)
+			throws MetricDoesNotExistException, ServerErrorException, ObserverErrorException {
+		if (!queryURIByMetric.keySet().contains(metricname))
+			throw new MetricDoesNotExistException();
+		String queryURI = queryURIByMetric.get(metricname);
+		csparqlAPI.addObserver(queryURI, callbackUrl);
+		String observerId = String.valueOf(queryURI.hashCode());
+		metricByObserverId.put(observerId, metricname);
+		return observerId;
+	}
+
+	public Set<String> getObservableMetrics() {
+		return queryURIByMetric.keySet();
+	}
+
+	private void removeObservers(MonitoringRule rule) throws ServerErrorException, ObserverErrorException {
+		Set<String> observersToRemove = new HashSet<String>();
+		for (Action action : rule.getActions().getActions()) {
+			if (action.getName().equals(Vocabulary.OutputMetric)) {
+				String metric = Util.getParameterValue(Vocabulary.name, action);
+				for (String observerId : metricByObserverId.keySet()) {
+					if (metricByObserverId.get(observerId).equals(metric)) {
+						observersToRemove.add(observerId);
+					}
+				}
+			}
+		}
+		for (String observer : observersToRemove) {
+			csparqlAPI.deleteObserver(observer);
+			metricByObserverId.remove(observer);
+		}
+	}
 
 }

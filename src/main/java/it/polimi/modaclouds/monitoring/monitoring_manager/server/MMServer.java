@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 public class MMServer extends Application{
 	private static Component component;
 	private static MonitoringManager manager = null;
+	private static final String apiVersion = "v1";
 	
 	private static Logger logger = LoggerFactory.getLogger(MMServer.class.getName());
 	
@@ -67,12 +68,12 @@ public class MMServer extends Application{
 		Router router = new Router(getContext());
 		router.setDefaultMatchingMode(Template.MODE_EQUALS);
 
-		router.attach("/monitoring-rules", MultipleRulesDataServer.class);
-		router.attach("/monitoring-rules/{id}", SingleRuleDataServer.class);
-		router.attach("/metrics", MultipleMetricsDataServer.class);
-		router.attach("/metrics/{metricname}", SingleMetricDataServer.class);
-		router.attach("/metrics/{metricname}/observers", MultipleObserversDataServer.class);
-		router.attach("/metrics/{metricname}/observers/{id}", SingleObserverDataServer.class);
+		router.attach("/"+ apiVersion +"/monitoring-rules", MultipleRulesDataServer.class);
+		router.attach("/"+ apiVersion +"/monitoring-rules/{id}", SingleRuleDataServer.class);
+		router.attach("/"+ apiVersion +"/metrics", MultipleMetricsDataServer.class);
+		router.attach("/"+ apiVersion +"/metrics/{metricname}", SingleMetricDataServer.class);
+		router.attach("/"+ apiVersion +"/metrics/{metricname}/observers", MultipleObserversDataServer.class);
+		router.attach("/"+ apiVersion +"/metrics/{metricname}/observers/{id}", SingleObserverDataServer.class);
 
 		return router;
 	}
