@@ -17,7 +17,9 @@
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
 import it.polimi.csparqool.FunctionArgs;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.DataCollector;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Parameter;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.StatisticalDataAnalyzer;
 import it.polimi.modaclouds.qos_models.schema.Action;
 import it.polimi.modaclouds.qos_models.schema.CollectedMetric;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
@@ -159,6 +161,23 @@ public class Util {
 			}
 		}
 		return args;
+	}
+
+	public static void addParameters(DataCollector dc,
+			List<it.polimi.modaclouds.qos_models.schema.Parameter> parameters) {
+		for (it.polimi.modaclouds.qos_models.schema.Parameter p: parameters) {
+			Parameter parameter = new Parameter(p.getName(), p.getValue());
+			dc.addParameter(parameter);
+		}
+		
+	}
+
+	public static void addParameters(StatisticalDataAnalyzer sda,
+			List<it.polimi.modaclouds.qos_models.schema.Parameter> parameters) {
+		for (it.polimi.modaclouds.qos_models.schema.Parameter p: parameters) {
+			Parameter parameter = new Parameter(p.getName(), p.getValue());
+			sda.addParameter(parameter);
+		}
 	}
 
 }

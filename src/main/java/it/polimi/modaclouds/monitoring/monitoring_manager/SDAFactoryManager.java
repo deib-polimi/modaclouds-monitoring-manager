@@ -51,6 +51,9 @@ public class SDAFactoryManager {
 		sda.addParameter(new Parameter(Vocabulary.timeStep, rule.getTimeStep()));
 		sda.addParameter(new Parameter(Vocabulary.timeWindow, rule
 				.getTimeWindow()));
+		
+		Util.addParameters(sda, rule.getMetricAggregation().getParameters());
+		
 		sda.setStarted(true);
 		sda.setTargetMetric(rule.getCollectedMetric().getMetricName());
 		sda.setReturnedMetric(sdaReturnedMetric);

@@ -89,11 +89,9 @@ public class DCFactoriesManager {
 				DataCollector dc = new DataCollector();
 				targetEntityDCbyMetric.put(requiredMetric, dc);
 				ruleIdByDataCollector.put(dc, rule.getId());
-				dc.addParameter(Util.getParameter(Vocabulary.samplingTime,
-						rule.getCollectedMetric()));
-				dc.addParameter(Util.getParameter(
-						Vocabulary.samplingProbability,
-						rule.getCollectedMetric()));
+				
+				Util.addParameters(dc, rule.getCollectedMetric().getParameters());
+				
 				dc.setEnabled(true);
 				updatedDCs.add(dc);
 			}
