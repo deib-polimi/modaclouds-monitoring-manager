@@ -248,18 +248,23 @@ public class CSPARQLEngineManager {
 		CSquery query = createQueryTemplate(queryName);
 		String[] requiredVars = addActions(rule, query, sdaRequired);
 		_body queryBody = new _body();
-		addSelect(queryBody, requiredVars, rule);
-		_body innerQueryBody = new _body();
-		addSelect(innerQueryBody, getInnerQueryRequiredVars(requiredVars), rule);
+		addSelect(queryBody, requiredVars, rule, sdaRequired);
+
+		if (sdaRequired) {
+			queryBody.where(createGraphPattern(rule));
+		} else {
+			_body innerQueryBody = new _body();
+			addSelect(innerQueryBody, getInnerQueryRequiredVars(requiredVars),
+					rule, sdaRequired);
+			queryBody.where(innerQueryBody.where(createGraphPattern(rule)))
+					.groupby(Util.getGroupingClassVariable(rule));
+		}
 
 		query.fromStream(sourceStreamURI, rule.getTimeWindow() + "s",
 				rule.getTimeStep() + "s")
 				.from(MO.getKnowledgeBaseDataURL() + "?graph=default")
-				.where(queryBody
-						.where(innerQueryBody.where(createGraphPattern(rule)))
-						.groupby(Util.getGroupingClassVariable(rule))
-						.having(parseCondition(rule.getCondition(),
-								Util.getOutputValueVariable(rule, sdaRequired))));
+				.where(queryBody.having(parseCondition(rule.getCondition(),
+						Util.getOutputValueVariable(rule, sdaRequired))));
 		return query;
 	}
 
@@ -292,13 +297,20 @@ public class CSPARQLEngineManager {
 	}
 
 	private void addSelect(_body queryBody, String[] variables,
-			MonitoringRule rule) throws MalformedQueryException {
+			MonitoringRule rule, boolean sdaRequired)
+			throws MalformedQueryException {
 		String aggregateFunction = Util.getAggregateFunction(rule);
 		for (String var : variables) {
 			switch (var) {
 			case QueryVars.TIMESTAMP:
-				queryBody.selectFunction(QueryVars.TIMESTAMP, Function.MAX,
-						QueryVars.INPUT_TIMESTAMP);
+				if (sdaRequired) {
+					queryBody.selectFunction(QueryVars.TIMESTAMP,
+							Function.TIMESTAMP, QueryVars.DATUM,
+							MO.shortForm(MO.aboutResource), QueryVars.TARGET);
+				} else {
+					queryBody.selectFunction(QueryVars.TIMESTAMP, Function.MAX,
+							QueryVars.INPUT_TIMESTAMP);
+				}
 				break;
 			case QueryVars.INPUT_TIMESTAMP:
 				queryBody.selectFunction(QueryVars.INPUT_TIMESTAMP,
@@ -306,7 +318,7 @@ public class CSPARQLEngineManager {
 						MO.shortForm(MO.aboutResource), QueryVars.TARGET);
 				break;
 			case QueryVars.OUTPUT:
-				if (Util.isGroupedMetric(rule)) {
+				if (Util.isGroupedMetric(rule) && !sdaRequired) {
 					String[] parameters = Util.getAggregateFunctionArgs(rule);
 					queryBody.selectFunction(QueryVars.OUTPUT,
 							aggregateFunction, parameters);
@@ -507,7 +519,8 @@ public class CSPARQLEngineManager {
 	}
 
 	public String addObserver(String metricname, String callbackUrl)
-			throws MetricDoesNotExistException, ServerErrorException, ObserverErrorException {
+			throws MetricDoesNotExistException, ServerErrorException,
+			ObserverErrorException {
 		if (!queryURIByMetric.keySet().contains(metricname))
 			throw new MetricDoesNotExistException();
 		String queryURI = queryURIByMetric.get(metricname);
@@ -521,7 +534,8 @@ public class CSPARQLEngineManager {
 		return queryURIByMetric.keySet();
 	}
 
-	private void removeObservers(MonitoringRule rule) throws ServerErrorException, ObserverErrorException {
+	private void removeObservers(MonitoringRule rule)
+			throws ServerErrorException, ObserverErrorException {
 		Set<String> observersToRemove = new HashSet<String>();
 		for (Action action : rule.getActions().getActions()) {
 			if (action.getName().equals(Vocabulary.OutputMetric)) {

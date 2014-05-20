@@ -87,6 +87,7 @@ public class DCFactoriesManager {
 															requiredMetric)));
 				}
 				DataCollector dc = new DataCollector();
+				dc.setCollectedMetric(requiredMetric);
 				targetEntityDCbyMetric.put(requiredMetric, dc);
 				ruleIdByDataCollector.put(dc, rule.getId());
 				

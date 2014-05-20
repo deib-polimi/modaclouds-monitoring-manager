@@ -126,7 +126,7 @@ public class MonitoringManager {
 			for (AggregateFunction availableFunction : availableFunctions) {
 				if (aggregateFunction.equals(availableFunction.getName())) {
 					validAggregateFunction = true;
-					sdaRequired = availableFunction.getComputedBy().equals(
+					sdaRequired = availableFunction.getComputedBy().value().equals(
 							Vocabulary.StatisticalDataAnalyzer);
 					break;
 				}

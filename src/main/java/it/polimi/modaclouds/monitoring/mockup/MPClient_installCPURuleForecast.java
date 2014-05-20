@@ -33,14 +33,12 @@ import it.polimi.modaclouds.qos_models.schema.MonitoringMetricAggregation;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 import it.polimi.modaclouds.qos_models.schema.Parameter;
 
-import java.math.BigInteger;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MPClient_installCPURule {
+public class MPClient_installCPURuleForecast {
 
-	private static Logger logger = LoggerFactory.getLogger(MPClient_installCPURule.class
+	private static Logger logger = LoggerFactory.getLogger(MPClient_installCPURuleForecast.class
 			.getName());
 
 	// private static final String amazonFEVMURL = "http://x.x.x.x";
@@ -91,8 +89,8 @@ public class MPClient_installCPURule {
 	private static MonitoringRule makeCPURule() {
 		MonitoringRule mr = new MonitoringRule();
 
-		mr.setId("cpuRule");
-		mr.setLabel("CPU rule");
+		mr.setId("cpuFCRule");
+		mr.setLabel("CPU Forecast rule");
 		
 		CollectedMetric metric = new CollectedMetric();
 		mr.setCollectedMetric(metric);
@@ -106,8 +104,9 @@ public class MPClient_installCPURule {
 		MonitoringMetricAggregation metricAggregation = new MonitoringMetricAggregation();
 		mr.setMetricAggregation(metricAggregation);
 		
-		metricAggregation.setAggregateFunction(Function.AVERAGE);
+		metricAggregation.setAggregateFunction(Function.FORECASTING_ML);
 		metricAggregation.setGroupingClass(Vocabulary.CloudProvider);
+		metricAggregation.getParameters().add(newParameter(Vocabulary.returnedMetric, "CpuForecast"));
 		
 		mr.setTimeStep("60");
 		mr.setTimeWindow("60");
