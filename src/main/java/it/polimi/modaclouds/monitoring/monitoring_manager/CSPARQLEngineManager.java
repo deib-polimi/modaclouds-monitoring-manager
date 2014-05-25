@@ -18,6 +18,7 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 
 import it.polimi.csparqool.CSquery;
 import it.polimi.csparqool.Function;
+import it.polimi.csparqool.FunctionArgs;
 import it.polimi.csparqool.MalformedQueryException;
 import it.polimi.csparqool._body;
 import it.polimi.csparqool._graph;
@@ -58,13 +59,15 @@ public class CSPARQLEngineManager {
 	// private DatasetAccessor da = DatasetAccessorFactory.createHTTP(MO
 	// .getKnowledgeBaseDataURL());
 	private URL ddaURL;
-	private URL sdaURL;
+	private URL matlabSdaURL;
+	private URL javaSdaURL;
 	private RSP_services_csparql_API csparqlAPI;
 
 	private Map<String, String> registeredQueriesById;
 	private Map<String, String> registeredStreamsByRuleId;
 	private Map<String, Set<String>> registeredQueriesByRuleId;
 	private ConcurrentHashMap<String, String> queryURIByMetric;
+	private ConcurrentHashMap<String, String> observableQueryURIByMetric;
 	private ConcurrentHashMap<String, String> metricByObserverId;
 
 	// private RuleValidator validator;
@@ -80,6 +83,7 @@ public class CSPARQLEngineManager {
 		registeredQueriesById = new ConcurrentHashMap<String, String>();
 		registeredQueriesByRuleId = new ConcurrentHashMap<String, Set<String>>();
 		queryURIByMetric = new ConcurrentHashMap<String, String>();
+		observableQueryURIByMetric = new ConcurrentHashMap<String, String>();
 		metricByObserverId = new ConcurrentHashMap<String, String>();
 		// validator = new RuleValidator();
 		csparqlAPI = new RSP_services_csparql_API(ddaURL.toString());
@@ -90,8 +94,10 @@ public class CSPARQLEngineManager {
 		Config config = Config.getInstance();
 		ddaURL = createURL(config.getDDAServerAddress(),
 				config.getDDAServerPort());
-		sdaURL = createURL(config.getSDAServerAddress(),
-				config.getSDAServerPort());
+		matlabSdaURL = createURL(config.getMatlabSDAServerAddress(),
+				config.getMatlabSDAServerPort());
+		javaSdaURL = createURL(config.getJavaSDAServerAddress(),
+				config.getJavaSDAServerPort());
 	}
 
 	private URL createURL(String address, int port)
@@ -140,20 +146,20 @@ public class CSPARQLEngineManager {
 		return !registeredStreamsByRuleId.values().contains(stream);
 	}
 
-	public void installRule(MonitoringRule rule, boolean sdaRequired,
+	public void installRule(MonitoringRule rule, String requiredDataAnalyzer,
 			String sdaReturnedMetric) throws RuleInstallationException {
 		try {
-			String metricName = sdaRequired ? sdaReturnedMetric
+			String metricName = isSDARequired(requiredDataAnalyzer) ? sdaReturnedMetric
 					: getMetricName(rule);
 
 			String queryName = getNewQueryName(rule, null);
 			String sourceStreamURI = getSourceStreamURI(metricName);
 			CSquery query = createActionQuery(rule, queryName, sourceStreamURI,
-					sdaRequired);
+					isSDARequired(requiredDataAnalyzer));
 			String csparqlQuery = query.getCSPARQL();
 			logger.info("Query generated:\n" + csparqlQuery);
 
-			if (sdaRequired) {
+			if (isSDARequired(requiredDataAnalyzer)) {
 				String tunnelQueryName = getNewQueryName(rule, "Tunnel");
 				String tunnelSourceStreamURI = getSourceStreamURI(getMetricName(rule));
 				CSquery tunnelQuery = createTunnelQuery(rule, tunnelQueryName,
@@ -164,7 +170,15 @@ public class CSPARQLEngineManager {
 				registerStream(tunnelSourceStreamURI, rule);
 				String tunnelQueryURI = registerQuery(tunnelQueryName,
 						csparqlTunnelQuery, rule);
-				attachObserver(tunnelQueryURI, sdaURL);
+				switch (requiredDataAnalyzer) {
+				case Vocabulary.MATLAB_SDA:
+					attachObserver(tunnelQueryURI, matlabSdaURL);
+					break;
+
+				case Vocabulary.JAVA_SDA:
+					attachObserver(tunnelQueryURI, javaSdaURL);
+					break;
+				}
 			}
 
 			registerStream(sourceStreamURI, rule);
@@ -185,6 +199,11 @@ public class CSPARQLEngineManager {
 		}
 	}
 
+	private boolean isSDARequired(String requiredDataAnalyzer) {
+		return requiredDataAnalyzer.equals(Vocabulary.MATLAB_SDA)
+				|| requiredDataAnalyzer.equals(Vocabulary.JAVA_SDA);
+	}
+
 	private String getMetricName(MonitoringRule rule) {
 		while (rule.getCollectedMetric().isInherited()) {
 			rule = rule.getParentMonitoringRule();
@@ -194,7 +213,7 @@ public class CSPARQLEngineManager {
 
 	private void attachObserver(String queryURI, URL url)
 			throws ServerErrorException, ObserverErrorException {
-		csparqlAPI.addObserver(queryURI, url.toString());
+		csparqlAPI.addObserver(queryURI, url.toString() + "/v1/results");
 	}
 
 	private String registerQuery(String queryName, String csparqlQuery,
@@ -212,7 +231,6 @@ public class CSPARQLEngineManager {
 		if (queriesURIs == null) {
 			queriesURIs = Collections
 					.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-			;
 			registeredQueriesByRuleId.put(rule.getId(), queriesURIs);
 		}
 		queriesURIs.add(queryURI);
@@ -250,21 +268,20 @@ public class CSPARQLEngineManager {
 		_body queryBody = new _body();
 		addSelect(queryBody, requiredVars, rule, sdaRequired);
 
-		if (sdaRequired) {
-			queryBody.where(createGraphPattern(rule));
-		} else {
-			_body innerQueryBody = new _body();
-			addSelect(innerQueryBody, getInnerQueryRequiredVars(requiredVars),
-					rule, sdaRequired);
-			queryBody.where(innerQueryBody.where(createGraphPattern(rule)))
-					.groupby(Util.getGroupingClassVariable(rule));
+		_body innerQueryBody = new _body();
+		addSelect(innerQueryBody, getInnerQueryRequiredVars(requiredVars),
+				rule, sdaRequired);
+		queryBody.where(innerQueryBody.where(createGraphPattern(rule)));
+
+		if (Util.isGroupedMetric(rule)) {
+			queryBody.groupby(Util.getGroupingClassVariable(rule));
 		}
 
 		query.fromStream(sourceStreamURI, rule.getTimeWindow() + "s",
 				rule.getTimeStep() + "s")
 				.from(MO.getKnowledgeBaseDataURL() + "?graph=default")
 				.where(queryBody.having(parseCondition(rule.getCondition(),
-						Util.getOutputValueVariable(rule, sdaRequired))));
+						Util.getOutputValueVariable(rule))));
 		return query;
 	}
 
@@ -303,14 +320,8 @@ public class CSPARQLEngineManager {
 		for (String var : variables) {
 			switch (var) {
 			case QueryVars.TIMESTAMP:
-				if (sdaRequired) {
-					queryBody.selectFunction(QueryVars.TIMESTAMP,
-							Function.TIMESTAMP, QueryVars.DATUM,
-							MO.shortForm(MO.aboutResource), QueryVars.TARGET);
-				} else {
 					queryBody.selectFunction(QueryVars.TIMESTAMP, Function.MAX,
 							QueryVars.INPUT_TIMESTAMP);
-				}
 				break;
 			case QueryVars.INPUT_TIMESTAMP:
 				queryBody.selectFunction(QueryVars.INPUT_TIMESTAMP,
@@ -322,6 +333,12 @@ public class CSPARQLEngineManager {
 					String[] parameters = Util.getAggregateFunctionArgs(rule);
 					queryBody.selectFunction(QueryVars.OUTPUT,
 							aggregateFunction, parameters);
+				} else if (Util.isGroupedMetric(rule) && sdaRequired) {
+					String[] parameters = new String[1];
+					parameters[FunctionArgs.getArgIdx(Function.AVERAGE,
+							FunctionArgs.INPUT_VARIABLE)] = QueryVars.INPUT;
+					queryBody.selectFunction(QueryVars.OUTPUT,
+							Function.AVERAGE, parameters);
 				} else {
 					queryBody.select(QueryVars.OUTPUT);
 				}
@@ -337,19 +354,32 @@ public class CSPARQLEngineManager {
 			String sourceStreamURI) throws RuleInstallationException {
 		try {
 			CSquery tunnelQuery = createQueryTemplate(queryName);
+			List<MonitoredTarget> targets = Util.getMonitoredTargets(rule);
 			tunnelQuery
-					.select(QueryVars.TARGET, QueryVars.INPUT,
-							QueryVars.TIMESTAMP)
+					.select(QueryVars.TARGET, QueryVars.METRIC,
+							QueryVars.INPUT, QueryVars.TIMESTAMP)
 					.fromStream(sourceStreamURI, rule.getTimeWindow() + "s",
 							rule.getTimeStep() + "s")
 					.from(MO.getKnowledgeBaseDataURL() + "?graph=default")
 					.where(body
-							.select(QueryVars.TARGET, QueryVars.INPUT)
+							.select(QueryVars.TARGET, QueryVars.INPUT,
+									QueryVars.METRIC)
 							.selectFunction(QueryVars.TIMESTAMP,
 									Function.TIMESTAMP, QueryVars.DATUM,
 									MO.shortForm(MO.aboutResource),
 									QueryVars.TARGET)
-							.where(createGraphPattern(rule)));
+							.where(graph
+									.add(QueryVars.DATUM, MO.metric,
+											QueryVars.METRIC)
+									.add(MO.aboutResource, QueryVars.TARGET)
+									.add(MO.value, QueryVars.INPUT)
+									.add(QueryVars.TARGET, MO.id,
+											getTargetIDLiteral(targets.get(0)))
+									.filter(QueryVars.METRIC
+											+ " = "
+											+ "\""
+											+ rule.getCollectedMetric()
+													.getMetricName() + "\"")));
 			return tunnelQuery;
 		} catch (MalformedQueryException e) {
 			throw new RuleInstallationException(e);
@@ -387,16 +417,15 @@ public class CSPARQLEngineManager {
 			switch (action.getName()) {
 			case Vocabulary.OutputMetric:
 				String outputTargetVariable = Util.getOutputTarget(rule);
-				String outputValueVariable = Util.getOutputValueVariable(rule,
-						sdaRequired);
+				String outputValueVariable = Util.getOutputValueVariable(rule);
 				requiredVars = new String[] { outputTargetVariable,
 						outputValueVariable, QueryVars.TIMESTAMP };
 				query.construct(graph
 						.add(CSquery.BLANK_NODE,
 								MO.metric,
-								"mo:"
+								"\""
 										+ Util.getParameterValue(
-												Vocabulary.name, action))
+												Vocabulary.name, action) + "\"")
 						.add(MO.aboutResource, outputTargetVariable)
 						.add(MO.value, outputValueVariable)
 						.add(MO.timestamp, QueryVars.TIMESTAMP));
@@ -447,9 +476,10 @@ public class CSPARQLEngineManager {
 		List<MonitoredTarget> targets = Util.getMonitoredTargets(rule);
 		String groupingClass = Util.getGroupingClass(rule);
 
-		graph.add(QueryVars.DATUM, MO.metric,
-				MO.prefix + ":" + rule.getCollectedMetric().getMetricName())
-				.add(MO.aboutResource, QueryVars.TARGET)
+		// graph.add(QueryVars.DATUM, MO.metric,
+		// "\"" + rule.getCollectedMetric().getMetricName() + "\"") the metric
+		// is specified by the source stream
+		graph.add(QueryVars.DATUM, MO.aboutResource, QueryVars.TARGET)
 				.add(MO.value, QueryVars.INPUT)
 				.add(QueryVars.TARGET, MO.id,
 						getTargetIDLiteral(targets.get(0)));
@@ -520,14 +550,62 @@ public class CSPARQLEngineManager {
 
 	public String addObserver(String metricname, String callbackUrl)
 			throws MetricDoesNotExistException, ServerErrorException,
-			ObserverErrorException {
-		if (!queryURIByMetric.keySet().contains(metricname))
-			throw new MetricDoesNotExistException();
+			ObserverErrorException, InternalErrorException {
 		String queryURI = queryURIByMetric.get(metricname);
-		csparqlAPI.addObserver(queryURI, callbackUrl);
+		if (queryURI == null)
+			throw new MetricDoesNotExistException();
+		String observableQueryURI = observableQueryURIByMetric.get(metricname);
+		if (observableQueryURI == null) {
+			observableQueryURI = registerObservableQuery(queryURI, metricname);
+		}
+		csparqlAPI.addObserver(observableQueryURI, callbackUrl);
 		String observerId = String.valueOf(queryURI.hashCode());
 		metricByObserverId.put(observerId, metricname);
 		return observerId;
+	}
+
+	private String registerObservableQuery(String queryURI, String metricname)
+			throws InternalErrorException {
+		try {
+			String queryName = CSquery.generateRandomName();
+			CSquery observableQuery = createQueryTemplate(queryName);
+			observableQuery
+					.select(QueryVars.TARGET, QueryVars.METRIC,
+							QueryVars.VALUE, QueryVars.TIMESTAMP)
+					.fromStream(extractNewStreamNameFromStreamQuery(queryURI),
+							"10s", "10s")
+					// .from(MO.getKnowledgeBaseDataURL() + "?graph=default")
+					.where(body
+							.select(QueryVars.TARGET, QueryVars.METRIC,
+									QueryVars.VALUE)
+							.selectFunction(QueryVars.TIMESTAMP,
+									Function.TIMESTAMP, QueryVars.DATUM,
+									MO.shortForm(MO.aboutResource),
+									QueryVars.TARGET)
+							.where(graph
+									.add(QueryVars.DATUM, MO.metric,
+											QueryVars.METRIC)
+									.add(MO.aboutResource, QueryVars.TARGET)
+									.add(MO.value, QueryVars.VALUE)));
+			String queryString = observableQuery.getCSPARQL();
+			logger.info("Registering observable query: " + queryString);
+			String observableQueryURI = csparqlAPI.registerQuery(queryName,
+					queryString);
+			logger.info("Server response, query ID: " + observableQueryURI);
+
+			// fix:
+			observableQueryURI = ddaURL.toString() + "/queries/" + queryName;
+			logger.info("actual query ID (temp fix):" + observableQueryURI);
+			return observableQueryURI;
+		} catch (Exception e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
+	private String extractNewStreamNameFromStreamQuery(String queryURI) {
+		return MO.streamsURI
+				+ queryURI.substring(queryURI.lastIndexOf("/") + 1,
+						queryURI.length());
 	}
 
 	public Set<String> getObservableMetrics() {

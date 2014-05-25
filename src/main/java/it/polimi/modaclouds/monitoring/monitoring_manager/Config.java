@@ -153,16 +153,24 @@ public class Config {
 		return availableGroupingClasses;
 	}
 
-	public String getSDAServerAddress() {
-		return config.getString("sda_server.address");
-	}
-
-	public int getSDAServerPort() {
-		return config.getInt("sda_server.port");
-	}
-
 	public int getMMServerPort() {
 		return config.getInt("mm_server.port");
+	}
+
+	public String getMatlabSDAServerAddress() {
+		return config.getString("matlab_sda_server.address");
+	}
+
+	public int getMatlabSDAServerPort() {
+		return config.getInt("matlab_sda_server.port");
+	}
+
+	public String getJavaSDAServerAddress() {
+		return config.getString("java_sda_server.address");
+	}
+
+	public int getJavaSDAServerPort() {
+		return config.getInt("java_sda_server.port");
 	}
 
 }

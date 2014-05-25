@@ -19,7 +19,6 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 import it.polimi.modaclouds.monitoring.kb.api.KBConnector;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Component;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
-import it.polimi.modaclouds.qos_models.schema.Action;
 import it.polimi.modaclouds.qos_models.schema.AggregateFunction;
 import it.polimi.modaclouds.qos_models.schema.GroupingCategory;
 import it.polimi.modaclouds.qos_models.schema.Metric;
@@ -27,10 +26,8 @@ import it.polimi.modaclouds.qos_models.schema.Metrics;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -97,7 +94,7 @@ public class MonitoringManager {
 		dcFactoriesManager.uninstallRule(rule);
 		sdaFactoryManager.uninstallRule(rule);
 		installedRules.remove(id);
-		
+
 	}
 
 	public void installRule(MonitoringRule rule)
@@ -105,7 +102,7 @@ public class MonitoringManager {
 		if (installedRules.containsKey(rule.getId()))
 			throw new RuleInstallationException("A rule with id "
 					+ rule.getId() + " is already installed");
-		boolean sdaRequired = false;
+		String requiredDataAnalyzer = null;
 		String sdaReturnedMetric = null;
 		String aggregateFunction = null;
 		String groupingClass = null;
@@ -126,8 +123,8 @@ public class MonitoringManager {
 			for (AggregateFunction availableFunction : availableFunctions) {
 				if (aggregateFunction.equals(availableFunction.getName())) {
 					validAggregateFunction = true;
-					sdaRequired = availableFunction.getComputedBy().value().equals(
-							Vocabulary.StatisticalDataAnalyzer);
+					requiredDataAnalyzer = availableFunction.getComputedBy()
+							.value();
 					break;
 				}
 			}
@@ -155,16 +152,19 @@ public class MonitoringManager {
 						+ groupingClass + " is not valid");
 			}
 		}
-		if (sdaRequired) {
+		if (requiredDataAnalyzer.equals(Vocabulary.MATLAB_SDA)
+				|| requiredDataAnalyzer.equals(Vocabulary.JAVA_SDA)) {
 			sdaReturnedMetric = generateRandomMetricName();
 		}
 		try {
-			csparqlEngineManager.installRule(rule, sdaRequired,
+			csparqlEngineManager.installRule(rule, requiredDataAnalyzer,
 					sdaReturnedMetric);
 			dcFactoriesManager.installRule(rule);
-			if (sdaRequired)
+			if (requiredDataAnalyzer.equals(Vocabulary.MATLAB_SDA)
+					|| requiredDataAnalyzer.equals(Vocabulary.JAVA_SDA)) {
 				sdaFactoryManager.installRule(rule, aggregateFunction,
 						sdaReturnedMetric);
+			}
 			installedRules.put(rule.getId(), rule);
 		} catch (Exception e) {
 			// TODO rollback
@@ -183,7 +183,8 @@ public class MonitoringManager {
 
 	public Metrics getMetrics() {
 		Metrics metrics = new Metrics();
-		for (String observableMetric : csparqlEngineManager.getObservableMetrics()) {
+		for (String observableMetric : csparqlEngineManager
+				.getObservableMetrics()) {
 			Metric metric = new Metric();
 			metric.setName(observableMetric);
 			metrics.getMetrics().add(metric);
@@ -197,11 +198,11 @@ public class MonitoringManager {
 		return rules;
 	}
 
-	
-
 	public String addObserver(String metricname, String callbackUrl)
-			throws MetricDoesNotExistException, ServerErrorException, ObserverErrorException {
-		String observerId = csparqlEngineManager.addObserver(metricname, callbackUrl);
+			throws MetricDoesNotExistException, ServerErrorException,
+			ObserverErrorException, InternalErrorException {
+		String observerId = csparqlEngineManager.addObserver(metricname,
+				callbackUrl);
 		return observerId;
 	}
 }

@@ -51,9 +51,9 @@ public class SDAFactoryManager {
 		sda.addParameter(new Parameter(Vocabulary.timeStep, rule.getTimeStep()));
 		sda.addParameter(new Parameter(Vocabulary.timeWindow, rule
 				.getTimeWindow()));
-		
+
 		Util.addParameters(sda, rule.getMetricAggregation().getParameters());
-		
+
 		sda.setStarted(true);
 		sda.setTargetMetric(rule.getCollectedMetric().getMetricName());
 		sda.setReturnedMetric(sdaReturnedMetric);
@@ -73,7 +73,8 @@ public class SDAFactoryManager {
 
 	public void uninstallRule(MonitoringRule rule) {
 		StatisticalDataAnalyzer sda = sdaByRuleId.get(rule.getId());
-		if (sda!=null) knowledgeBase.delete(sda.getUri());
+		if (sda != null)
+			knowledgeBase.delete(sda.getUri());
 	}
 
 }

@@ -21,7 +21,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.polimi.modaclouds.monitoring.monitoring-manager</groupId>
 	<artifactId>monitoring-manager</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>MODAClouds Monitoring Manager</name>
@@ -168,7 +168,7 @@
 		<dependency>
 			<groupId>it.polimi.csparqool</groupId>
 			<artifactId>csparqool</artifactId>
-			<version>1.0</version>
+			<version>1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
@@ -204,7 +204,7 @@
 				it.polimi.modaclouds.monitoring.knowledge-base-api
 			</groupId>
 			<artifactId>knowledge-base-api</artifactId>
-			<version>1.0</version>
+			<version>1.0.1</version>
 		</dependency>
 	</dependencies>
 

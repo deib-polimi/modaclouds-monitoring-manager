@@ -19,11 +19,13 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 import it.polimi.modaclouds.monitoring.kb.api.KBConnector;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.DataCollector;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.KBEntity;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.MonitorableResource;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -94,6 +96,9 @@ public class DCFactoriesManager {
 				Util.addParameters(dc, rule.getCollectedMetric().getParameters());
 				
 				dc.setEnabled(true);
+				Set<MonitorableResource> targetResources = new HashSet<MonitorableResource>();
+				targetResources.add((MonitorableResource) targetEntity);
+				dc.setTargetResources(targetResources);
 				updatedDCs.add(dc);
 			}
 		}

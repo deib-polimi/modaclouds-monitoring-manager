@@ -31,28 +31,35 @@
 	</aggregateFunction>
 	<aggregateFunction name="Min" computedBy="DeterministicDataAnalyzer">
 	</aggregateFunction>
-	<aggregateFunction name="ForecastingML" computedBy="StatisticalDataAnalyzer">
+	<aggregateFunction name="ForecastingML" computedBy="JAVAStatisticalDataAnalyzer">
+		<requiredParameter>otherTarget1</requiredParameter>
 		<requiredParameter>otherMetric1</requiredParameter>
-		<requiredParameter>otherMetric2</requiredParameter>
 		<requiredParameter>method</requiredParameter>
 		<requiredParameter>predictionStep</requiredParameter>
 		<requiredParameter>returnedMetric</requiredParameter>
 	</aggregateFunction>
 	<aggregateFunction name="ForecastingTimeSeriesAR"
-		computedBy="StatisticalDataAnalyzer">
+		computedBy="MATLABStatisticalDataAnalyzer">
 		<requiredParameter>order</requiredParameter>
 		<requiredParameter>forecastPeriod</requiredParameter>
 		<requiredParameter>returnedMetric</requiredParameter>
 	</aggregateFunction>
 	<aggregateFunction name="ForecastingTimeSeriesARMA"
-		computedBy="StatisticalDataAnalyzer">
+		computedBy="MATLABStatisticalDataAnalyzer">
+		<requiredParameter>autoregressive</requiredParameter>
+		<requiredParameter>movingAverage</requiredParameter>
+		<requiredParameter>forecastPeriod</requiredParameter>
+		<requiredParameter>returnedMetric</requiredParameter>
+	</aggregateFunction>
+		<aggregateFunction name="ForecastingTimeSeriesARiMA"
+		computedBy="MATLABStatisticalDataAnalyzer">
 		<requiredParameter>autoregressive</requiredParameter>
 		<requiredParameter>integrated</requiredParameter>
 		<requiredParameter>movingAverage</requiredParameter>
 		<requiredParameter>forecastPeriod</requiredParameter>
 		<requiredParameter>returnedMetric</requiredParameter>
 	</aggregateFunction>
-	<aggregateFunction name="EstimationCI" computedBy="StatisticalDataAnalyzer">
+	<aggregateFunction name="Estimation" computedBy="MATLABStatisticalDataAnalyzer">
 		<requiredParameter>method</requiredParameter>
 		<requiredParameter>window</requiredParameter>
 		<requiredParameter>nCPU</requiredParameter>
@@ -60,10 +67,11 @@
 		<requiredParameter>CPUUtilTarget</requiredParameter>
 		<requiredParameter>returnedMetric</requiredParameter>
 	</aggregateFunction>
-	<aggregateFunction name="Correlation" computedBy="StatisticalDataAnalyzer">
+	<aggregateFunction name="Correlation" computedBy="JAVAStatisticalDataAnalyzer">
+		<requiredParameter>otherTarget1</requiredParameter>
 		<requiredParameter>otherMetric1</requiredParameter>
-		<requiredParameter>otherMetric2</requiredParameter>
 		<requiredParameter>method</requiredParameter>
+		<requiredParameter>isTraining</requiredParameter>
 		<requiredParameter>returnedMetric</requiredParameter>
 	</aggregateFunction>
 </aggregateFunctions>

@@ -28,5 +28,6 @@ class QueryVars {
 	public static final String TIMESTAMP = "?timestamp";
 	public static final String INPUT_TIMESTAMP = "?input_timestamp";
 	public static final String DATUM = "?datum";
-
+	public static final String METRIC = "?metric";
+	public static final String VALUE = "?value";
 }

@@ -43,9 +43,8 @@ public class Util {
 		return null;
 	}
 
-	public static String getOutputValueVariable(MonitoringRule rule,
-			boolean sdaRequired) {
-		if (sdaRequired || !isGroupedMetric(rule))
+	public static String getOutputValueVariable(MonitoringRule rule) {
+		if (!isGroupedMetric(rule))
 			return QueryVars.INPUT;
 		return QueryVars.OUTPUT;
 	}
