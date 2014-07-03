@@ -21,7 +21,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.polimi.modaclouds.monitoring.monitoring-manager</groupId>
 	<artifactId>monitoring-manager</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<packaging>jar</packaging>
 
 	<name>MODAClouds Monitoring Manager</name>
@@ -204,7 +204,7 @@
 				it.polimi.modaclouds.monitoring.knowledge-base-api
 			</groupId>
 			<artifactId>knowledge-base-api</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.3</version>
 		</dependency>
 	</dependencies>
 
@@ -223,14 +223,14 @@
 					</descriptorRefs>
 					<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
-				<executions>
+				<!-- <executions>
 					<execution>
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
 						</goals>
 					</execution>
-				</executions>
+				</executions> -->
 			</plugin>
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
