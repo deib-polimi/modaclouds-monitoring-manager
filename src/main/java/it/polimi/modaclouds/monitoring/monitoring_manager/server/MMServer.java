@@ -75,7 +75,11 @@ public class MMServer extends Application{
 		router.attach("/"+ apiVersion +"/metrics/{metricname}/observers", MultipleObserversDataServer.class);
 		router.attach("/"+ apiVersion +"/metrics/{metricname}/observers/{id}", SingleObserverDataServer.class);
 		
-		//test commit
+		router.attach("/"+ apiVersion +"/update", UpdateDeploymentDataServer.class);
+		//TODO maybe should be inserted a list in the payload of the components to be removed, instead using the single id
+		router.attach("/"+ apiVersion +"/update/{id}", UpdateDeploymentDataServer.class);
+		router.attach("/"+ apiVersion +"/upload", UploadDeploymentDataServer.class);
+
 
 		return router;
 	}

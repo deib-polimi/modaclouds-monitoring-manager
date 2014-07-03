@@ -205,4 +205,13 @@ public class MonitoringManager {
 				callbackUrl);
 		return observerId;
 	}
+
+	public void deleteInstance(String id) throws ComponentDoesNotExistException{
+		// TODO Auto-generated method stub	
+		
+	}
+	
+	public void uploadModel(List<Component> model){
+		
+	}
 }
