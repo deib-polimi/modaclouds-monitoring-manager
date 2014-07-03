@@ -74,6 +74,8 @@ public class MMServer extends Application{
 		router.attach("/"+ apiVersion +"/metrics/{metricname}", SingleMetricDataServer.class);
 		router.attach("/"+ apiVersion +"/metrics/{metricname}/observers", MultipleObserversDataServer.class);
 		router.attach("/"+ apiVersion +"/metrics/{metricname}/observers/{id}", SingleObserverDataServer.class);
+		
+		//test commit
 
 		return router;
 	}
