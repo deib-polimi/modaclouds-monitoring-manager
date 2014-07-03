@@ -48,6 +48,8 @@ public class MMServer extends Application{
 		component.getDefaultHost().attach("", mmServer);
 		
 		component.start();
+		
+		Component com = new Component();
 
 	}
 	
