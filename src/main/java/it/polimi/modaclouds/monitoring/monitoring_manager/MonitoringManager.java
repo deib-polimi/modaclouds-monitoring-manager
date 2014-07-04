@@ -17,7 +17,7 @@
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
 import it.polimi.modaclouds.monitoring.kb.api.KBConnector;
-import it.polimi.modaclouds.monitoring.monitoring_manager.server.DeserialisedUpdateModel;
+import it.polimi.modaclouds.monitoring.monitoring_manager.server.ModelUpdates;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Component;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.ExternalComponent;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.VM;
@@ -215,13 +215,24 @@ public class MonitoringManager {
 	}
 
 	//there could be the case to gather the next two method in just one, and specify with a boolean if it should overwrite the model or not
-	public void uploadModel(DeserialisedUpdateModel component) {
+	public void uploadModel(ModelUpdates component) {
 		// TODO Auto-generated method stub
 		
 	}
 	
-	public void updateModel(DeserialisedUpdateModel component) {
-		// TODO Auto-generated method stub
+	public void updateModel(ModelUpdates update) {
+		
+		if(update.getVms()!=null){
+			
+		}
+		
+		if(update.getComponents()!=null){
+			
+		}
+		
+		if(update.getExternalComponents()!=null){
+			
+		}
 		
 	}
 }

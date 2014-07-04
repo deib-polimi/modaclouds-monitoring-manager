@@ -84,7 +84,7 @@ public class UploadDeploymentDataServer extends ServerResource {
 			
 			Gson gson = new Gson();
 			
-			DeserialisedUpdateModel deserialised = gson.fromJson(payload, DeserialisedUpdateModel.class);
+			ModelUpdates deserialised = gson.fromJson(payload, ModelUpdates.class);
 			
 			/* test to check deserialized object
 			List<VM> vms = new ArrayList<VM>();

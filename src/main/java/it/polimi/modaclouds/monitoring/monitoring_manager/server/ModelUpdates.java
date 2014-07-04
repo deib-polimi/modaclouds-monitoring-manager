@@ -6,13 +6,20 @@ import it.polimi.modaclouds.qos_models.monitoring_ontology.VM;
 
 import java.util.List;
 
-public class DeserialisedUpdateModel {
+public class ModelUpdates {
 	
 	private List<VM> vms;
 	
 	private List<Component> components;
 	
 	private List<ExternalComponent> externalComponents;
+
+	public ModelUpdates(List<VM> vms, List<Component> components,
+			List<ExternalComponent> externalComponents) {
+		this.vms = vms;
+		this.components = components;
+		this.externalComponents = externalComponents;
+	}
 
 	public List<VM> getVms() {
 		return vms;

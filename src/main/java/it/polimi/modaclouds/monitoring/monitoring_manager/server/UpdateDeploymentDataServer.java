@@ -32,11 +32,10 @@ public class UpdateDeploymentDataServer extends ServerResource  {
 			
 			//conversion from json to Component object
 			Gson gson = new Gson();
-			DeserialisedUpdateModel deserialised = gson.fromJson(payload, DeserialisedUpdateModel.class);
+			ModelUpdates deserialised = gson.fromJson(payload, ModelUpdates.class);
 			
 			manager.updateModel(deserialised);
 			
-
 		} catch (Exception e) {
 			logger.error("Error while adding components", e);
 			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL,
