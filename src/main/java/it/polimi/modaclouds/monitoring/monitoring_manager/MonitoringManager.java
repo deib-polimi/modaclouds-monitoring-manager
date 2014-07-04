@@ -17,7 +17,10 @@
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
 import it.polimi.modaclouds.monitoring.kb.api.KBConnector;
+import it.polimi.modaclouds.monitoring.monitoring_manager.server.DeserialisedUpdateModel;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Component;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.ExternalComponent;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.VM;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 import it.polimi.modaclouds.qos_models.schema.AggregateFunction;
 import it.polimi.modaclouds.qos_models.schema.GroupingCategory;
@@ -210,8 +213,15 @@ public class MonitoringManager {
 		// TODO Auto-generated method stub	
 		
 	}
+
+	//there could be the case to gather the next two method in just one, and specify with a boolean if it should overwrite the model or not
+	public void uploadModel(DeserialisedUpdateModel component) {
+		// TODO Auto-generated method stub
+		
+	}
 	
-	public void uploadModel(List<Component> model){
+	public void updateModel(DeserialisedUpdateModel component) {
+		// TODO Auto-generated method stub
 		
 	}
 }

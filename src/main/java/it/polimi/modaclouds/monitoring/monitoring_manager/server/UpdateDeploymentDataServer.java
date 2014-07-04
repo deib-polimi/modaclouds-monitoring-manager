@@ -28,23 +28,21 @@ public class UpdateDeploymentDataServer extends ServerResource  {
 			MonitoringManager manager = (MonitoringManager) getContext()
 					.getAttributes().get("manager");
 			
-			Component instance = null;
 			String payload = rep.getText();
-					
-			//{"started":true,"id":"nuovoid"}
-			//conversion from json to Component object
-			Gson g = new Gson();
-			Component component = g.fromJson(payload, Component.class);
 			
-			//TODO KB deployment update
-			//manager.newInstance(instance);
+			//conversion from json to Component object
+			Gson gson = new Gson();
+			DeserialisedUpdateModel deserialised = gson.fromJson(payload, DeserialisedUpdateModel.class);
+			
+			manager.updateModel(deserialised);
+			
 
 		} catch (Exception e) {
-			logger.error("Error while adding component", e);
+			logger.error("Error while adding components", e);
 			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL,
 					e.getMessage());
 			this.getResponse().setEntity(
-					"Error while adding component: " + e.getMessage(),
+					"Error while adding components: " + e.getMessage(),
 					MediaType.TEXT_PLAIN);
 		} finally {
 			this.getResponse().commit();
