@@ -100,7 +100,7 @@ public class CSPARQLEngineManager {
 		for (Action action : rule.getActions().getActions()) {
 			switch (action.getName()) {
 			case Vocabulary.OutputMetric:
-				String outputTargetVariable = Util.getOutputTarget(rule);
+				String outputTargetVariable = Util.getTargetVariable(rule);
 				String outputValueVariable = Util.getOutputValueVariable(rule);
 				requiredVars = new String[] { outputTargetVariable,
 						outputValueVariable, QueryVars.TIMESTAMP };
@@ -176,7 +176,7 @@ public class CSPARQLEngineManager {
 
 	private void addSelect(_body queryBody, String[] variables,
 			MonitoringRule rule, boolean sdaRequired)
-			throws MalformedQueryException {
+			throws MalformedQueryException, RuleInstallationException {
 		String aggregateFunction = Util.getAggregateFunction(rule);
 		for (String var : variables) {
 			switch (var) {
@@ -187,7 +187,7 @@ public class CSPARQLEngineManager {
 			case QueryVars.INPUT_TIMESTAMP:
 				queryBody.selectFunction(QueryVars.INPUT_TIMESTAMP,
 						Function.TIMESTAMP, QueryVars.DATUM,
-						MO.shortForm(MO.aboutResource), QueryVars.TARGET);
+						MO.shortForm(MO.aboutResource), Util.getTargetVariable(rule));
 				break;
 			case QueryVars.OUTPUT:
 				if (Util.isGroupedMetric(rule) && !sdaRequired) {
@@ -257,24 +257,32 @@ public class CSPARQLEngineManager {
 		_graph graph = new _graph();
 		List<MonitoredTarget> targets = Util.getMonitoredTargets(rule);
 		String groupingClass = Util.getGroupingClass(rule);
-
+		String targetVariable = Util.getTargetVariable(rule);
+		
 		// graph.add(QueryVars.DATUM, MO.metric,
 		// "\"" + rule.getCollectedMetric().getMetricName() + "\"") the metric
 		// is specified by the source stream
-		graph.add(QueryVars.DATUM, MO.aboutResource, QueryVars.TARGET)
-				.add(MO.value, QueryVars.INPUT)
-				.add(QueryVars.TARGET, MO.id,
-						getTargetIDLiteral(targets.get(0)));
+//		graph.add(QueryVars.DATUM, MO.aboutResource, QueryVars.TARGET)
+//				.add(MO.value, QueryVars.INPUT)
+//				.add(QueryVars.TARGET, MO.id,
+//						getTargetIDLiteral(targets.get(0)));
+		graph.add(QueryVars.DATUM, MO.aboutResource, targetVariable)
+		.add(MO.value, QueryVars.INPUT)
+		.add(targetVariable, MO.id,
+				getTargetIDLiteral(targets.get(0)));
 
 		switch (targets.get(0).getClazz()) {
 		case Vocabulary.VM:
-			graph.add(QueryVars.TARGET, RDF.type, MO.VM);
+//			graph.add(QueryVars.TARGET, RDF.type, MO.VM);
+			graph.add(targetVariable, RDF.type, MO.VM);
 			if (groupingClass != null) {
 				switch (groupingClass) {
 				case Vocabulary.VM:
 					break;
 				case Vocabulary.CloudProvider:
-					graph.add(QueryVars.TARGET, MO.cloudProvider,
+//					graph.add(QueryVars.TARGET, MO.cloudProvider,
+//							Util.getGroupingClassVariable(rule));
+					graph.add(targetVariable, MO.cloudProvider,
 							Util.getGroupingClassVariable(rule));
 					break;
 				default:
