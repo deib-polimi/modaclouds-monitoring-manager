@@ -32,14 +32,14 @@ public class UploadDeploymentDataServer extends ServerResource {
 	private Logger logger = LoggerFactory.getLogger(SingleMetricDataServer.class
 			.getName());
 	
-	@Post("json")
+	@Post
 	public void uploadModel(Representation rep){
 		try {
 			MonitoringManager manager = (MonitoringManager) getContext().getAttributes().get("manager");
 			
 			//[{"started":true,"id":"0","logger":{"currentLogLevel":20,"name":"it.polimi.modaclouds.qos_models.monitoring_ontology.Component"},"shortURI":"mo:b94b65f7-fd5c-416f-a43b-c72644134fbc","uri":"http://www.modaclouds.eu/rdfs/1.0/monitoring/b94b65f7-fd5c-416f-a43b-c72644134fbc"},{"started":true,"id":"1","logger":{"currentLogLevel":20,"name":"it.polimi.modaclouds.qos_models.monitoring_ontology.Component"},"shortURI":"mo:f50551cf-2807-4919-8e18-162d56675b46","uri":"http://www.modaclouds.eu/rdfs/1.0/monitoring/f50551cf-2807-4919-8e18-162d56675b46"},{"started":true,"id":"2","logger":{"currentLogLevel":20,"name":"it.polimi.modaclouds.qos_models.monitoring_ontology.Component"},"shortURI":"mo:b0ce36cf-c6a0-4c30-a72b-e5e1d5c8cde8","uri":"http://www.modaclouds.eu/rdfs/1.0/monitoring/b0ce36cf-c6a0-4c30-a72b-e5e1d5c8cde8"},{"started":true,"id":"3","logger":{"currentLogLevel":20,"name":"it.polimi.modaclouds.qos_models.monitoring_ontology.Component"},"shortURI":"mo:86fa89b6-b8d0-4777-a1f5-94aca8ce922c","uri":"http://www.modaclouds.eu/rdfs/1.0/monitoring/86fa89b6-b8d0-4777-a1f5-94aca8ce922c"},{"started":true,"id":"4","logger":{"currentLogLevel":20,"name":"it.polimi.modaclouds.qos_models.monitoring_ontology.Component"},"shortURI":"mo:8f406c1b-1965-40d3-9d76-ca0309711110","uri":"http://www.modaclouds.eu/rdfs/1.0/monitoring/8f406c1b-1965-40d3-9d76-ca0309711110"}]
 			
-			//ricordarsi problema logger
+			//ricordarsi problema logger, escluderlo dalla serializzazione
 			
 			// {"vms":[{"numberOfCpus":0,"started":false,"url":"abcd","id":"0"}],"components":[{"started":true,"url":"abcd-compo","id":"0comp"},{"started":true,"url":"abcd-compo","id":"1comp"}],"externalComponents":[{"cloudProvider":"me","started":false,"url":"abcd-extcompo","id":"0extcomp"},{"cloudProvider":"me","started":false,"url":"abcd-extcompo","id":"1extcomp"},{"cloudProvider":"me","started":false,"url":"abcd-extcompo","id":"2extcomp"}]}
 			
@@ -86,7 +86,7 @@ public class UploadDeploymentDataServer extends ServerResource {
 			
 			ModelUpdates deserialised = gson.fromJson(payload, ModelUpdates.class);
 			
-			/* test to check deserialized object
+			/* test to check deserialised object
 			List<VM> vms = new ArrayList<VM>();
 			List<Component> components = new ArrayList<Component>();
 			List<ExternalComponent> externalComponents = new ArrayList<ExternalComponent>();

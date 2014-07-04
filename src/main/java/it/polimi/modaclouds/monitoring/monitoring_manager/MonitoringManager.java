@@ -20,6 +20,7 @@ import it.polimi.modaclouds.monitoring.kb.api.KBConnector;
 import it.polimi.modaclouds.monitoring.monitoring_manager.server.ModelUpdates;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Component;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.ExternalComponent;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.KBEntity;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.VM;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 import it.polimi.modaclouds.qos_models.schema.AggregateFunction;
@@ -31,6 +32,7 @@ import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -210,29 +212,35 @@ public class MonitoringManager {
 	}
 
 	public void deleteInstance(String id) throws ComponentDoesNotExistException{
-		// TODO Auto-generated method stub	
-		
-	}
-
-	//there could be the case to gather the next two method in just one, and specify with a boolean if it should overwrite the model or not
-	public void uploadModel(ModelUpdates component) {
 		// TODO Auto-generated method stub
+		knowledgeBase.delete(id);
+
+	}
+	
+	public void uploadModel(ModelUpdates update) throws ComponentDoesNotExistException {
 		
+		Set<String> URIs = knowledgeBase.getURIs(KBEntity.class);
+		
+		for (String id : URIs) {
+		    deleteInstance(id);
+		}
+		
+		updateModel(update);
 	}
 	
 	public void updateModel(ModelUpdates update) {
 		
-		if(update.getVms()!=null){
-			
-		}
+			for(int i=0; i<update.getVms().size();i++){
+				knowledgeBase.add(update.getVms().get(i));
+			}
 		
-		if(update.getComponents()!=null){
-			
-		}
+			for(int i=0; i<update.getComponents().size();i++){
+				knowledgeBase.add(update.getComponents().get(i));
+			}
 		
-		if(update.getExternalComponents()!=null){
-			
-		}
-		
+			for(int i=0; i<update.getExternalComponents().size();i++){
+				knowledgeBase.add(update.getExternalComponents().get(i));
+			}		
 	}
+
 }

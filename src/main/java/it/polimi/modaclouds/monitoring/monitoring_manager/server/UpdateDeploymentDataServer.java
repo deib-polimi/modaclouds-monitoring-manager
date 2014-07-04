@@ -22,7 +22,7 @@ public class UpdateDeploymentDataServer extends ServerResource  {
 	private Logger logger = LoggerFactory.getLogger(SingleMetricDataServer.class
 			.getName());
 	
-	@Post("json")
+	@Post
 	public void addInstance(Representation rep) {
 		try {
 			MonitoringManager manager = (MonitoringManager) getContext()
