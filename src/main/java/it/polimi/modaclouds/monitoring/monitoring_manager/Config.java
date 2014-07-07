@@ -37,25 +37,25 @@ public class Config {
 	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
 	private PropertiesConfiguration config;
-	private AggregateFunctions availableAggregateFunctions;
-	private GroupingCategories availableGroupingClasses;
+//	private AggregateFunctions availableAggregateFunctions;
+//	private GroupingCategories availableGroupingClasses;
 
 	private static final String monitoringManagerPropertiesFileName = "monitoring_manager.properties";
-	private static final String monitoringAggregateFunctionsFileName = "monitoring_aggregate_functions.xml";
-	private static final String monitoringGroupingClassesFileName = "monitoring_grouping_categories.xml";
+//	private static final String monitoringAggregateFunctionsFileName = "monitoring_aggregate_functions.xml";
+//	private static final String monitoringGroupingClassesFileName = "monitoring_grouping_categories.xml";
 
 	private Config() throws ConfigurationException {
 		ClassLoader cl = this.getClass().getClassLoader();
 		try {
 			config = new PropertiesConfiguration(monitoringManagerPropertiesFileName);
-			availableAggregateFunctions = XMLHelper
-					.deserialize(
-							cl.getResourceAsStream(monitoringAggregateFunctionsFileName),
-							AggregateFunctions.class);
-			availableGroupingClasses = XMLHelper
-					.deserialize(
-							cl.getResourceAsStream(monitoringGroupingClassesFileName),
-							GroupingCategories.class);
+//			availableAggregateFunctions = XMLHelper
+//					.deserialize(
+//							cl.getResourceAsStream(monitoringAggregateFunctionsFileName),
+//							AggregateFunctions.class);
+//			availableGroupingClasses = XMLHelper
+//					.deserialize(
+//							cl.getResourceAsStream(monitoringGroupingClassesFileName),
+//							GroupingCategories.class);
 		} catch (Exception e) {
 			throw new ConfigurationException(e);
 		}
@@ -114,9 +114,9 @@ public class Config {
 		return config.getString("dda_server.address");
 	}
 
-	public AggregateFunctions getAvailableAggregateFunctions() {
-		return availableAggregateFunctions;
-	}
+//	public AggregateFunctions getAvailableAggregateFunctions() {
+//		return availableAggregateFunctions;
+//	}
 
 //	public static URL getURL(String URLName) {
 //		boolean exists = false;
@@ -149,9 +149,9 @@ public class Config {
 //		return null;
 //	}
 
-	public GroupingCategories getAvailableGroupingClasses() {
-		return availableGroupingClasses;
-	}
+//	public GroupingCategories getAvailableGroupingClasses() {
+//		return availableGroupingClasses;
+//	}
 
 	public int getMMServerPort() {
 		return config.getInt("mm_server.port");

@@ -23,6 +23,8 @@ import it.polimi.modaclouds.qos_models.monitoring_ontology.ExternalComponent;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.KBEntity;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.VM;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
+import it.polimi.modaclouds.qos_models.monitoring_rules.Problem;
+import it.polimi.modaclouds.qos_models.monitoring_rules.Validator;
 import it.polimi.modaclouds.qos_models.schema.AggregateFunction;
 import it.polimi.modaclouds.qos_models.schema.GroupingCategory;
 import it.polimi.modaclouds.qos_models.schema.Metric;
@@ -51,17 +53,24 @@ public class MonitoringManager {
 	private DCFactoriesManager dcFactoriesManager;
 	private SDAFactoryManager sdaFactoryManager;
 	private Map<String, MonitoringRule> installedRules;
+	private List<MonitoringRule> installingRules;
+
+	private Validator validator;
 
 	private Config config;
+	private it.polimi.modaclouds.qos_models.util.Config qosModelConfig;
 
 	public MonitoringManager() throws InternalErrorException {
 		try {
 			knowledgeBase = KBConnector.getInstance();
 			config = Config.getInstance();
+			qosModelConfig = it.polimi.modaclouds.qos_models.util.Config
+					.getInstance();
 			installedRules = new ConcurrentHashMap<String, MonitoringRule>();
-			csparqlEngineManager = new CSPARQLEngineManager();
+			csparqlEngineManager = new CSPARQLEngineManager(this);
 			dcFactoriesManager = new DCFactoriesManager(knowledgeBase);
 			sdaFactoryManager = new SDAFactoryManager(knowledgeBase);
+			validator = new Validator();
 		} catch (Exception e) {
 			logger.error("Inernal Error", e);
 			throw new InternalErrorException(e);
@@ -75,9 +84,11 @@ public class MonitoringManager {
 	public void installRules(MonitoringRules rules)
 			throws RuleInstallationException {
 		validate(rules);
+		installingRules = rules.getMonitoringRules();
 		for (MonitoringRule rule : rules.getMonitoringRules()) {
 			installRule(rule);
 		}
+		installingRules = null;
 	}
 
 	private void validate(MonitoringRules rules)
@@ -87,7 +98,24 @@ public class MonitoringManager {
 				throw new RuleInstallationException("A rule with id "
 						+ rule.getId() + " is already installed");
 		}
-		// TODO
+		MonitoringRules allrules = new MonitoringRules();
+		allrules.getMonitoringRules().addAll(installedRules.values());
+		allrules.getMonitoringRules().addAll(rules.getMonitoringRules());
+		Set<Problem> problems = validator.validateAllRules(allrules);
+		if (!problems.isEmpty()) {
+			String message = "Rules could not be installed because of the following problems:\n";
+			for (Problem p : problems) {
+				message += "Rule "
+						+ p.getId()
+						+ ", error: "
+						+ p.getError()
+						+ " at position "
+						+ p.getTagName()
+						+ (p.getDescription() != null ? ", details: "
+								+ p.getDescription() : "") + "\n";
+			}
+			throw new RuleInstallationException(message);
+		}
 	}
 
 	public void uninstallRule(String id) throws RuleDoesNotExistException,
@@ -115,7 +143,7 @@ public class MonitoringManager {
 			MonitoringRule pRule = rule;
 			while (pRule.getMetricAggregation() != null
 					&& rule.getMetricAggregation().isInherited()) {
-				pRule = rule.getParentMonitoringRule();
+				pRule = getParentRule(rule.getParentMonitoringRuleId());
 			}
 			aggregateFunction = pRule.getMetricAggregation()
 					.getAggregateFunction();
@@ -123,8 +151,8 @@ public class MonitoringManager {
 		}
 		if (aggregateFunction != null) {
 			boolean validAggregateFunction = false;
-			List<AggregateFunction> availableFunctions = config
-					.getAvailableAggregateFunctions().getAggregateFunctions();
+			List<AggregateFunction> availableFunctions = qosModelConfig
+					.getMonitoringAggregateFunctions().getAggregateFunctions();
 			for (AggregateFunction availableFunction : availableFunctions) {
 				if (aggregateFunction.equals(availableFunction.getName())) {
 					validAggregateFunction = true;
@@ -142,8 +170,8 @@ public class MonitoringManager {
 		}
 		if (groupingClass != null) {
 			boolean validGroupingCategoryFunction = false;
-			List<GroupingCategory> availableGroupingCategories = config
-					.getAvailableGroupingClasses().getGroupingCategories();
+			List<GroupingCategory> availableGroupingCategories = qosModelConfig
+					.getGroupingCategories().getGroupingCategories();
 			for (GroupingCategory availableGroupingCategory : availableGroupingCategories) {
 				if (groupingClass.equals(availableGroupingCategory.getName())) {
 					validGroupingCategoryFunction = true;
@@ -176,6 +204,17 @@ public class MonitoringManager {
 			logger.error("Error while installing rule", e);
 			throw new RuleInstallationException(e);
 		}
+	}
+
+	protected MonitoringRule getParentRule(String parentMonitoringRuleId) {
+		MonitoringRule parent = installedRules.get(parentMonitoringRuleId);
+		if (parent == null && installingRules != null) {
+			for (MonitoringRule rule : installingRules) {
+				if (rule.getId().equals(parentMonitoringRuleId))
+					return rule;
+			}
+		}
+		return null;
 	}
 
 	private String generateRandomMetricName() {

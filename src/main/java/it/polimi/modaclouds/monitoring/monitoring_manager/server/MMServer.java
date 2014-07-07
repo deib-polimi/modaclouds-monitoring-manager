@@ -63,8 +63,6 @@ public class MMServer extends Application{
 		}
 
 		getContext().getAttributes().put("complete_server_address", server_address);
-//		getContext().getAttributes().put("csaprqlinputStreamTable", csparqlStreamTable);
-//		getContext().getAttributes().put("csaprqlQueryTable", csparqlQueryTable);
 		getContext().getAttributes().put("manager", manager);
 
 		Router router = new Router(getContext());

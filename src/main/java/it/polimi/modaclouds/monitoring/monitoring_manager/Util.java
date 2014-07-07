@@ -49,15 +49,15 @@ public class Util {
 		return QueryVars.OUTPUT;
 	}
 
-	public static String getOutputTarget(MonitoringRule rule)
+	public static String getTargetVariable(MonitoringRule rule)
 			throws RuleInstallationException {
-		String outputTarget;
+		String targetVar;
 		if (isGroupedMetric(rule)) {
-			outputTarget = getGroupingClassVariable(rule);
+			targetVar = getGroupingClassVariable(rule);
 		} else {
-			outputTarget = QueryVars.TARGET;
+			targetVar = QueryVars.TARGET;
 		}
-		return outputTarget;
+		return targetVar;
 	}
 
 	public static String getAggregateFunction(MonitoringRule rule) {

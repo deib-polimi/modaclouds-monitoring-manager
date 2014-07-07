@@ -18,7 +18,6 @@ package it.polimi.modaclouds.monitoring.test;
 
 import static org.junit.Assert.assertTrue;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 
 import org.junit.Test;
 
