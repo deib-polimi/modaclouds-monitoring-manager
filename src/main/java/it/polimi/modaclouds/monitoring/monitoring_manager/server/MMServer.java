@@ -28,6 +28,8 @@ import org.restlet.routing.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.MonitorableResource;
 
 public class MMServer extends Application{
 	private static Component component;
@@ -49,8 +51,6 @@ public class MMServer extends Application{
 		
 		component.start();
 		
-		Component com = new Component();
-
 	}
 	
 	

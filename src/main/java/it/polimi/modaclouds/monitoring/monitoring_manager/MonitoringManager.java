@@ -258,9 +258,12 @@ public class MonitoringManager {
 	
 	public void uploadModel(ModelUpdates update) throws ComponentDoesNotExistException {
 		
-		Set<String> URIs = knowledgeBase.getURIs(KBEntity.class);
+		Set<String> URIs = knowledgeBase.getURIs(Component.class);
 		
 		for (String id : URIs) {
+			
+			System.out.println(id);
+			
 		    deleteInstance(id);
 		}
 		

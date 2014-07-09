@@ -25,16 +25,18 @@ public class UpdateDeploymentDataServer extends ServerResource  {
 	@Post
 	public void addInstance(Representation rep) {
 		try {
+			//invoking manager and payload of the post request
 			MonitoringManager manager = (MonitoringManager) getContext()
 					.getAttributes().get("manager");
-			
 			String payload = rep.getText();
 			
-			//conversion from json to Component object
+			//deserialisation from json to ModelUpdate.class
 			Gson gson = new Gson();
 			ModelUpdates deserialised = gson.fromJson(payload, ModelUpdates.class);
 			
+			//update model and responde to the post request
 			manager.updateModel(deserialised);
+			this.getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 			
 		} catch (Exception e) {
 			logger.error("Error while adding components", e);
