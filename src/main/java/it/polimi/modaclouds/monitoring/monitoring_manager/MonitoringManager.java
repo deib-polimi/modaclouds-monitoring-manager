@@ -16,13 +16,11 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
-import it.polimi.modaclouds.monitoring.kb.api.KBConnector;
+import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Component;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
 import it.polimi.modaclouds.qos_models.monitoring_rules.Problem;
 import it.polimi.modaclouds.qos_models.monitoring_rules.Validator;
-import it.polimi.modaclouds.qos_models.schema.AggregateFunction;
-import it.polimi.modaclouds.qos_models.schema.GroupingCategory;
 import it.polimi.modaclouds.qos_models.schema.Metric;
 import it.polimi.modaclouds.qos_models.schema.Metrics;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
@@ -44,7 +42,6 @@ public class MonitoringManager {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-	private KBConnector knowledgeBase;
 	private CSPARQLEngineManager csparqlEngineManager;
 	private DCFactoriesManager dcFactoriesManager;
 	private SDAFactoryManager sdaFactoryManager;
@@ -54,27 +51,27 @@ public class MonitoringManager {
 	private Validator validator;
 
 	private Config config;
-	private it.polimi.modaclouds.qos_models.util.Config qosModelConfig;
 
-	public MonitoringManager() throws InternalErrorException {
-		try {
-			knowledgeBase = KBConnector.getInstance();
-			config = Config.getInstance();
-			qosModelConfig = it.polimi.modaclouds.qos_models.util.Config
-					.getInstance();
-			installedRules = new ConcurrentHashMap<String, MonitoringRule>();
-			csparqlEngineManager = new CSPARQLEngineManager(this);
-			dcFactoriesManager = new DCFactoriesManager(knowledgeBase);
-			sdaFactoryManager = new SDAFactoryManager(knowledgeBase);
-			validator = new Validator();
-		} catch (Exception e) {
-			logger.error("Inernal Error", e);
-			throw new InternalErrorException(e);
-		}
+	private FusekiKBAPI systemDomainKB;
+	private FusekiKBAPI dcDomainKB;
+
+	public MonitoringManager(Config config) throws Exception {
+		this.config = config;
+		validator = new Validator();
+		systemDomainKB = new FusekiKBAPI(config.getKbUrl(),"it.polimi.modaclouds.qos_models.monitoring_ontology");
+		dcDomainKB = new FusekiKBAPI(config.getKbUrl(), "it.polimi.modaclouds.monitoring.dcfactory.kbconnectors");
+//		sdaDomainKB = new FusekiKBAPI(config.getKbUrl(), "");
+		installedRules = new ConcurrentHashMap<String, MonitoringRule>();
+		csparqlEngineManager = new CSPARQLEngineManager(this, config);
+		dcFactoriesManager = new DCFactoriesManager(dcDomainKB);
+//		sdaFactoryManager = new SDAFactoryManager(systemDomainKB);
+		
+		logger.info("Uploading ontology to KB");
+		systemDomainKB.uploadOntology(MO.model);
 	}
 
 	public void newInstance(Component instance) {
-		knowledgeBase.add(instance);
+		systemDomainKB.add(instance);
 	}
 
 	public void installRules(MonitoringRules rules)
@@ -146,51 +143,18 @@ public class MonitoringManager {
 			groupingClass = pRule.getMetricAggregation().getGroupingClass();
 		}
 		if (aggregateFunction != null) {
-			boolean validAggregateFunction = false;
-			List<AggregateFunction> availableFunctions = qosModelConfig
-					.getMonitoringAggregateFunctions().getAggregateFunctions();
-			for (AggregateFunction availableFunction : availableFunctions) {
-				if (aggregateFunction.equals(availableFunction.getName())) {
-					validAggregateFunction = true;
-					requiredDataAnalyzer = availableFunction.getComputedBy()
-							.value();
-					break;
-				}
-			}
-			if (!validAggregateFunction) {
-				logger.error("Aggregate function " + aggregateFunction
-						+ " is not valid");
-				throw new RuleInstallationException("Aggregate function "
-						+ aggregateFunction + " is not valid");
-			}
+			requiredDataAnalyzer = validator.getRequiredDataAnalyzer(aggregateFunction);
 		}
-		if (groupingClass != null) {
-			boolean validGroupingCategoryFunction = false;
-			List<GroupingCategory> availableGroupingCategories = qosModelConfig
-					.getGroupingCategories().getGroupingCategories();
-			for (GroupingCategory availableGroupingCategory : availableGroupingCategories) {
-				if (groupingClass.equals(availableGroupingCategory.getName())) {
-					validGroupingCategoryFunction = true;
-					break;
-				}
-			}
-			if (!validGroupingCategoryFunction) {
-				logger.error("Grouping category " + groupingClass
-						+ " is not valid");
-				throw new RuleInstallationException("Grouping category "
-						+ groupingClass + " is not valid");
-			}
-		}
-		if (requiredDataAnalyzer.equals(Vocabulary.MATLAB_SDA)
-				|| requiredDataAnalyzer.equals(Vocabulary.JAVA_SDA)) {
+		if (Util.softEquals(requiredDataAnalyzer,MMVocabulary.MATLAB_SDA)
+				|| Util.softEquals(requiredDataAnalyzer,MMVocabulary.JAVA_SDA)) {
 			sdaReturnedMetric = generateRandomMetricName();
 		}
 		try {
 			csparqlEngineManager.installRule(rule, requiredDataAnalyzer,
 					sdaReturnedMetric);
 			dcFactoriesManager.installRule(rule);
-			if (requiredDataAnalyzer.equals(Vocabulary.MATLAB_SDA)
-					|| requiredDataAnalyzer.equals(Vocabulary.JAVA_SDA)) {
+			if (requiredDataAnalyzer.equals(MMVocabulary.MATLAB_SDA)
+					|| requiredDataAnalyzer.equals(MMVocabulary.JAVA_SDA)) {
 				sdaFactoryManager.installRule(rule, aggregateFunction,
 						sdaReturnedMetric);
 			}
@@ -245,4 +209,8 @@ public class MonitoringManager {
 				callbackUrl);
 		return observerId;
 	}
+
+	
+	
+	
 }

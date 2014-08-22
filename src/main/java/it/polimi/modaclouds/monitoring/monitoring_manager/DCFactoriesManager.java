@@ -16,10 +16,12 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
-import it.polimi.modaclouds.monitoring.kb.api.KBConnector;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.DataCollector;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.KBEntity;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.MonitorableResource;
+import it.polimi.modaclouds.monitoring.dcfactory.kbconnectors.DCMetaData;
+import it.polimi.modaclouds.monitoring.dcfactory.kbconnectors.FusekiDCMetaData;
+import it.polimi.modaclouds.monitoring.dcfactory.kbconnectors.KBConnector;
+import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
+import it.polimi.modaclouds.monitoring.kb.api.KBEntity;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.Resource;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
@@ -32,24 +34,24 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DCFactoriesManager {
 
-	private KBConnector knowledgeBase;
-	private Map<KBEntity, Map<String, DataCollector>> dataCollectorsByMetricByEntity;
-	private Map<String, Set<DataCollector>> dataCollectorsByRuleId;
-	private Map<DataCollector, String> ruleIdByDataCollector;
+	private FusekiKBAPI knowledgeBase;
+	private Map<KBEntity, Map<String, FusekiDCMetaData>> dataCollectorsByMetricByEntity;
+	private Map<String, Set<FusekiDCMetaData>> dataCollectorsByRuleId;
+	private Map<FusekiDCMetaData, String> ruleIdByDataCollector;
 
-	public DCFactoriesManager(KBConnector knowledgeBase) {
+	public DCFactoriesManager(FusekiKBAPI knowledgeBase) {
 		this.knowledgeBase = knowledgeBase;
-		dataCollectorsByMetricByEntity = new ConcurrentHashMap<KBEntity, Map<String, DataCollector>>();
-		dataCollectorsByRuleId = new ConcurrentHashMap<String, Set<DataCollector>>();
-		ruleIdByDataCollector = new ConcurrentHashMap<DataCollector, String>();
+		dataCollectorsByMetricByEntity = new ConcurrentHashMap<KBEntity, Map<String, FusekiDCMetaData>>();
+		dataCollectorsByRuleId = new ConcurrentHashMap<String, Set<FusekiDCMetaData>>();
+		ruleIdByDataCollector = new ConcurrentHashMap<FusekiDCMetaData, String>();
 	}
 
 	public void uninstallRule(MonitoringRule rule) {
-		Set<DataCollector> dataCollectors = dataCollectorsByRuleId.remove(rule
+		Set<FusekiDCMetaData> dataCollectors = dataCollectorsByRuleId.remove(rule
 				.getId());
 		if (dataCollectors != null) {
 			knowledgeBase.deleteAll(dataCollectors);
-			for (DataCollector dc : dataCollectors) {
+			for (DCMetaData dc : dataCollectors) {
 				ruleIdByDataCollector.remove(dc);
 				for (KBEntity entity : dataCollectorsByMetricByEntity.keySet()) {
 					dataCollectorsByMetricByEntity.get(entity).remove(
@@ -61,18 +63,18 @@ public class DCFactoriesManager {
 
 	public void installRule(MonitoringRule rule)
 			throws RuleInstallationException {
-		Set<DataCollector> updatedDCs = Collections
-				.newSetFromMap(new ConcurrentHashMap<DataCollector, Boolean>());
+		Set<FusekiDCMetaData> updatedDCs = Collections
+				.newSetFromMap(new ConcurrentHashMap<FusekiDCMetaData, Boolean>());
 		String requiredMetric = rule.getCollectedMetric().getMetricName();
 		for (MonitoredTarget target : rule.getMonitoredTargets()
 				.getMonitoredTargets()) {
 			Set<KBEntity> targetEntities = knowledgeBase.getByPropertyValue(
 					Vocabulary.id, target.getId());
 			for (KBEntity targetEntity : targetEntities) {
-				Map<String, DataCollector> targetEntityDCbyMetric = dataCollectorsByMetricByEntity
+				Map<String, FusekiDCMetaData> targetEntityDCbyMetric = dataCollectorsByMetricByEntity
 						.get(targetEntity);
 				if (targetEntityDCbyMetric == null) {
-					targetEntityDCbyMetric = new ConcurrentHashMap<String, DataCollector>();
+					targetEntityDCbyMetric = new ConcurrentHashMap<String, FusekiDCMetaData>();
 					dataCollectorsByMetricByEntity.put(targetEntity,
 							targetEntityDCbyMetric);
 				}
@@ -88,17 +90,15 @@ public class DCFactoriesManager {
 													.get(targetEntity).get(
 															requiredMetric)));
 				}
-				DataCollector dc = new DataCollector();
-				dc.setCollectedMetric(requiredMetric);
+				FusekiDCMetaData dc = new FusekiDCMetaData();
+				dc.setMonitoredMetric(requiredMetric);
 				targetEntityDCbyMetric.put(requiredMetric, dc);
 				ruleIdByDataCollector.put(dc, rule.getId());
 				
 				Util.addParameters(dc, rule.getCollectedMetric().getParameters());
 				
-				dc.setEnabled(true);
-				Set<MonitorableResource> targetResources = new HashSet<MonitorableResource>();
-				targetResources.add((MonitorableResource) targetEntity);
-				dc.setTargetResources(targetResources);
+				dc.addMonitoredResourceId(((Resource)targetEntity).getId());
+				
 				updatedDCs.add(dc);
 			}
 		}

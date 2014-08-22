@@ -17,11 +17,9 @@
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
 import it.polimi.csparqool.FunctionArgs;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.DataCollector;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.Parameter;
+import it.polimi.modaclouds.monitoring.dcfactory.kbconnectors.FusekiDCMetaData;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.StatisticalDataAnalyzer;
 import it.polimi.modaclouds.qos_models.schema.Action;
-import it.polimi.modaclouds.qos_models.schema.CollectedMetric;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringMetricAggregation;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
@@ -32,16 +30,16 @@ import org.apache.commons.lang.NotImplementedException;
 
 public class Util {
 
-	public static Parameter getParameter(String parameterName,
-			CollectedMetric collectedMetric) {
-		for (it.polimi.modaclouds.qos_models.schema.Parameter par : collectedMetric
-				.getParameters()) {
-			if (par.getName().equals(parameterName)) {
-				return new Parameter(par.getName(), par.getValue());
-			}
-		}
-		return null;
-	}
+//	public static Parameter getParameter(String parameterName,
+//			CollectedMetric collectedMetric) {
+//		for (it.polimi.modaclouds.qos_models.schema.Parameter par : collectedMetric
+//				.getParameters()) {
+//			if (par.getName().equals(parameterName)) {
+//				return new Parameter(par.getName(), par.getValue());
+//			}
+//		}
+//		return null;
+//	}
 
 	public static String getOutputValueVariable(MonitoringRule rule) {
 		if (!isGroupedMetric(rule))
@@ -114,16 +112,16 @@ public class Util {
 		return targets;
 	}
 
-	public static Parameter getParameter(String parameterName,
-			MonitoringMetricAggregation metricAggregation) {
-		for (it.polimi.modaclouds.qos_models.schema.Parameter par : metricAggregation
-				.getParameters()) {
-			if (par.getName().equals(parameterName)) {
-				return new Parameter(par.getName(), par.getValue());
-			}
-		}
-		return null;
-	}
+//	public static Parameter getParameter(String parameterName,
+//			MonitoringMetricAggregation metricAggregation) {
+//		for (it.polimi.modaclouds.qos_models.schema.Parameter par : metricAggregation
+//				.getParameters()) {
+//			if (par.getName().equals(parameterName)) {
+//				return new Parameter(par.getName(), par.getValue());
+//			}
+//		}
+//		return null;
+//	}
 
 	public static String getParameterValue(String parameterName,
 			MonitoringMetricAggregation metricAggregation) {
@@ -162,11 +160,10 @@ public class Util {
 		return args;
 	}
 
-	public static void addParameters(DataCollector dc,
+	public static void addParameters(FusekiDCMetaData dc,
 			List<it.polimi.modaclouds.qos_models.schema.Parameter> parameters) {
 		for (it.polimi.modaclouds.qos_models.schema.Parameter p: parameters) {
-			Parameter parameter = new Parameter(p.getName(), p.getValue());
-			dc.addParameter(parameter);
+			dc.addParameter(p.getName(), p.getValue());
 		}
 		
 	}
@@ -174,9 +171,12 @@ public class Util {
 	public static void addParameters(StatisticalDataAnalyzer sda,
 			List<it.polimi.modaclouds.qos_models.schema.Parameter> parameters) {
 		for (it.polimi.modaclouds.qos_models.schema.Parameter p: parameters) {
-			Parameter parameter = new Parameter(p.getName(), p.getValue());
-			sda.addParameter(parameter);
+			sda.addParameter(p.getName(), p.getValue());
 		}
+	}
+	
+	public static boolean softEquals(String name1, String name2) {
+		return name1.toLowerCase().equals(name2.toLowerCase());
 	}
 
 }

@@ -16,9 +16,8 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
-import it.polimi.modaclouds.monitoring.kb.api.KBConnector;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.MonitorableResource;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.Parameter;
+import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.Resource;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.StatisticalDataAnalyzer;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
@@ -29,12 +28,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang.NotImplementedException;
+
 public class SDAFactoryManager {
 
-	private KBConnector knowledgeBase;
+	private FusekiKBAPI knowledgeBase;
 	private Map<String, StatisticalDataAnalyzer> sdaByRuleId;
 
-	public SDAFactoryManager(KBConnector knowledgeBase) {
+	public SDAFactoryManager(FusekiKBAPI knowledgeBase) {
 		this.knowledgeBase = knowledgeBase;
 		sdaByRuleId = new ConcurrentHashMap<String, StatisticalDataAnalyzer>();
 	}
@@ -48,33 +49,34 @@ public class SDAFactoryManager {
 			sdaByRuleId.put(rule.getId(), sda);
 		}
 		sda.setAggregateFunction(aggregateFunction);
-		sda.addParameter(new Parameter(Vocabulary.timeStep, rule.getTimeStep()));
-		sda.addParameter(new Parameter(Vocabulary.timeWindow, rule
-				.getTimeWindow()));
+		sda.addParameter(Vocabulary.timeStep, rule.getTimeStep());
+		sda.addParameter(Vocabulary.timeWindow, rule
+				.getTimeWindow());
 
 		Util.addParameters(sda, rule.getMetricAggregation().getParameters());
 
-		sda.setStarted(true);
-		sda.setTargetMetric(rule.getCollectedMetric().getMetricName());
+		sda.addInputMetric(rule.getCollectedMetric().getMetricName());
 		sda.setReturnedMetric(sdaReturnedMetric);
 
-		Set<MonitorableResource> monitorableResources = Collections
-				.newSetFromMap(new ConcurrentHashMap<MonitorableResource, Boolean>());
+		Set<Resource> monitorableResources = Collections
+				.newSetFromMap(new ConcurrentHashMap<Resource, Boolean>());
 
 		for (MonitoredTarget target : rule.getMonitoredTargets()
 				.getMonitoredTargets()) {
 			monitorableResources.addAll((Set) knowledgeBase.getByPropertyValue(
 					Vocabulary.id, target.getId()));
 		}
-
-		sda.setTargetResources(monitorableResources);
-		knowledgeBase.add(sda);
+		
+//		TODO
+//		sda.setTargetResources(monitorableResources);
+//		knowledgeBase.add(sda);
+		throw new NotImplementedException();
 	}
 
 	public void uninstallRule(MonitoringRule rule) {
 		StatisticalDataAnalyzer sda = sdaByRuleId.get(rule.getId());
 		if (sda != null)
-			knowledgeBase.delete(sda.getUri());
+			knowledgeBase.deleteEntityByURI(sda.getUri());
 	}
 
 }
