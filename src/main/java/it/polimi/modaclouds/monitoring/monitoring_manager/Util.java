@@ -17,7 +17,7 @@
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
 import it.polimi.csparqool.FunctionArgs;
-import it.polimi.modaclouds.monitoring.dcfactory.kbconnectors.FusekiDCMetaData;
+import it.polimi.modaclouds.monitoring.dcfactory.DCMetaData;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.StatisticalDataAnalyzer;
 import it.polimi.modaclouds.qos_models.schema.Action;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
@@ -47,13 +47,24 @@ public class Util {
 		return QueryVars.OUTPUT;
 	}
 
-	public static String getTargetVariable(MonitoringRule rule)
+//	public static String getTargetVariable(MonitoringRule rule)
+//			throws RuleInstallationException {
+//		String targetVar;
+////		if (isGroupedMetric(rule)) {
+////			targetVar = getGroupingClassVariable(rule);
+////		} else {
+//			targetVar = QueryVars.TARGET;
+////		}
+//		return targetVar;
+//	}
+	
+	public static String getOutputResourceIdVariable(MonitoringRule rule)
 			throws RuleInstallationException {
 		String targetVar;
 		if (isGroupedMetric(rule)) {
-			targetVar = getGroupingClassVariable(rule);
+			targetVar = getGroupingClassVariable(rule)+"Id";
 		} else {
-			targetVar = QueryVars.TARGET;
+			targetVar = QueryVars.RESOURCE_ID;
 		}
 		return targetVar;
 	}
@@ -73,7 +84,7 @@ public class Util {
 		String groupingClass = getGroupingClass(rule);
 		String targetClass = getTargetClass(rule);
 		if (groupingClass.equals(targetClass))
-			return QueryVars.TARGET;
+			return QueryVars.RESOURCE;
 		return "?" + groupingClass;
 	}
 
@@ -160,7 +171,7 @@ public class Util {
 		return args;
 	}
 
-	public static void addParameters(FusekiDCMetaData dc,
+	public static void addParameters(DCMetaData dc,
 			List<it.polimi.modaclouds.qos_models.schema.Parameter> parameters) {
 		for (it.polimi.modaclouds.qos_models.schema.Parameter p: parameters) {
 			dc.addParameter(p.getName(), p.getValue());

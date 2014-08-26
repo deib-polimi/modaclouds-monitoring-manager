@@ -16,9 +16,13 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
+import it.polimi.modaclouds.monitoring.kb.api.DeserializationException;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.Component;
+import it.polimi.modaclouds.monitoring.kb.api.SerializationException;
+import it.polimi.modaclouds.monitoring.monitoring_manager.server.Model;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.Resource;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 import it.polimi.modaclouds.qos_models.monitoring_rules.Problem;
 import it.polimi.modaclouds.qos_models.monitoring_rules.Validator;
 import it.polimi.modaclouds.qos_models.schema.Metric;
@@ -52,29 +56,27 @@ public class MonitoringManager {
 
 	private Config config;
 
-	private FusekiKBAPI systemDomainKB;
-	private FusekiKBAPI dcDomainKB;
+	private FusekiKBAPI knowledgeBase;
 
 	public MonitoringManager(Config config) throws Exception {
 		this.config = config;
 		validator = new Validator();
-		systemDomainKB = new FusekiKBAPI(config.getKbUrl(),"it.polimi.modaclouds.qos_models.monitoring_ontology");
-		dcDomainKB = new FusekiKBAPI(config.getKbUrl(), "it.polimi.modaclouds.monitoring.dcfactory.kbconnectors");
-//		sdaDomainKB = new FusekiKBAPI(config.getKbUrl(), "");
+		knowledgeBase = new FusekiKBAPI(config.getKbUrl());
+		// sdaDomainKB = new FusekiKBAPI(config.getKbUrl(), "");
 		installedRules = new ConcurrentHashMap<String, MonitoringRule>();
 		csparqlEngineManager = new CSPARQLEngineManager(this, config);
-		dcFactoriesManager = new DCFactoriesManager(dcDomainKB);
-//		sdaFactoryManager = new SDAFactoryManager(systemDomainKB);
-		
+		dcFactoriesManager = new DCFactoriesManager(knowledgeBase);
+		sdaFactoryManager = new SDAFactoryManager(knowledgeBase);
+
 		logger.info("Uploading ontology to KB");
-		systemDomainKB.uploadOntology(MO.model);
+		knowledgeBase.uploadOntology(MO.model);
 	}
 
-	public void newInstance(Component instance) {
-		systemDomainKB.add(instance);
-	}
+	// public void newInstance(Component instance) {
+	// systemDomainKB.add(instance);
+	// }
 
-	public void installRules(MonitoringRules rules)
+	public synchronized void installRules(MonitoringRules rules)
 			throws RuleInstallationException {
 		validate(rules);
 		installingRules = rules.getMonitoringRules();
@@ -111,7 +113,7 @@ public class MonitoringManager {
 		}
 	}
 
-	public void uninstallRule(String id) throws RuleDoesNotExistException,
+	public synchronized void uninstallRule(String id) throws RuleDoesNotExistException,
 			FailedToUninstallRuleException {
 		MonitoringRule rule = installedRules.get(id);
 		if (rule == null)
@@ -123,7 +125,7 @@ public class MonitoringManager {
 
 	}
 
-	public void installRule(MonitoringRule rule)
+	public synchronized void installRule(MonitoringRule rule)
 			throws RuleInstallationException {
 		if (installedRules.containsKey(rule.getId()))
 			throw new RuleInstallationException("A rule with id "
@@ -143,10 +145,11 @@ public class MonitoringManager {
 			groupingClass = pRule.getMetricAggregation().getGroupingClass();
 		}
 		if (aggregateFunction != null) {
-			requiredDataAnalyzer = validator.getRequiredDataAnalyzer(aggregateFunction);
+			requiredDataAnalyzer = validator
+					.getRequiredDataAnalyzer(aggregateFunction);
 		}
-		if (Util.softEquals(requiredDataAnalyzer,MMVocabulary.MATLAB_SDA)
-				|| Util.softEquals(requiredDataAnalyzer,MMVocabulary.JAVA_SDA)) {
+		if (Util.softEquals(requiredDataAnalyzer, MMVocabulary.MATLAB_SDA)
+				|| Util.softEquals(requiredDataAnalyzer, MMVocabulary.JAVA_SDA)) {
 			sdaReturnedMetric = generateRandomMetricName();
 		}
 		try {
@@ -210,7 +213,27 @@ public class MonitoringManager {
 		return observerId;
 	}
 
-	
-	
-	
+	public void deleteInstance(String id) throws SerializationException {
+		knowledgeBase.deleteEntitiesByPropertyValue(id, Vocabulary.resourceIdParameterName);
+
+	}
+
+	public void uploadModel(Model update) throws SerializationException,
+			DeserializationException {
+
+		Set<String> ids = knowledgeBase.getIds(Resource.class,
+				Vocabulary.resourceIdParameterName);
+
+		knowledgeBase.deleteEntitiesByPropertyValues(ids,
+				Vocabulary.resourceIdParameterName);
+
+		updateModel(update);
+	}
+
+	public void updateModel(Model update) throws SerializationException,
+			DeserializationException {
+		knowledgeBase.add(update.getResources(),
+				Vocabulary.resourceIdParameterName);
+	}
+
 }

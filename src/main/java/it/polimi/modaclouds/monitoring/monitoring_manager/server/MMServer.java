@@ -20,6 +20,7 @@ import it.polimi.modaclouds.monitoring.monitoring_manager.Config;
 import it.polimi.modaclouds.monitoring.monitoring_manager.ConfigurationException;
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
 
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.restlet.Application;
 import org.restlet.Component;
 import org.restlet.Restlet;
@@ -37,6 +38,7 @@ public class MMServer extends Application {
 	private static Logger logger = LoggerFactory.getLogger(MMServer.class);
 
 	public static void main(String[] args) {
+		
 		Config config;
 		try {
 			config = Config.getInstance();
@@ -95,6 +97,9 @@ public class MMServer extends Application {
 		router.attach(
 				"/" + apiVersion + "/metrics/{metricname}/observers/{id}",
 				SingleObserverDataServer.class);
+		
+		router.attach("/"+ apiVersion +"/model/resources", MultipleResourcesDataServer.class);
+		router.attach("/"+ apiVersion +"/model/resources/{id}", SingleResourceDataServer.class);
 
 		return router;
 	}

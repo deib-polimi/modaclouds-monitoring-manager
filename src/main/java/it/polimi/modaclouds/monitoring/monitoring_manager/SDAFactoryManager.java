@@ -60,23 +60,26 @@ public class SDAFactoryManager {
 
 		Set<Resource> monitorableResources = Collections
 				.newSetFromMap(new ConcurrentHashMap<Resource, Boolean>());
-
-		for (MonitoredTarget target : rule.getMonitoredTargets()
-				.getMonitoredTargets()) {
-			monitorableResources.addAll((Set) knowledgeBase.getByPropertyValue(
-					Vocabulary.id, target.getId()));
-		}
 		
-//		TODO
+//		TODO:
+
+//		for (MonitoredTarget target : rule.getMonitoredTargets()
+//				.getMonitoredTargets()) {
+//			monitorableResources.addAll((Set) knowledgeBase.getEntitiesByPropertyValue(
+//					Vocabulary.id, target.getId()));
+//		}
+		
+
 //		sda.setTargetResources(monitorableResources);
 //		knowledgeBase.add(sda);
 		throw new NotImplementedException();
 	}
 
 	public void uninstallRule(MonitoringRule rule) {
-		StatisticalDataAnalyzer sda = sdaByRuleId.get(rule.getId());
-		if (sda != null)
-			knowledgeBase.deleteEntityByURI(sda.getUri());
+		// TODO:
+//		StatisticalDataAnalyzer sda = sdaByRuleId.get(rule.getId());
+//		if (sda != null)
+//			knowledgeBase.deleteEntityById(sda.getId(), "id");
 	}
 
 }
