@@ -68,7 +68,7 @@ public class CSPARQLEngineManager {
 	private Map<String, String> registeredStreamsByRuleId;
 	private Map<String, Set<String>> registeredQueriesByRuleId;
 	private ConcurrentHashMap<String, String> queryURIByMetric;
-	private ConcurrentHashMap<String, String> observableQueryURIByMetric;
+//	private ConcurrentHashMap<String, String> observableQueryURIByMetric;
 	private ConcurrentHashMap<String, String> metricByObserverId;
 	private MonitoringManager monitoringManager;
 	private Config config;
@@ -85,7 +85,7 @@ public class CSPARQLEngineManager {
 		registeredQueriesById = new ConcurrentHashMap<String, String>();
 		registeredQueriesByRuleId = new ConcurrentHashMap<String, Set<String>>();
 		queryURIByMetric = new ConcurrentHashMap<String, String>();
-		observableQueryURIByMetric = new ConcurrentHashMap<String, String>();
+//		observableQueryURIByMetric = new ConcurrentHashMap<String, String>();
 		metricByObserverId = new ConcurrentHashMap<String, String>();
 		// validator = new RuleValidator();
 		csparqlAPI = new RSP_services_csparql_API(ddaURL.toString());
@@ -142,6 +142,7 @@ public class CSPARQLEngineManager {
 	}
 
 	private void addObservableMetrics(MonitoringRule rule, String queryURI) {
+		// TODO are we checking if metric already exist?
 		for (Action action : rule.getActions().getActions()) {
 			if (action.getName().equals(MMVocabulary.OutputMetric)) {
 				String metric = Util.getParameterValue(Vocabulary.name, action);
@@ -156,12 +157,14 @@ public class CSPARQLEngineManager {
 		String queryURI = queryURIByMetric.get(metricname.toLowerCase());
 		if (queryURI == null)
 			throw new MetricDoesNotExistException();
-		String observableQueryURI = observableQueryURIByMetric.get(metricname);
-		if (observableQueryURI == null) {
-			observableQueryURI = registerObservableQuery(queryURI, metricname);
-			observableQueryURIByMetric.put(metricname, observableQueryURI);
-		}
-		csparqlAPI.addObserver(observableQueryURI, callbackUrl);
+//		String observableQueryURI = observableQueryURIByMetric.get(metricname);
+//		if (observableQueryURI == null) {
+//			observableQueryURI = registerObservableQuery(queryURI, metricname);
+//			observableQueryURIByMetric.put(metricname, observableQueryURI);
+//		}
+		String queryName = queryURI.substring(queryURI.lastIndexOf('/')+1);
+		String realQueryUri = ddaURL.toString() + "/queries/" + queryName;
+		csparqlAPI.addObserver(realQueryUri, callbackUrl);
 		String observerId = String.valueOf(queryURI.hashCode());
 		metricByObserverId.put(observerId, metricname);
 		return observerId;
@@ -522,48 +525,48 @@ public class CSPARQLEngineManager {
 				outputValueVariable) : null;
 	}
 
-	private String registerObservableQuery(String queryURI, String metricname)
-			throws InternalErrorException {
-		try {
-			String queryName = CSquery.generateRandomName();
-			CSquery observableQuery = createQueryTemplate(queryName);
-			observableQuery
-					.select(QueryVars.RESOURCE_ID, QueryVars.METRIC,
-							QueryVars.VALUE, QueryVars.TIMESTAMP)
-					.fromStream(extractNewStreamNameFromStreamQuery(queryURI),
-							"10s", "10s")
-					// .from(MO.getKnowledgeBaseDataURL() + "?graph=default")
-					.where(body
-							.select(QueryVars.RESOURCE_ID, QueryVars.METRIC,
-									QueryVars.VALUE)
-							.selectFunction(
-									QueryVars.TIMESTAMP,
-									Function.TIMESTAMP,
-									QueryVars.DATUM,
-									RCSOntology
-											.shortForm(RCSOntology.resourceId),
-									QueryVars.RESOURCE_ID)
-							.where(graph
-									.add(QueryVars.DATUM, RCSOntology.metric,
-											QueryVars.METRIC)
-									.add(RCSOntology.resourceId,
-											QueryVars.RESOURCE_ID)
-									.add(RCSOntology.value, QueryVars.VALUE)));
-			String queryString = observableQuery.getCSPARQL();
-			logger.info("Registering observable query: " + queryString);
-			String observableQueryURI = csparqlAPI.registerQuery(queryName,
-					queryString);
-			logger.info("Server response, query ID: " + observableQueryURI);
-
-			observableQueryURI = ddaURL.toString() + "/queries/" + queryName;
-			// observableQueryURI = "http://www.modaclouds.eu/queries/" +
-			// queryName;
-			logger.info("actual query ID (temp fix):" + observableQueryURI);
-			return observableQueryURI;
-		} catch (Exception e) {
-			throw new InternalErrorException(e);
-		}
-	}
+//	private String registerObservableQuery(String queryURI, String metricname)
+//			throws InternalErrorException {
+//		try {
+//			String queryName = CSquery.generateRandomName();
+//			CSquery observableQuery = createQueryTemplate(queryName);
+//			observableQuery
+//					.select(QueryVars.RESOURCE_ID, QueryVars.METRIC,
+//							QueryVars.VALUE, QueryVars.TIMESTAMP)
+//					.fromStream(extractNewStreamNameFromStreamQuery(queryURI),
+//							"10s", "10s")
+//					// .from(MO.getKnowledgeBaseDataURL() + "?graph=default")
+//					.where(body
+//							.select(QueryVars.RESOURCE_ID, QueryVars.METRIC,
+//									QueryVars.VALUE)
+//							.selectFunction(
+//									QueryVars.TIMESTAMP,
+//									Function.TIMESTAMP,
+//									QueryVars.DATUM,
+//									RCSOntology
+//											.shortForm(RCSOntology.resourceId),
+//									QueryVars.RESOURCE_ID)
+//							.where(graph
+//									.add(QueryVars.DATUM, RCSOntology.metric,
+//											QueryVars.METRIC)
+//									.add(RCSOntology.resourceId,
+//											QueryVars.RESOURCE_ID)
+//									.add(RCSOntology.value, QueryVars.VALUE)));
+//			String queryString = observableQuery.getCSPARQL();
+//			logger.info("Registering observable query: " + queryString);
+//			String observableQueryURI = csparqlAPI.registerQuery(queryName,
+//					queryString);
+//			logger.info("Server response, query ID: " + observableQueryURI);
+//
+//			observableQueryURI = ddaURL.toString() + "/queries/" + queryName;
+//			// observableQueryURI = "http://www.modaclouds.eu/queries/" +
+//			// queryName;
+//			logger.info("actual query ID (temp fix):" + observableQueryURI);
+//			return observableQueryURI;
+//		} catch (Exception e) {
+//			throw new InternalErrorException(e);
+//		}
+//	}
 
 	private String registerQuery(String queryName, String csparqlQuery,
 			MonitoringRule rule) throws ServerErrorException,
