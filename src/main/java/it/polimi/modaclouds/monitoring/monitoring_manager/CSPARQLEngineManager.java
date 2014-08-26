@@ -265,29 +265,29 @@ public class CSPARQLEngineManager {
 
 	private _graph createGraphPattern(MonitoringRule rule)
 			throws RuleInstallationException {
-		_graph graph = new _graph();
+		_graph graphPattern = new _graph();
 		List<MonitoredTarget> targets = Util.getMonitoredTargets(rule);
 		String groupingClass = Util.getGroupingClass(rule);
 		
-		graph.add(QueryVars.DATUM, RCSOntology.resourceId,
+		graphPattern.add(QueryVars.DATUM, RCSOntology.resourceId,
 				QueryVars.RESOURCE_ID).add(RCSOntology.value, QueryVars.INPUT)
 				.add(QueryVars.RESOURCE, MO.id, QueryVars.RESOURCE_ID);
 		
-		_union union = new _union();
-		graph.add(union);
+		_union unionOfTargets = new _union();
+		graphPattern.add(unionOfTargets);
 		for (MonitoredTarget target: targets) {
-			union.add(graph.add(QueryVars.RESOURCE,MO.type,getTargetIDLiteral(target)));
+			unionOfTargets.add(graph.add(QueryVars.RESOURCE,MO.type,getTargetIDLiteral(target)));
 		}
 
 		switch (targets.get(0).getClazz()) {
 		case Vocabulary.VM:
-			graph.add(QueryVars.RESOURCE, RDF.type, MO.VM);
+			graphPattern.add(QueryVars.RESOURCE, RDF.type, MO.VM);
 			if (groupingClass != null) {
 				switch (groupingClass) {
 				case Vocabulary.VM:
 					break;
 				case Vocabulary.CloudProvider:
-					graph.add(QueryVars.RESOURCE, MO.cloudProvider,
+					graphPattern.add(QueryVars.RESOURCE, MO.cloudProvider,
 							Util.getGroupingClassIdVariable(rule)).add(
 							Util.getGroupingClassVariable(rule), MO.id,
 							Util.getGroupingClassIdVariable(rule));
@@ -301,13 +301,13 @@ public class CSPARQLEngineManager {
 				break;
 			}
 		case Vocabulary.Method:
-			graph.add(QueryVars.RESOURCE, RDF.type, MO.Method);
+			graphPattern.add(QueryVars.RESOURCE, RDF.type, MO.Method);
 			if (groupingClass != null) {
 				switch (groupingClass) {
 				case Vocabulary.Method:
 					break;
 				case Vocabulary.CloudProvider:
-					graph.add(QueryVars.INTERNAL_COMPONENT, MO.providedMethods,
+					graphPattern.add(QueryVars.INTERNAL_COMPONENT, MO.providedMethods,
 							QueryVars.RESOURCE_ID)
 							.addTransitive(QueryVars.INTERNAL_COMPONENT,
 									MO.requiredComponents, QueryVars.COMPONENT)
@@ -329,7 +329,7 @@ public class CSPARQLEngineManager {
 					"Cannot install rules with target class "
 							+ targets.get(0).getClazz() + " yet");
 		}
-		return graph;
+		return graphPattern;
 	}
 
 	private CSquery createQueryTemplate(String queryName)
