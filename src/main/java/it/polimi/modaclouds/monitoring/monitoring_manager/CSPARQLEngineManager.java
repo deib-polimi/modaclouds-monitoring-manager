@@ -68,7 +68,7 @@ public class CSPARQLEngineManager {
 	private Map<String, String> registeredStreamsByRuleId;
 	private Map<String, Set<String>> registeredQueriesByRuleId;
 	private ConcurrentHashMap<String, String> queryURIByMetric;
-//	private ConcurrentHashMap<String, String> observableQueryURIByMetric;
+	// private ConcurrentHashMap<String, String> observableQueryURIByMetric;
 	private ConcurrentHashMap<String, String> metricByObserverId;
 	private MonitoringManager monitoringManager;
 	private Config config;
@@ -85,7 +85,7 @@ public class CSPARQLEngineManager {
 		registeredQueriesById = new ConcurrentHashMap<String, String>();
 		registeredQueriesByRuleId = new ConcurrentHashMap<String, Set<String>>();
 		queryURIByMetric = new ConcurrentHashMap<String, String>();
-//		observableQueryURIByMetric = new ConcurrentHashMap<String, String>();
+		// observableQueryURIByMetric = new ConcurrentHashMap<String, String>();
 		metricByObserverId = new ConcurrentHashMap<String, String>();
 		// validator = new RuleValidator();
 		csparqlAPI = new RSP_services_csparql_API(ddaURL.toString());
@@ -100,10 +100,11 @@ public class CSPARQLEngineManager {
 		for (Action action : rule.getActions().getActions()) {
 			switch (action.getName()) {
 			case MMVocabulary.OutputMetric:
-				String outputTargetVariable = Util
+				String outputReousourceIdVariableVariable = Util
 						.getOutputResourceIdVariable(rule);
 				String outputValueVariable = Util.getOutputValueVariable(rule);
-				requiredVars = new String[] { outputTargetVariable,
+				requiredVars = new String[] {
+						outputReousourceIdVariableVariable,
 						outputValueVariable, QueryVars.TIMESTAMP };
 				query.construct(graph
 						.add(CSquery.BLANK_NODE,
@@ -111,7 +112,8 @@ public class CSPARQLEngineManager {
 								"\""
 										+ Util.getParameterValue(
 												Vocabulary.name, action) + "\"")
-						.add(RCSOntology.resourceId, outputTargetVariable)
+						.add(RCSOntology.resourceId,
+								outputReousourceIdVariableVariable)
 						.add(RCSOntology.value, outputValueVariable)
 						.add(RCSOntology.timestamp, QueryVars.TIMESTAMP));
 				break;
@@ -157,12 +159,13 @@ public class CSPARQLEngineManager {
 		String queryURI = queryURIByMetric.get(metricname.toLowerCase());
 		if (queryURI == null)
 			throw new MetricDoesNotExistException();
-//		String observableQueryURI = observableQueryURIByMetric.get(metricname);
-//		if (observableQueryURI == null) {
-//			observableQueryURI = registerObservableQuery(queryURI, metricname);
-//			observableQueryURIByMetric.put(metricname, observableQueryURI);
-//		}
-		String queryName = queryURI.substring(queryURI.lastIndexOf('/')+1);
+		// String observableQueryURI =
+		// observableQueryURIByMetric.get(metricname);
+		// if (observableQueryURI == null) {
+		// observableQueryURI = registerObservableQuery(queryURI, metricname);
+		// observableQueryURIByMetric.put(metricname, observableQueryURI);
+		// }
+		String queryName = queryURI.substring(queryURI.lastIndexOf('/') + 1);
 		String realQueryUri = ddaURL.toString() + "/queries/" + queryName;
 		csparqlAPI.addObserver(realQueryUri, callbackUrl);
 		String observerId = String.valueOf(queryURI.hashCode());
@@ -245,7 +248,7 @@ public class CSPARQLEngineManager {
 		queryBody.where(innerQueryBody.where(createGraphPattern(rule)));
 
 		if (Util.isGroupedMetric(rule)) {
-			queryBody.groupby(Util.getGroupingClassVariable(rule)+"Id");
+			queryBody.groupby(Util.getGroupingClassIdVariable(rule));
 		}
 		if (rule.getCondition() != null) {
 			queryBody.having(parseCondition(rule.getCondition().getValue(),
@@ -280,21 +283,40 @@ public class CSPARQLEngineManager {
 
 		switch (targets.get(0).getClazz()) {
 		case Vocabulary.VM:
-			// graph.add(QueryVars.TARGET, RDF.type, MO.VM);
 			graph.add(QueryVars.RESOURCE, RDF.type, MO.VM);
 			if (groupingClass != null) {
 				switch (groupingClass) {
 				case Vocabulary.VM:
 					break;
 				case Vocabulary.CloudProvider:
-					// graph.add(QueryVars.TARGET, MO.cloudProvider,
-					// Util.getGroupingClassVariable(rule));
-					String groupingClassVariable = Util
-							.getGroupingClassVariable(rule);
 					graph.add(QueryVars.RESOURCE, MO.cloudProvider,
-							groupingClassVariable + "Id").add(
-							groupingClassVariable, MO.id,
-							groupingClassVariable + "Id");
+							Util.getGroupingClassIdVariable(rule)).add(
+							Util.getGroupingClassVariable(rule), MO.id,
+							Util.getGroupingClassIdVariable(rule));
+					break;
+				default:
+					throw new NotImplementedException("Grouping class "
+							+ groupingClass + " for target "
+							+ targets.get(0).getClazz()
+							+ " has not been implemented yet");
+				}
+				break;
+			}
+		case Vocabulary.Method:
+			graph.add(QueryVars.RESOURCE, RDF.type, MO.Method);
+			if (groupingClass != null) {
+				switch (groupingClass) {
+				case Vocabulary.Method:
+					break;
+				case Vocabulary.CloudProvider:
+					graph.add(QueryVars.INTERNAL_COMPONENT, MO.providedMethods,
+							QueryVars.RESOURCE_ID)
+							.addTransitive(QueryVars.INTERNAL_COMPONENT,
+									MO.requiredComponents, QueryVars.COMPONENT)
+							.add(QueryVars.COMPONENT, MO.cloudProvider,
+									Util.getGroupingClassIdVariable(rule))
+							.add(Util.getGroupingClassVariable(rule), MO.id,
+									Util.getGroupingClassIdVariable(rule));
 					break;
 				default:
 					throw new NotImplementedException("Grouping class "
@@ -525,48 +547,49 @@ public class CSPARQLEngineManager {
 				outputValueVariable) : null;
 	}
 
-//	private String registerObservableQuery(String queryURI, String metricname)
-//			throws InternalErrorException {
-//		try {
-//			String queryName = CSquery.generateRandomName();
-//			CSquery observableQuery = createQueryTemplate(queryName);
-//			observableQuery
-//					.select(QueryVars.RESOURCE_ID, QueryVars.METRIC,
-//							QueryVars.VALUE, QueryVars.TIMESTAMP)
-//					.fromStream(extractNewStreamNameFromStreamQuery(queryURI),
-//							"10s", "10s")
-//					// .from(MO.getKnowledgeBaseDataURL() + "?graph=default")
-//					.where(body
-//							.select(QueryVars.RESOURCE_ID, QueryVars.METRIC,
-//									QueryVars.VALUE)
-//							.selectFunction(
-//									QueryVars.TIMESTAMP,
-//									Function.TIMESTAMP,
-//									QueryVars.DATUM,
-//									RCSOntology
-//											.shortForm(RCSOntology.resourceId),
-//									QueryVars.RESOURCE_ID)
-//							.where(graph
-//									.add(QueryVars.DATUM, RCSOntology.metric,
-//											QueryVars.METRIC)
-//									.add(RCSOntology.resourceId,
-//											QueryVars.RESOURCE_ID)
-//									.add(RCSOntology.value, QueryVars.VALUE)));
-//			String queryString = observableQuery.getCSPARQL();
-//			logger.info("Registering observable query: " + queryString);
-//			String observableQueryURI = csparqlAPI.registerQuery(queryName,
-//					queryString);
-//			logger.info("Server response, query ID: " + observableQueryURI);
-//
-//			observableQueryURI = ddaURL.toString() + "/queries/" + queryName;
-//			// observableQueryURI = "http://www.modaclouds.eu/queries/" +
-//			// queryName;
-//			logger.info("actual query ID (temp fix):" + observableQueryURI);
-//			return observableQueryURI;
-//		} catch (Exception e) {
-//			throw new InternalErrorException(e);
-//		}
-//	}
+	// private String registerObservableQuery(String queryURI, String
+	// metricname)
+	// throws InternalErrorException {
+	// try {
+	// String queryName = CSquery.generateRandomName();
+	// CSquery observableQuery = createQueryTemplate(queryName);
+	// observableQuery
+	// .select(QueryVars.RESOURCE_ID, QueryVars.METRIC,
+	// QueryVars.VALUE, QueryVars.TIMESTAMP)
+	// .fromStream(extractNewStreamNameFromStreamQuery(queryURI),
+	// "10s", "10s")
+	// // .from(MO.getKnowledgeBaseDataURL() + "?graph=default")
+	// .where(body
+	// .select(QueryVars.RESOURCE_ID, QueryVars.METRIC,
+	// QueryVars.VALUE)
+	// .selectFunction(
+	// QueryVars.TIMESTAMP,
+	// Function.TIMESTAMP,
+	// QueryVars.DATUM,
+	// RCSOntology
+	// .shortForm(RCSOntology.resourceId),
+	// QueryVars.RESOURCE_ID)
+	// .where(graph
+	// .add(QueryVars.DATUM, RCSOntology.metric,
+	// QueryVars.METRIC)
+	// .add(RCSOntology.resourceId,
+	// QueryVars.RESOURCE_ID)
+	// .add(RCSOntology.value, QueryVars.VALUE)));
+	// String queryString = observableQuery.getCSPARQL();
+	// logger.info("Registering observable query: " + queryString);
+	// String observableQueryURI = csparqlAPI.registerQuery(queryName,
+	// queryString);
+	// logger.info("Server response, query ID: " + observableQueryURI);
+	//
+	// observableQueryURI = ddaURL.toString() + "/queries/" + queryName;
+	// // observableQueryURI = "http://www.modaclouds.eu/queries/" +
+	// // queryName;
+	// logger.info("actual query ID (temp fix):" + observableQueryURI);
+	// return observableQueryURI;
+	// } catch (Exception e) {
+	// throw new InternalErrorException(e);
+	// }
+	// }
 
 	private String registerQuery(String queryName, String csparqlQuery,
 			MonitoringRule rule) throws ServerErrorException,

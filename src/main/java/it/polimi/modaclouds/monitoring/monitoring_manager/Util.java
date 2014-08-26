@@ -117,9 +117,6 @@ public class Util {
 	public static List<MonitoredTarget> getMonitoredTargets(MonitoringRule rule) {
 		List<MonitoredTarget> targets = rule.getMonitoredTargets()
 				.getMonitoredTargets();
-		if (targets.size() != 1)
-			throw new NotImplementedException(
-					"Multiple or zero monitored target is not implemented yet");
 		return targets;
 	}
 
@@ -188,6 +185,10 @@ public class Util {
 	
 	public static boolean softEquals(String name1, String name2) {
 		return name1.toLowerCase().equals(name2.toLowerCase());
+	}
+
+	public static String getGroupingClassIdVariable(MonitoringRule rule) throws RuleInstallationException {
+		return getGroupingClassVariable(rule)+"Id";
 	}
 
 }

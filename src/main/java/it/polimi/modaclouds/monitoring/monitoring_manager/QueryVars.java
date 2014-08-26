@@ -30,4 +30,5 @@ class QueryVars {
 	public static final String METRIC = "?metric";
 	public static final String VALUE = "?value";
 	public static final String RESOURCE_ID = "?resourceId";
+	public static final String INTERNAL_COMPONENT = "?internalComponent";
 }
