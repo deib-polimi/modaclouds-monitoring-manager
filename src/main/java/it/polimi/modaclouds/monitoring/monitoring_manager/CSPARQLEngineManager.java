@@ -50,6 +50,7 @@ import polimi.deib.csparql_rest_api.exception.ObserverErrorException;
 import polimi.deib.csparql_rest_api.exception.QueryErrorException;
 import polimi.deib.csparql_rest_api.exception.ServerErrorException;
 
+import com.google.common.base.Strings;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
@@ -268,15 +269,19 @@ public class CSPARQLEngineManager {
 		_graph graphPattern = new _graph();
 		List<MonitoredTarget> targets = Util.getMonitoredTargets(rule);
 		String groupingClass = Util.getGroupingClass(rule);
-		
-		graphPattern.add(QueryVars.DATUM, RCSOntology.resourceId,
-				QueryVars.RESOURCE_ID).add(RCSOntology.value, QueryVars.INPUT)
+
+		graphPattern
+				.add(QueryVars.DATUM, RCSOntology.resourceId,
+						QueryVars.RESOURCE_ID)
+				.add(RCSOntology.value, QueryVars.INPUT)
 				.add(QueryVars.RESOURCE, MO.id, QueryVars.RESOURCE_ID);
-		
+
 		_union unionOfTargets = new _union();
 		graphPattern.add(unionOfTargets);
-		for (MonitoredTarget target: targets) {
-			unionOfTargets.add(graph.add(QueryVars.RESOURCE,MO.type,getTargetIDLiteral(target)));
+		for (MonitoredTarget target : targets) {
+			if (!Strings.isNullOrEmpty(target.getId()))
+				unionOfTargets.add(graph.add(QueryVars.RESOURCE, MO.type,
+						getTargetIDLiteral(target)));
 		}
 
 		switch (targets.get(0).getClazz()) {
@@ -307,8 +312,9 @@ public class CSPARQLEngineManager {
 				case Vocabulary.Method:
 					break;
 				case Vocabulary.CloudProvider:
-					graphPattern.add(QueryVars.INTERNAL_COMPONENT, MO.providedMethods,
-							QueryVars.RESOURCE_ID)
+					graphPattern
+							.add(QueryVars.INTERNAL_COMPONENT,
+									MO.providedMethods, QueryVars.RESOURCE_ID)
 							.addTransitive(QueryVars.INTERNAL_COMPONENT,
 									MO.requiredComponents, QueryVars.COMPONENT)
 							.add(QueryVars.COMPONENT, MO.cloudProvider,
