@@ -22,6 +22,7 @@ import it.polimi.csparqool.FunctionArgs;
 import it.polimi.csparqool.MalformedQueryException;
 import it.polimi.csparqool._body;
 import it.polimi.csparqool._graph;
+import it.polimi.csparqool._union;
 import it.polimi.csparqool.body;
 import it.polimi.csparqool.graph;
 import it.polimi.modaclouds.monitoring.dcfactory.ddaconnectors.RCSOntology;
@@ -267,19 +268,16 @@ public class CSPARQLEngineManager {
 		_graph graph = new _graph();
 		List<MonitoredTarget> targets = Util.getMonitoredTargets(rule);
 		String groupingClass = Util.getGroupingClass(rule);
-		// String targetVariable = Util.getOutputTargetVariable(rule);
-
-		// graph.add(QueryVars.DATUM, MO.metric,
-		// "\"" + rule.getCollectedMetric().getMetricName() + "\"") the metric
-		// is specified by the source stream
-		// graph.add(QueryVars.DATUM, MO.aboutResource, QueryVars.TARGET)
-		// .add(MO.value, QueryVars.INPUT)
-		// .add(QueryVars.TARGET, MO.id,
-		// getTargetIDLiteral(targets.get(0)));
+		
 		graph.add(QueryVars.DATUM, RCSOntology.resourceId,
 				QueryVars.RESOURCE_ID).add(RCSOntology.value, QueryVars.INPUT)
-				.add(QueryVars.RESOURCE, MO.id, QueryVars.RESOURCE_ID)
-				.add(MO.type, getTargetIDLiteral(targets.get(0)));
+				.add(QueryVars.RESOURCE, MO.id, QueryVars.RESOURCE_ID);
+		
+		_union union = new _union();
+		graph.add(union);
+		for (MonitoredTarget target: targets) {
+			union.add(graph.add(QueryVars.RESOURCE,MO.type,getTargetIDLiteral(target)));
+		}
 
 		switch (targets.get(0).getClazz()) {
 		case Vocabulary.VM:
