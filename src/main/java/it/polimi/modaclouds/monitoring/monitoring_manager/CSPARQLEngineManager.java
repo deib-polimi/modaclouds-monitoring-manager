@@ -314,7 +314,7 @@ public class CSPARQLEngineManager {
 				case Vocabulary.CloudProvider:
 					graphPattern
 							.add(QueryVars.INTERNAL_COMPONENT,
-									MO.providedMethods, QueryVars.RESOURCE_ID)
+									MO.providedMethods, QueryVars.RESOURCE)
 							.addTransitive(QueryVars.INTERNAL_COMPONENT,
 									MO.requiredComponents, QueryVars.COMPONENT)
 							.add(QueryVars.COMPONENT, MO.cloudProvider,
