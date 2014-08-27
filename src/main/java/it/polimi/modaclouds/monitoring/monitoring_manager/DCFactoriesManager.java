@@ -56,28 +56,19 @@ public class DCFactoriesManager {
 			throws RuleInstallationException {
 		logger.info("Adding data collectors related to rule {} to KB",
 				rule.getId());
-		Set<String> dataCollectorsIds = new HashSet<String>();
-		Set<DCMetaData> dataCollectors = new HashSet<DCMetaData>();
+		DCMetaData dc = new DCMetaData();
+		dc.setMonitoringRuleId(rule.getId());
+		Util.addParameters(dc, rule.getCollectedMetric().getParameters());
+		dc.setMonitoredMetric(rule.getCollectedMetric().getMetricName());
 		for (MonitoredTarget target : rule.getMonitoredTargets()
 				.getMonitoredTargets()) {
-
-			DCMetaData dc = new DCMetaData();
-			dc.setMonitoringRuleId(rule.getId());
-
-			dataCollectorsIds.add(dc.getId());
-			dataCollectors.add(dc);
-
 			if (target.getId() != null) // TODO THIS WILL CHANGE TO TYPE
 				dc.addMonitoredResourceType(target.getId());
 			if (target.getClazz() != null)
 				dc.addMonitoredResourceClass(target.getClazz());
-			Util.addParameters(dc, rule.getCollectedMetric().getParameters());
-			
-			dc.setMonitoredMetric(rule.getCollectedMetric().getMetricName());
-
 		}
 		try {
-			knowledgeBase.add(dataCollectors, DCFields.id);
+			knowledgeBase.add(dc, DCFields.id);
 		} catch (SerializationException | DeserializationException e) {
 			throw new RuleInstallationException(e);
 		}
