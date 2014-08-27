@@ -68,6 +68,7 @@ public class DCFactoriesManager {
 				dc.addMonitoredResourceClass(target.getClazz());
 		}
 		try {
+			dc.setId("dc"+dc.hashCode()); // identical dc won't be persisted
 			knowledgeBase.add(dc, DCFields.id);
 		} catch (SerializationException | DeserializationException e) {
 			throw new RuleInstallationException(e);
