@@ -30,16 +30,17 @@ import org.apache.commons.lang.NotImplementedException;
 
 public class Util {
 
-//	public static Parameter getParameter(String parameterName,
-//			CollectedMetric collectedMetric) {
-//		for (it.polimi.modaclouds.qos_models.schema.Parameter par : collectedMetric
-//				.getParameters()) {
-//			if (par.getName().equals(parameterName)) {
-//				return new Parameter(par.getName(), par.getValue());
-//			}
-//		}
-//		return null;
-//	}
+	// public static Parameter getParameter(String parameterName,
+	// CollectedMetric collectedMetric) {
+	// for (it.polimi.modaclouds.qos_models.schema.Parameter par :
+	// collectedMetric
+	// .getParameters()) {
+	// if (par.getName().equals(parameterName)) {
+	// return new Parameter(par.getName(), par.getValue());
+	// }
+	// }
+	// return null;
+	// }
 
 	public static String getOutputValueVariable(MonitoringRule rule) {
 		if (!isGroupedMetric(rule))
@@ -47,22 +48,23 @@ public class Util {
 		return QueryVars.OUTPUT;
 	}
 
-//	public static String getTargetVariable(MonitoringRule rule)
-//			throws RuleInstallationException {
-//		String targetVar;
-////		if (isGroupedMetric(rule)) {
-////			targetVar = getGroupingClassVariable(rule);
-////		} else {
-//			targetVar = QueryVars.TARGET;
-////		}
-//		return targetVar;
-//	}
-	
+	// public static String getTargetVariable(MonitoringRule rule)
+	// throws RuleInstallationException {
+	// String targetVar;
+	// // if (isGroupedMetric(rule)) {
+	// // targetVar = getGroupingClassVariable(rule);
+	// // } else {
+	// targetVar = QueryVars.TARGET;
+	// // }
+	// return targetVar;
+	// }
+
 	public static String getOutputResourceIdVariable(MonitoringRule rule)
 			throws RuleInstallationException {
 		String targetVar;
-		if (isGroupedMetric(rule) && !getTargetClass(rule).equals(getGroupingClass(rule))) {
-			targetVar = getGroupingClassVariable(rule)+"Id";
+		if (isGroupedMetric(rule)
+				&& !getTargetClass(rule).equals(getGroupingClass(rule))) {
+			targetVar = getGroupingClassVariable(rule) + "Id";
 		} else {
 			targetVar = QueryVars.RESOURCE_ID;
 		}
@@ -93,12 +95,12 @@ public class Util {
 		List<MonitoredTarget> targets = getMonitoredTargets(rule);
 		String targetClass = null;
 		for (MonitoredTarget t : targets) {
-			if (targetClass != null)
+			if (targetClass != null) {
 				if (!targetClass.equals(t.getClazz()))
 					throw new RuleInstallationException(
 							"Monitored targets must belong to the same class");
-				else
-					targetClass = t.getClazz();
+			} else
+				targetClass = t.getClazz();
 		}
 		return targetClass;
 	}
@@ -120,16 +122,17 @@ public class Util {
 		return targets;
 	}
 
-//	public static Parameter getParameter(String parameterName,
-//			MonitoringMetricAggregation metricAggregation) {
-//		for (it.polimi.modaclouds.qos_models.schema.Parameter par : metricAggregation
-//				.getParameters()) {
-//			if (par.getName().equals(parameterName)) {
-//				return new Parameter(par.getName(), par.getValue());
-//			}
-//		}
-//		return null;
-//	}
+	// public static Parameter getParameter(String parameterName,
+	// MonitoringMetricAggregation metricAggregation) {
+	// for (it.polimi.modaclouds.qos_models.schema.Parameter par :
+	// metricAggregation
+	// .getParameters()) {
+	// if (par.getName().equals(parameterName)) {
+	// return new Parameter(par.getName(), par.getValue());
+	// }
+	// }
+	// return null;
+	// }
 
 	public static String getParameterValue(String parameterName,
 			MonitoringMetricAggregation metricAggregation) {
@@ -170,25 +173,26 @@ public class Util {
 
 	public static void addParameters(DCMetaData dc,
 			List<it.polimi.modaclouds.qos_models.schema.Parameter> parameters) {
-		for (it.polimi.modaclouds.qos_models.schema.Parameter p: parameters) {
+		for (it.polimi.modaclouds.qos_models.schema.Parameter p : parameters) {
 			dc.addParameter(p.getName(), p.getValue());
 		}
-		
+
 	}
 
 	public static void addParameters(StatisticalDataAnalyzer sda,
 			List<it.polimi.modaclouds.qos_models.schema.Parameter> parameters) {
-		for (it.polimi.modaclouds.qos_models.schema.Parameter p: parameters) {
+		for (it.polimi.modaclouds.qos_models.schema.Parameter p : parameters) {
 			sda.addParameter(p.getName(), p.getValue());
 		}
 	}
-	
+
 	public static boolean softEquals(String name1, String name2) {
 		return name1.toLowerCase().equals(name2.toLowerCase());
 	}
 
-	public static String getGroupingClassIdVariable(MonitoringRule rule) throws RuleInstallationException {
-		return getGroupingClassVariable(rule)+"Id";
+	public static String getGroupingClassIdVariable(MonitoringRule rule)
+			throws RuleInstallationException {
+		return getGroupingClassVariable(rule) + "Id";
 	}
 
 }
