@@ -61,7 +61,7 @@ public class Util {
 	public static String getOutputResourceIdVariable(MonitoringRule rule)
 			throws RuleInstallationException {
 		String targetVar;
-		if (isGroupedMetric(rule)) {
+		if (isGroupedMetric(rule) && !getTargetClass(rule).equals(getGroupingClass(rule))) {
 			targetVar = getGroupingClassVariable(rule)+"Id";
 		} else {
 			targetVar = QueryVars.RESOURCE_ID;
