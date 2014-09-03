@@ -22,7 +22,7 @@ import it.polimi.modaclouds.monitoring.kb.api.SerializationException;
 import it.polimi.modaclouds.monitoring.monitoring_manager.server.Model;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Resource;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.MOVocabulary;
 import it.polimi.modaclouds.qos_models.monitoring_rules.Problem;
 import it.polimi.modaclouds.qos_models.monitoring_rules.Validator;
 import it.polimi.modaclouds.qos_models.schema.Metric;
@@ -216,7 +216,7 @@ public class MonitoringManager {
 	}
 
 	public void deleteInstance(String id) throws SerializationException {
-		knowledgeBase.deleteEntitiesByPropertyValue(id, Vocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+		knowledgeBase.deleteEntitiesByPropertyValue(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 
 	}
 
@@ -224,10 +224,10 @@ public class MonitoringManager {
 			DeserializationException {
 
 		Set<String> ids = knowledgeBase.getIds(Resource.class,
-				Vocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 
 		knowledgeBase.deleteEntitiesByPropertyValues(ids,
-				Vocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 
 		updateModel(update);
 	}
@@ -235,7 +235,7 @@ public class MonitoringManager {
 	public void updateModel(Model update) throws SerializationException,
 			DeserializationException {
 		knowledgeBase.add(update.getResources(),
-				Vocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 	}
 
 }

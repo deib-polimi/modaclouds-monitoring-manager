@@ -29,7 +29,7 @@ import it.polimi.modaclouds.monitoring.dcfactory.ddaconnectors.RCSOntology;
 import it.polimi.modaclouds.monitoring.dcfactory.kbconnectors.FusekiConnector;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.MOVocabulary;
 import it.polimi.modaclouds.qos_models.schema.Action;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
@@ -117,7 +117,7 @@ public class CSPARQLEngineManager {
 								RCSOntology.metric,
 								"\""
 										+ Util.getParameterValue(
-												Vocabulary.name, action) + "\"")
+												MOVocabulary.name, action) + "\"")
 						.add(RCSOntology.resourceId,
 								outputReousourceIdVariableVariable)
 						.add(RCSOntology.value, outputValueVariable)
@@ -153,7 +153,7 @@ public class CSPARQLEngineManager {
 		// TODO are we checking if metric already exist?
 		for (Action action : rule.getActions().getActions()) {
 			if (action.getName().equals(MMVocabulary.OutputMetric)) {
-				String metric = Util.getParameterValue(Vocabulary.name, action);
+				String metric = Util.getParameterValue(MOVocabulary.name, action);
 				queryURIByMetric.put(metric.toLowerCase(), queryURI);
 			}
 		}
@@ -285,13 +285,13 @@ public class CSPARQLEngineManager {
 		}
 
 		switch (targets.get(0).getClazz()) {
-		case Vocabulary.VM:
+		case MOVocabulary.VM:
 			graphPattern.add(QueryVars.RESOURCE, RDF.type, MO.VM);
 			if (groupingClass != null) {
 				switch (groupingClass) {
-				case Vocabulary.VM:
+				case MOVocabulary.VM:
 					break;
-				case Vocabulary.CloudProvider:
+				case MOVocabulary.CloudProvider:
 					graphPattern.add(QueryVars.RESOURCE, MO.cloudProvider,
 							Util.getGroupingClassIdVariable(rule)).add(
 							Util.getGroupingClassVariable(rule), MO.id,
@@ -305,13 +305,13 @@ public class CSPARQLEngineManager {
 				}
 				break;
 			}
-		case Vocabulary.Method:
+		case MOVocabulary.Method:
 			graphPattern.add(QueryVars.RESOURCE, RDF.type, MO.Method);
 			if (groupingClass != null) {
 				switch (groupingClass) {
-				case Vocabulary.Method:
+				case MOVocabulary.Method:
 					break;
-				case Vocabulary.CloudProvider:
+				case MOVocabulary.CloudProvider:
 					graphPattern
 							.add(QueryVars.INTERNAL_COMPONENT,
 									MO.providedMethods, QueryVars.RESOURCE)
@@ -404,7 +404,7 @@ public class CSPARQLEngineManager {
 	private void deleteObservableMetrics(MonitoringRule rule) {
 		for (Action action : rule.getActions().getActions()) {
 			if (action.getName().equals(MMVocabulary.OutputMetric)) {
-				String metric = Util.getParameterValue(Vocabulary.name, action);
+				String metric = Util.getParameterValue(MOVocabulary.name, action);
 				queryURIByMetric.remove(metric.toLowerCase());
 			}
 		}
@@ -646,7 +646,7 @@ public class CSPARQLEngineManager {
 		Set<String> observersToRemove = new HashSet<String>();
 		for (Action action : rule.getActions().getActions()) {
 			if (action.getName().equals(MMVocabulary.OutputMetric)) {
-				String metric = Util.getParameterValue(Vocabulary.name, action);
+				String metric = Util.getParameterValue(MOVocabulary.name, action);
 				for (String observerId : metricByObserverId.keySet()) {
 					if (metricByObserverId.get(observerId).equals(metric)) {
 						observersToRemove.add(observerId);

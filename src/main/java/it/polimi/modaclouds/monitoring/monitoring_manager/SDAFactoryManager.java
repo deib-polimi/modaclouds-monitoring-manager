@@ -19,7 +19,7 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Resource;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.StatisticalDataAnalyzer;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.MOVocabulary;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 
@@ -49,8 +49,8 @@ public class SDAFactoryManager {
 			sdaByRuleId.put(rule.getId(), sda);
 		}
 		sda.setAggregateFunction(aggregateFunction);
-		sda.addParameter(Vocabulary.timeStep, rule.getTimeStep());
-		sda.addParameter(Vocabulary.timeWindow, rule
+		sda.addParameter(MOVocabulary.timeStep, rule.getTimeStep());
+		sda.addParameter(MOVocabulary.timeWindow, rule
 				.getTimeWindow());
 
 		Util.addParameters(sda, rule.getMetricAggregation().getParameters());

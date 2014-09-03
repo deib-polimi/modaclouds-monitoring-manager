@@ -18,6 +18,7 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 
 import it.polimi.modaclouds.monitoring.dcfactory.DCFields;
 import it.polimi.modaclouds.monitoring.dcfactory.DCMetaData;
+import it.polimi.modaclouds.monitoring.dcfactory.DCVocabulary;
 import it.polimi.modaclouds.monitoring.dcfactory.kbconnectors.FusekiConnector;
 import it.polimi.modaclouds.monitoring.kb.api.DeserializationException;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
@@ -45,7 +46,7 @@ public class DCFactoriesManager {
 		try {
 			knowledgeBase.deleteEntitiesByPropertyValue(rule.getId(),
 					DCFields.monitoringRuleId,
-					FusekiConnector.DATA_COLLECTORS_GRAPH_NAME);
+					DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
 		} catch (SerializationException e) {
 			throw new FailedToUninstallRuleException(e);
 		}
@@ -69,7 +70,7 @@ public class DCFactoriesManager {
 		}
 		try {
 			dc.setId("dc" + dc.hashCode()); // identical dc won't be persisted
-			knowledgeBase.add(dc, DCFields.id, FusekiConnector.DATA_COLLECTORS_GRAPH_NAME);
+			knowledgeBase.add(dc, DCFields.id, DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
 		} catch (SerializationException | DeserializationException e) {
 			throw new RuleInstallationException(e);
 		}
