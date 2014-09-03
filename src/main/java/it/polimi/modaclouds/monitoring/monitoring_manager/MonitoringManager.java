@@ -44,6 +44,8 @@ import polimi.deib.csparql_rest_api.exception.ServerErrorException;
 
 public class MonitoringManager {
 
+	public static final String MODEL_GRAPH_NAME = "model";
+
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
 	private CSPARQLEngineManager csparqlEngineManager;
@@ -64,12 +66,12 @@ public class MonitoringManager {
 		knowledgeBase = new FusekiKBAPI(config.getKbUrl());
 		// sdaDomainKB = new FusekiKBAPI(config.getKbUrl(), "");
 		installedRules = new ConcurrentHashMap<String, MonitoringRule>();
-		csparqlEngineManager = new CSPARQLEngineManager(this, config);
+		csparqlEngineManager = new CSPARQLEngineManager(this, config, knowledgeBase);
 		dcFactoriesManager = new DCFactoriesManager(knowledgeBase);
 		sdaFactoryManager = new SDAFactoryManager(knowledgeBase);
 
 		logger.info("Uploading ontology to KB");
-		knowledgeBase.uploadOntology(MO.model);
+		knowledgeBase.uploadOntology(MO.model, MODEL_GRAPH_NAME);
 	}
 
 	// public void newInstance(Component instance) {
@@ -214,7 +216,7 @@ public class MonitoringManager {
 	}
 
 	public void deleteInstance(String id) throws SerializationException {
-		knowledgeBase.deleteEntitiesByPropertyValue(id, Vocabulary.resourceIdParameterName);
+		knowledgeBase.deleteEntitiesByPropertyValue(id, Vocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 
 	}
 
@@ -222,10 +224,10 @@ public class MonitoringManager {
 			DeserializationException {
 
 		Set<String> ids = knowledgeBase.getIds(Resource.class,
-				Vocabulary.resourceIdParameterName);
+				Vocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 
 		knowledgeBase.deleteEntitiesByPropertyValues(ids,
-				Vocabulary.resourceIdParameterName);
+				Vocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 
 		updateModel(update);
 	}
@@ -233,7 +235,7 @@ public class MonitoringManager {
 	public void updateModel(Model update) throws SerializationException,
 			DeserializationException {
 		knowledgeBase.add(update.getResources(),
-				Vocabulary.resourceIdParameterName);
+				Vocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 	}
 
 }

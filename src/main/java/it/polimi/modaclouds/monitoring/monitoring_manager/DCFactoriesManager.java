@@ -18,14 +18,12 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 
 import it.polimi.modaclouds.monitoring.dcfactory.DCFields;
 import it.polimi.modaclouds.monitoring.dcfactory.DCMetaData;
+import it.polimi.modaclouds.monitoring.dcfactory.kbconnectors.FusekiConnector;
 import it.polimi.modaclouds.monitoring.kb.api.DeserializationException;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.monitoring.kb.api.SerializationException;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,12 +38,14 @@ public class DCFactoriesManager {
 		this.knowledgeBase = knowledgeBase;
 	}
 
-	public void uninstallRule(MonitoringRule rule) throws FailedToUninstallRuleException {
+	public void uninstallRule(MonitoringRule rule)
+			throws FailedToUninstallRuleException {
 		logger.info("Removing data collectors related to rule {} from KB",
 				rule.getId());
 		try {
 			knowledgeBase.deleteEntitiesByPropertyValue(rule.getId(),
-					DCFields.monitoringRuleId);
+					DCFields.monitoringRuleId,
+					FusekiConnector.DATA_COLLECTORS_GRAPH_NAME);
 		} catch (SerializationException e) {
 			throw new FailedToUninstallRuleException(e);
 		}
@@ -68,8 +68,8 @@ public class DCFactoriesManager {
 				dc.addMonitoredResourceClass(target.getClazz());
 		}
 		try {
-			dc.setId("dc"+dc.hashCode()); // identical dc won't be persisted
-			knowledgeBase.add(dc, DCFields.id);
+			dc.setId("dc" + dc.hashCode()); // identical dc won't be persisted
+			knowledgeBase.add(dc, DCFields.id, FusekiConnector.DATA_COLLECTORS_GRAPH_NAME);
 		} catch (SerializationException | DeserializationException e) {
 			throw new RuleInstallationException(e);
 		}

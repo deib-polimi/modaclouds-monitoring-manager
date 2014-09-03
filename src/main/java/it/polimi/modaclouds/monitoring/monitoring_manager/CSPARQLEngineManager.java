@@ -26,6 +26,8 @@ import it.polimi.csparqool._union;
 import it.polimi.csparqool.body;
 import it.polimi.csparqool.graph;
 import it.polimi.modaclouds.monitoring.dcfactory.ddaconnectors.RCSOntology;
+import it.polimi.modaclouds.monitoring.dcfactory.kbconnectors.FusekiConnector;
+import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Vocabulary;
 import it.polimi.modaclouds.qos_models.schema.Action;
@@ -74,12 +76,14 @@ public class CSPARQLEngineManager {
 	private ConcurrentHashMap<String, String> metricByObserverId;
 	private MonitoringManager monitoringManager;
 	private Config config;
+	private FusekiKBAPI kb;
 
 	// private RuleValidator validator;
 
 	public CSPARQLEngineManager(MonitoringManager monitoringManager,
-			Config config) throws MalformedURLException {
+			Config config, FusekiKBAPI kb) throws MalformedURLException {
 		this.config = config;
+		this.kb = kb;
 		configure();
 
 		this.monitoringManager = monitoringManager;
@@ -161,12 +165,7 @@ public class CSPARQLEngineManager {
 		String queryURI = queryURIByMetric.get(metricname.toLowerCase());
 		if (queryURI == null)
 			throw new MetricDoesNotExistException();
-		// String observableQueryURI =
-		// observableQueryURIByMetric.get(metricname);
-		// if (observableQueryURI == null) {
-		// observableQueryURI = registerObservableQuery(queryURI, metricname);
-		// observableQueryURIByMetric.put(metricname, observableQueryURI);
-		// }
+		// TODO gonna be fixed?
 		String queryName = queryURI.substring(queryURI.lastIndexOf('/') + 1);
 		String realQueryUri = ddaURL.toString() + "/queries/" + queryName;
 		csparqlAPI.addObserver(realQueryUri, callbackUrl);
@@ -225,7 +224,8 @@ public class CSPARQLEngineManager {
 
 	private void attachObserver(String queryURI, URL url)
 			throws ServerErrorException, ObserverErrorException {
-		csparqlAPI.addObserver(queryURI, url.toString() + "/v1/results");
+//		csparqlAPI.addObserver(queryURI, url.toString() + "/v1/results");
+		csparqlAPI.addObserver(queryURI, url.toString());
 	}
 
 	private String cleanAddress(String address) {
@@ -259,7 +259,7 @@ public class CSPARQLEngineManager {
 
 		query.fromStream(sourceStreamURI, rule.getTimeWindow() + "s",
 				rule.getTimeStep() + "s")
-				.from(config.getKbUrl() + "/data?graph=default")
+				.from(kb.getGraphURL(MonitoringManager.MODEL_GRAPH_NAME))
 				.where(queryBody);
 		return query;
 	}
@@ -355,7 +355,7 @@ public class CSPARQLEngineManager {
 							QueryVars.INPUT, QueryVars.TIMESTAMP)
 					.fromStream(sourceStreamURI, rule.getTimeWindow() + "s",
 							rule.getTimeStep() + "s")
-					.from(config.getKbUrl() + "/data?graph=default")
+					.from(kb.getGraphURL(MonitoringManager.MODEL_GRAPH_NAME))
 					.where(body
 							.select(QueryVars.RESOURCE_ID, QueryVars.INPUT,
 									QueryVars.METRIC)
@@ -495,11 +495,11 @@ public class CSPARQLEngineManager {
 				String tunnelQueryURI = registerQuery(tunnelQueryName,
 						csparqlTunnelQuery, rule);
 				switch (requiredDataAnalyzer) {
-				case MMVocabulary.MATLAB_SDA:
+				case MMVocabulary.MATLAB_SDA: //TODO what path??
 					attachObserver(tunnelQueryURI, matlabSdaURL);
 					break;
 
-				case MMVocabulary.JAVA_SDA:
+				case MMVocabulary.JAVA_SDA: //TODO what path??
 					attachObserver(tunnelQueryURI, javaSdaURL);
 					break;
 				}
