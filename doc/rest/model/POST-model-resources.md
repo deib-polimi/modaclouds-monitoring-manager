@@ -1,11 +1,11 @@
 [Documentation table of contents](../../TOC.md) / [API Reference](../../api.md) / POST-metrics-id-observers
 
-# Monitoring Rules
+# Model
 
-	POST /metrics/:id/observers
+	POST /model/resources
 
 ## Description
-Attach an observer to the metric.
+Add resources to the knowledge base.
 
 ***
 
@@ -17,37 +17,33 @@ None
 
 ## Data Parameters
 
-the callback url of the observer.
+A JSON containing all the resources that must be added to the knowledge base.
 
 ***
 
 ## Response
 
-**Status:** **201 Created**
+**Status:** **204 No Content**
 
-**Body:** the observer id.
 
 ***
 
 ## Errors
 
-* **404 Resource not found** - The metric does not exist.
+* **505 error while adding resources** - One or more resources were not valid
 
 ***
 
 ## Example
 **Request**
 
-	POST v1/metrics/ResponseTime/observers
+	POST v1/model/resources
 	
 ```
-http://url.to.observer.1:8176/ResponseTime
+{"cloudProviders":null,"locations":null,"vMs":[{"numberOfCPUs":1,"location":"192.168.12.4","cloudProvider":"flexiant","type":"vm","id":"vm1"}],"paaSServices":null,"internalComponents":[{"requiredComponents":[],"providedMethods":[],"type":null,"id":"internalComp"},{"requiredComponents":[],"providedMethods":[],"type":null,"id":"internalComp1"},{"requiredComponents":[],"providedMethods":[],"type":null,"id":"internalComp2"}],"methods":null}
+
 ```
 
 **Response**
 
-	Status: 201 Created
-
-```
-observer-id
-```
+	Status: 204 No Content
