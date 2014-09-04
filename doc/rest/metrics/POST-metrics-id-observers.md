@@ -1,8 +1,8 @@
-[Documentation table of contents](../../TOC.md) / [API Reference](../../api.md) / POST-metrics-id
+[Documentation table of contents](../../TOC.md) / [API Reference](../../api.md) / POST-metrics-id-observers
 
 # Monitoring Rules
 
-	POST /metrics/:id
+	POST /metrics/:id/observers
 
 ## Description
 Attach an observer to the metric.
@@ -38,7 +38,7 @@ the callback url of the observer.
 ## Example
 **Request**
 
-	POST v1/metrics/ResponseTime
+	POST v1/metrics/ResponseTime/observers
 	
 ```
 http://url.to.observer.1:8176/ResponseTime

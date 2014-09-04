@@ -13,6 +13,8 @@ It is responsible of installing monitoring rules, configuring monitoring compone
 Please refer to deliverable [D6.3.2](http://www.modaclouds.eu/publications/public-deliverables/) 
 to better understand the role of this component in the MODAClouds Monitoring Platform.
 
+Refer to the [Monitoring Platform Wiki](https://github.com/deib-polimi/modaclouds-monitoring-manager/wiki) for installation and usage of the whole platform.
+
 ## Documentation
 
 Take a look at the [documentation table of contents](doc/TOC.md).

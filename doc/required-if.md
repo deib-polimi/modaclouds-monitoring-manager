@@ -17,12 +17,3 @@ by Balduini M. and Della Valle E., for further details on the specification.
 ## Knowledge Base
 
 The Knowledge Base must provide a REST interface compliant with the SPARQL protocol over HTTP (http://www.w3.org/TR/2013/REC-sparql11-http-rdf-update-20130321/).
-
-## Models@runtime
-
-The required interface towards Models@runtime will be defined during the integration with Models@runtime, due at M24.
-It will consist of an interface for retrieving the current deployment configuration.
-
-## Object Store
-
-The required interface towards the Object Store will be defined during the integration with Object Store, due at M24. It will consist of an interface that allows all the components to retrieve the url of the knowledge base.

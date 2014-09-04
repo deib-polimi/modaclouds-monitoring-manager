@@ -16,8 +16,14 @@ Version 1
 
 - **[<code>GET</code> /metrics](rest/metrics/GET-metrics.md)**
 - **[<code>GET</code> /metrics/:id/observers](rest/metrics/GET-metrics-id-observers.md)**
-- **[<code>POST</code> /metrics/:id](rest/metrics/POST-metrics-id.md)**
+- **[<code>POST</code> /metrics/:id/observers](rest/metrics/POST-metrics-id-observers.md)**
 - **[<code>DELETE</code> /metrics/:id/observers/:id](rest/metrics/DELETE-metrics-id-observers-id.md)**
+
+### Model
+
+- **[<code>POST</code> /model/resources](rest/model/POST-model-resources.md)**
+- **[<code>PUT</code> /model/resources](rest/model/PUT-model-resources.md)**
+- **[<code>DELETE</code> /model/resources/:id](rest/model/DELETE-model-resources-id.md)**
 
 ## Java API
 
