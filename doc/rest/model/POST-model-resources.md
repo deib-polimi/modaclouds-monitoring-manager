@@ -5,7 +5,9 @@
 	POST /model/resources
 
 ## Description
-Add resources to the knowledge base.
+Add resources to the knowledge base. If a previous model existed, the existing model is updated. 
+A new resource is created for each resource in the uploaded model with the id specified. If a resource with an existing
+id already exists, the resource is replaced with the new one.
 
 ***
 
@@ -39,8 +41,45 @@ A JSON containing all the resources that must be added to the knowledge base.
 
 	POST v1/model/resources
 	
-```
-{"cloudProviders":null,"locations":null,"vMs":[{"numberOfCPUs":1,"location":"192.168.12.4","cloudProvider":"flexiant","type":"vm","id":"vm1"}],"paaSServices":null,"internalComponents":[{"requiredComponents":[],"providedMethods":[],"type":null,"id":"internalComp"},{"requiredComponents":[],"providedMethods":[],"type":null,"id":"internalComp1"},{"requiredComponents":[],"providedMethods":[],"type":null,"id":"internalComp2"}],"methods":null}
+``` json
+{
+  "internalComponents": [
+    {
+      "id": "mic3", 
+      "providedMethods": [
+        "mic3-register", 
+        "mic3-answerQuestions", 
+        "mic3-saveAnswers"
+      ], 
+      "requiredComponents": [
+        "frontend3"
+      ], 
+      "type": "Mic"
+    }
+  ], 
+  "methods": [
+    {
+      "id": "mic3-answerQuestions", 
+      "type": "answerQuestions"
+    }, 
+    {
+      "id": "mic3-saveAnswers", 
+      "type": "saveAnswers"
+    }, 
+    {
+      "id": "mic3-register", 
+      "type": "register"
+    }
+  ], 
+  "vMs": [
+    {
+      "cloudProvider": "amazon", 
+      "id": "frontend3", 
+      "numberOfCPUs": 2, 
+      "type": "Frontend"
+    }
+  ]
+}
 
 ```
 

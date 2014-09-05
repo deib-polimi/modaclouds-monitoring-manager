@@ -5,7 +5,7 @@
 	DELETE /model/resources/:id
 
 ## Description
-Delete the specified resource from the knowledge base
+Delete the specified resource from the knowledge base if it exists
 
 ***
 
@@ -23,7 +23,7 @@ None.
 
 ## Errors
 
-* **404 Resource not found** - The resource does not exist
+* **404 Resource not found** - The resource does not exist (not implemented yet), answer is 204 even if it doesn't exist
 
 ***
 
