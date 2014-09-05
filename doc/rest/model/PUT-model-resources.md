@@ -38,7 +38,7 @@ A JSON containing the new model that must be uploaded on the knowledge base
 ## Example
 **Request**
 
-	POST v1/model/resources
+	PUT v1/model/resources
 	
 ``` json
 {
