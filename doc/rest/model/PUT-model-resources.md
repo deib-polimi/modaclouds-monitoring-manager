@@ -7,6 +7,9 @@
 ## Description
 Upload a new model on the knowledge base. If a previous model existed, the existing model is replaced. 
 A new resource is created for each resource in the uploaded model with the id specified.
+The Java representation of the model is available [here](https://github.com/deib-polimi/modaclouds-monitoring-manager/blob/master/src/main/java/it/polimi/modaclouds/monitoring/monitoring_manager/server/Model.java).
+The Java representation of resources are available [here](https://github.com/deib-polimi/modaclouds-qos-models/tree/master/src/main/java/it/polimi/modaclouds/qos_models/monitoring_ontology).
+A graphical representation of resources and their relations is available [here](https://github.com/deib-polimi/modaclouds-qos-models/blob/master/doc/user-manual.md#the-monitoring-ontology).
 
 ***
 
