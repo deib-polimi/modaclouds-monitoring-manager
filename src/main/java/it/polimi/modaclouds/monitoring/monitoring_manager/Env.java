@@ -26,8 +26,8 @@ public class Env {
 	public static final String MODACLOUDS_MONITORING_MANAGER_PORT = "MODACLOUDS_MONITORING_MANAGER_PORT";
 	public static final String MODACLOUDS_MATLAB_SDA_IP = "MODACLOUDS_MATLAB_SDA_IP";
 	public static final String MODACLOUDS_MATLAB_SDA_PORT = "MODACLOUDS_MATLAB_SDA_PORT";
-	public static final String MODACLOUDS_JAVA_SDA_IP = "MODACLOUDS_JAVA_SDA_IP";
-	public static final String MODACLOUDS_JAVA_SDA_PORT = "MODACLOUDS_JAVA_SDA_PORT";
+	public static final String MODACLOUDS_WEKA_SDA_IP = "MODACLOUDS_WEKA_SDA_IP";
+	public static final String MODACLOUDS_WEKA_SDA_PORT = "MODACLOUDS_WEKA_SDA_PORT";
 	
 
 	

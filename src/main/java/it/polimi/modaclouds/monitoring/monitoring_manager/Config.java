@@ -53,8 +53,8 @@ public class Config {
 		mmPort = getMandatoryEnvVar(Env.MODACLOUDS_MONITORING_MANAGER_PORT);
 		matlabSdaIP = getMandatoryEnvVar(Env.MODACLOUDS_MATLAB_SDA_IP);
 		matlabSdaPort = getMandatoryEnvVar(Env.MODACLOUDS_MATLAB_SDA_PORT);
-		javaSdaIP = getMandatoryEnvVar(Env.MODACLOUDS_JAVA_SDA_IP);
-		javaSdaPort = getMandatoryEnvVar(Env.MODACLOUDS_JAVA_SDA_PORT);
+		javaSdaIP = getMandatoryEnvVar(Env.MODACLOUDS_WEKA_SDA_IP);
+		javaSdaPort = getMandatoryEnvVar(Env.MODACLOUDS_WEKA_SDA_PORT);
 		
 		ddaUrl = "http://" + ddaIP + ":" + ddaPort;
 		kbUrl = "http://" + kbIP + ":" + kbPort + kbPath;
