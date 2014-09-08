@@ -16,52 +16,52 @@
  */
 package it.polimi.modaclouds.monitoring.deployment_examples;
 
+import it.polimi.modaclouds.monitoring.monitoring_manager.server.Model;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.CloudProvider;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.InternalComponent;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.VM;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.google.gson.Gson;
 
 public class BOCDeployment  {
 	
 	public static void main(String[] args) {
 		
-		int nBLTiers = 3;
+		Model model = new Model();
 		
-		Set<Object> entities = new HashSet<Object>();
-
+		int nBLTiers = 3;
+	
 		CloudProvider flexiantCloud = new CloudProvider();
-		entities.add(flexiantCloud);
+		model.add(flexiantCloud);
 		flexiantCloud.setId("Flexiant");
 
 		VM winVM = new VM();
-		entities.add(winVM);
+		model.add(winVM);
 		winVM.setId("WinVM1");
 		winVM.setType("WinVM");
 		winVM.setCloudProvider(flexiantCloud.getId());
 
 		InternalComponent tomcat = new InternalComponent();
-		entities.add(tomcat);
+		model.add(tomcat);
 		tomcat.setId("Tomcat1");
 		tomcat.setType("Tomcat");
 		tomcat.addRequiredComponent(winVM.getId());
 
 		InternalComponent war = new InternalComponent();
-		entities.add(war);
+		model.add(war);
 		war.setId("War1");
 		war.setType("War");
 		war.addRequiredComponent(tomcat.getId());
 
 		InternalComponent sqlDB = new InternalComponent();
-		entities.add(sqlDB);
+		model.add(sqlDB);
 		sqlDB.setId("SQLDB1");
 		sqlDB.setType("SQLDB");
 		sqlDB.addRequiredComponent(winVM.getId());
 
 		for (int i = 0; i < nBLTiers; i++) {
 			InternalComponent bLTier = new InternalComponent();
-			entities.add(bLTier);
+			model.add(bLTier);
 			bLTier.setId("BLTier" + (i + 1));
 			bLTier.setType("BLTier");
 			bLTier.addRequiredComponent(sqlDB.getId());
@@ -69,8 +69,9 @@ public class BOCDeployment  {
 
 			war.addRequiredComponent(bLTier.getId());
 		}
-
-		System.out.println(entities);
+		Gson gson = new Gson();
+		String json = gson.toJson(model);
+		System.out.println(json);
 	}
 
 }
