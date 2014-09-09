@@ -66,7 +66,8 @@ public class MonitoringManager {
 		knowledgeBase = new FusekiKBAPI(config.getKbUrl());
 		// sdaDomainKB = new FusekiKBAPI(config.getKbUrl(), "");
 		installedRules = new ConcurrentHashMap<String, MonitoringRule>();
-		csparqlEngineManager = new CSPARQLEngineManager(this, config, knowledgeBase);
+		csparqlEngineManager = new CSPARQLEngineManager(this, config,
+				knowledgeBase);
 		dcFactoriesManager = new DCFactoriesManager(knowledgeBase);
 		sdaFactoryManager = new SDAFactoryManager(knowledgeBase);
 
@@ -115,8 +116,8 @@ public class MonitoringManager {
 		}
 	}
 
-	public synchronized void uninstallRule(String id) throws RuleDoesNotExistException,
-			FailedToUninstallRuleException {
+	public synchronized void uninstallRule(String id)
+			throws RuleDoesNotExistException, FailedToUninstallRuleException {
 		MonitoringRule rule = installedRules.get(id);
 		if (rule == null)
 			throw new RuleDoesNotExistException();
@@ -216,7 +217,8 @@ public class MonitoringManager {
 	}
 
 	public void deleteInstance(String id) throws SerializationException {
-		knowledgeBase.deleteEntitiesByPropertyValue(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+		knowledgeBase.deleteEntitiesByPropertyValue(id,
+				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 
 	}
 
@@ -226,8 +228,10 @@ public class MonitoringManager {
 		Set<String> ids = knowledgeBase.getIds(Resource.class,
 				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 
-		knowledgeBase.deleteEntitiesByPropertyValues(ids,
-				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+		if (!ids.isEmpty()) {
+			knowledgeBase.deleteEntitiesByPropertyValues(ids,
+					MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+		}
 
 		updateModel(update);
 	}

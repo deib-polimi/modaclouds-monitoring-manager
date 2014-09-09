@@ -279,7 +279,7 @@ public class CSPARQLEngineManager {
 		_union unionOfTargets = new _union();
 		graphPattern.add(unionOfTargets);
 		for (MonitoredTarget target : targets) {
-			if (!Strings.isNullOrEmpty(target.getId()))
+			if (!Strings.isNullOrEmpty(target.getType()))
 				unionOfTargets.add(graph.add(QueryVars.RESOURCE, MO.type,
 						getTargetIDLiteral(target)));
 		}
@@ -469,7 +469,7 @@ public class CSPARQLEngineManager {
 	}
 
 	private String getTargetIDLiteral(MonitoredTarget monitoredTarget) {
-		return "\"" + monitoredTarget.getId() + "\"";
+		return "\"" + monitoredTarget.getType() + "\"";
 	}
 
 	public void installRule(MonitoringRule rule, String requiredDataAnalyzer,

@@ -63,8 +63,8 @@ public class DCFactoriesManager {
 		dc.setMonitoredMetric(rule.getCollectedMetric().getMetricName());
 		for (MonitoredTarget target : rule.getMonitoredTargets()
 				.getMonitoredTargets()) {
-			if (target.getId() != null) // TODO THIS WILL CHANGE TO TYPE
-				dc.addMonitoredResourceType(target.getId());
+			if (target.getType() != null)
+				dc.addMonitoredResourceType(target.getType());
 			if (target.getClazz() != null)
 				dc.addMonitoredResourceClass(target.getClazz());
 		}
