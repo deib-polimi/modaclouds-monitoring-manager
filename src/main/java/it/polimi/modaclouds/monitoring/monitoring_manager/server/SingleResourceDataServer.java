@@ -16,6 +16,7 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
+import it.polimi.modaclouds.monitoring.monitoring_manager.ComponentDoesNotExistException;
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
 
 import org.restlet.data.MediaType;
@@ -44,12 +45,12 @@ public class SingleResourceDataServer extends ServerResource {
 			manager.deleteInstance(id);
 
 			this.getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
-//		} catch (ComponentDoesNotExistException e) {
-//			logger.error("The component does not exist", e);
-//			this.getResponse().setStatus(Status.CLIENT_ERROR_NOT_FOUND,
-//					"The component does not exist");
-//			this.getResponse().setEntity("The component does not exist",
-//					MediaType.TEXT_PLAIN);
+		} catch (ComponentDoesNotExistException e) {
+			logger.error("The component does not exist", e);
+			this.getResponse().setStatus(Status.CLIENT_ERROR_NOT_FOUND,
+					"The component does not exist");
+			this.getResponse().setEntity("The component does not exist",
+					MediaType.TEXT_PLAIN);
 		} catch (Exception e) {
 			logger.error("Error while deleting the component", e);
 			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL,

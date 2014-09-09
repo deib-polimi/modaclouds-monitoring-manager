@@ -215,9 +215,15 @@ public class MonitoringManager {
 		return observerId;
 	}
 
-	public void deleteInstance(String id) throws SerializationException {
+	public void deleteInstance(String id) throws SerializationException, DeserializationException, ComponentDoesNotExistException {
+		
+		Object component = knowledgeBase.getEntityById(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+		
+		if (component == null)
+			throw new ComponentDoesNotExistException();
+		
 		knowledgeBase.deleteEntitiesByPropertyValue(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
-
+		
 	}
 
 	public void uploadModel(Model update) throws SerializationException,
