@@ -12,8 +12,8 @@ Requirements:
 ```
 git clone https://github.com/deib-polimi/modaclouds-monitoring-manager.git
 cd modaclouds-monitoring-manager
-git checkout tags/v1.1.1
-mvn package assembly:single
+git checkout tags/v1.1.2
+mvn package
 cd ..
 ```
 

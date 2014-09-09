@@ -25,3 +25,4 @@ v1.1.2:
 
 * Fixed a bug that didn't allow to upload a new model the first time using the PUT method
 * updated to qos-models 2.1.4: check qos-models change list for the new of version of monitoring rules
+* installation instructions updated (look at the documentation)
