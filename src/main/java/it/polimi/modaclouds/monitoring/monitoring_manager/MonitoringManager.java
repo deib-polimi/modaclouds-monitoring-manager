@@ -20,6 +20,7 @@ import it.polimi.modaclouds.monitoring.kb.api.DeserializationException;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.monitoring.kb.api.SerializationException;
 import it.polimi.modaclouds.monitoring.monitoring_manager.server.Model;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.InternalComponent;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Resource;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MOVocabulary;
@@ -221,6 +222,19 @@ public class MonitoringManager {
 		
 		if (component == null)
 			throw new ComponentDoesNotExistException();
+		
+		Resource resource = (Resource) component;
+		
+		if (resource.getType() == MOVocabulary.Component){ //TODO check how to know what type of resource it is
+			Set<?> internalComponents = knowledgeBase. getEntitiesByPropertyValue(MOVocabulary.requiredComponents, resource.getId(), MODEL_GRAPH_NAME);
+			for(Object i : internalComponents){
+				Resource internalComponentResource = (Resource) i;
+				knowledgeBase.deleteEntitiesByPropertyValue(id, MOVocabulary.requiredInternalComponent, MODEL_GRAPH_NAME);
+				knowledgeBase.deleteEntitiesByPropertyValue(internalComponentResource.getId() , MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+			}
+		} else if (((Resource) component).getType() == MOVocabulary.InternalComponent){ //TODO check how to know what type of resource it is
+			knowledgeBase.deleteEntitiesByPropertyValue(id , MOVocabulary.requiredInternalComponent, MODEL_GRAPH_NAME);
+		}
 		
 		knowledgeBase.deleteEntitiesByPropertyValue(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 		
