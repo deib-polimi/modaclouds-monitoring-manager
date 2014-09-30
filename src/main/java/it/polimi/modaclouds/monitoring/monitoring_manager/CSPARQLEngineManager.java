@@ -313,8 +313,10 @@ public class CSPARQLEngineManager {
 					break;
 				case MOVocabulary.CloudProvider:
 					graphPattern
-							.add(QueryVars.INTERNAL_COMPONENT,
-									MO.providedMethods, QueryVars.RESOURCE)
+							//.add(QueryVars.INTERNAL_COMPONENT,
+									//MO.providedMethods, QueryVars.RESOURCE)
+					.add(MO.requiredInternalComponent,
+							QueryVars.INTERNAL_COMPONENT, QueryVars.RESOURCE)
 							.addTransitive(QueryVars.INTERNAL_COMPONENT,
 									MO.requiredComponents, QueryVars.COMPONENT)
 							.add(QueryVars.COMPONENT, MO.cloudProvider,
