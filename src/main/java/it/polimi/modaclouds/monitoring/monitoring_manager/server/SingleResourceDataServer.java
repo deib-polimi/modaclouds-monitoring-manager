@@ -16,7 +16,6 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
-import it.polimi.modaclouds.monitoring.monitoring_manager.ComponentDoesNotExistException;
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
 import it.polimi.modaclouds.monitoring.monitoring_manager.ResourceDoesNotExistException;
 

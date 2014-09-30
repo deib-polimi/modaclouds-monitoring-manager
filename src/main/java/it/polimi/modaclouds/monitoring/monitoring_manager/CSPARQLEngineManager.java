@@ -315,8 +315,9 @@ public class CSPARQLEngineManager {
 					graphPattern
 							//.add(QueryVars.INTERNAL_COMPONENT,
 									//MO.providedMethods, QueryVars.RESOURCE)
-					.add(MO.requiredInternalComponent,
-							QueryVars.INTERNAL_COMPONENT, QueryVars.RESOURCE)
+					//TODO scommentare qui
+					//.add(MO.requiredInternalComponent,
+							//QueryVars.INTERNAL_COMPONENT, QueryVars.RESOURCE)
 							.addTransitive(QueryVars.INTERNAL_COMPONENT,
 									MO.requiredComponents, QueryVars.COMPONENT)
 							.add(QueryVars.COMPONENT, MO.cloudProvider,

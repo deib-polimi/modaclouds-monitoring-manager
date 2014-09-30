@@ -236,7 +236,8 @@ public class MonitoringManager {
 		} else */
 		
 			if (component instanceof InternalComponent){ //TODO check how to know what type of resource it is
-			knowledgeBase.deleteEntitiesByPropertyValue(id , MOVocabulary.requiredInternalComponent, MODEL_GRAPH_NAME);
+				//TODO scommentare qui
+			//knowledgeBase.deleteEntitiesByPropertyValue(id , MOVocabulary.requiredInternalComponent, MODEL_GRAPH_NAME);
 		}		
 		knowledgeBase.deleteEntitiesByPropertyValue(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 	}
