@@ -139,10 +139,10 @@ public class MonitoringManager {
 		String groupingClass = null;
 		if (rule.getMetricAggregation() != null) {
 			MonitoringRule pRule = rule;
-			while (pRule.getMetricAggregation() != null
-					&& rule.getMetricAggregation().isInherited()) {
-				pRule = getParentRule(rule.getParentMonitoringRuleId());
-			}
+//			while (pRule.getMetricAggregation() != null
+//					&& rule.getMetricAggregation().isInherited()) {
+//				pRule = getParentRule(rule.getParentMonitoringRuleId());
+//			}
 			aggregateFunction = pRule.getMetricAggregation()
 					.getAggregateFunction();
 			groupingClass = pRule.getMetricAggregation().getGroupingClass();

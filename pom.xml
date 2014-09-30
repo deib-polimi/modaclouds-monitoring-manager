@@ -21,7 +21,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.polimi.modaclouds.monitoring.monitoring-manager</groupId>
 	<artifactId>monitoring-manager</artifactId>
-	<version>1.1.2</version>
+	<version>1.2</version>
 	<packaging>jar</packaging>
 
 	<name>MODAClouds Monitoring Manager</name>
@@ -36,7 +36,7 @@
 	</licenses>
 
 	<properties>
-		<runSuite>**/AllTests.class</runSuite>
+		<!-- <runSuite>**/AllTests.class</runSuite> -->
 		<github.global.server>github</github.global.server>
 		<github.repository.name>modaclouds-monitoring-manager</github.repository.name>
 		<github.user.name>deib-polimi</github.user.name>
@@ -162,7 +162,7 @@
 		<dependency>
 			<groupId>it.polimi.csparqool</groupId>
 			<artifactId>csparqool</artifactId>
-			<version>1.1.2</version>
+			<version>1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
@@ -185,7 +185,7 @@
 				it.polimi.modaclouds.monitoring.knowledge-base-api
 			</groupId>
 			<artifactId>knowledge-base-api</artifactId>
-			<version>2.1</version>
+			<version>2.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>it.polimi.modaclouds.monitoring</groupId>
@@ -195,7 +195,7 @@
 		<dependency>
 			<groupId>it.polimi.modaclouds.qos-models</groupId>
 			<artifactId>qos-models</artifactId>
-			<version>2.1.4</version>
+			<version>2.1.5</version>
 		</dependency>
 
 		<dependency>
@@ -344,7 +344,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+			<!-- <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.17</version>
@@ -353,7 +353,7 @@
 						<include>${runSuite}</include>
 					</includes>
 				</configuration>
-			</plugin>
+			</plugin> -->
 		</plugins>
 	</build>
 </project>

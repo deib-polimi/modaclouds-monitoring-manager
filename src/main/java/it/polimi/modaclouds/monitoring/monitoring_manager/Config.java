@@ -97,14 +97,18 @@ public class Config {
 		return kbUrl;
 	}
 	
+	
 	private String getMandatoryEnvVar(String varName)
 			throws ConfigurationException {
-		String var = System.getenv(varName);
-		if (var == null)
+		String var = System.getProperty(varName);
+		if (var == null) {
+			var = System.getenv(varName);
+		}
+		if (var == null) {
 			throw new ConfigurationException(varName
 					+ " variable was not defined");
+		}
 		return var;
 	}
-	
 
 }
