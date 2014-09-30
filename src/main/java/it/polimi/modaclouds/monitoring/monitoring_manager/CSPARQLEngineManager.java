@@ -279,7 +279,7 @@ public class CSPARQLEngineManager {
 		_union unionOfTargets = new _union();
 		graphPattern.add(unionOfTargets);
 		for (MonitoredTarget target : targets) {
-			if (!Strings.isNullOrEmpty(target.getId()))
+			if (!Strings.isNullOrEmpty(target.getType()))
 				unionOfTargets.add(graph.add(QueryVars.RESOURCE, MO.type,
 						getTargetIDLiteral(target)));
 		}
@@ -305,6 +305,29 @@ public class CSPARQLEngineManager {
 				}
 				break;
 			}
+			break;
+		case MOVocabulary.InternalComponent:
+			graphPattern.add(QueryVars.RESOURCE, RDF.type, MO.InternalComponent);
+			if (groupingClass != null) {
+				switch (groupingClass) {
+				case MOVocabulary.InternalComponent:
+					break;
+				case MOVocabulary.CloudProvider:
+					graphPattern.addTransitive(QueryVars.RESOURCE, MO.requiredComponents, QueryVars.COMPONENT)
+						.add(QueryVars.COMPONENT, MO.cloudProvider,
+							Util.getGroupingClassIdVariable(rule)).add(
+							Util.getGroupingClassVariable(rule), MO.id,
+							Util.getGroupingClassIdVariable(rule));
+					break;
+				default:
+					throw new NotImplementedException("Grouping class "
+							+ groupingClass + " for target "
+							+ targets.get(0).getClazz()
+							+ " has not been implemented yet");
+				}
+				break;
+			}
+			break;
 		case MOVocabulary.Method:
 			graphPattern.add(QueryVars.RESOURCE, RDF.type, MO.Method);
 			if (groupingClass != null) {
@@ -333,6 +356,7 @@ public class CSPARQLEngineManager {
 				}
 				break;
 			}
+			break;
 		default:
 			throw new NotImplementedException(
 					"Cannot install rules with target class "
@@ -442,10 +466,10 @@ public class CSPARQLEngineManager {
 	}
 
 	private String getMetricName(MonitoringRule rule) {
-		while (rule.getCollectedMetric().isInherited()) {
-			rule = monitoringManager.getParentRule(rule
-					.getParentMonitoringRuleId());
-		}
+//		while (rule.getCollectedMetric().isInherited()) {
+//			rule = monitoringManager.getParentRule(rule
+//					.getParentMonitoringRuleId());
+//		}
 		return rule.getCollectedMetric().getMetricName();
 	}
 
@@ -472,7 +496,7 @@ public class CSPARQLEngineManager {
 	}
 
 	private String getTargetIDLiteral(MonitoredTarget monitoredTarget) {
-		return "\"" + monitoredTarget.getId() + "\"";
+		return "\"" + monitoredTarget.getType() + "\"";
 	}
 
 	public void installRule(MonitoringRule rule, String requiredDataAnalyzer,

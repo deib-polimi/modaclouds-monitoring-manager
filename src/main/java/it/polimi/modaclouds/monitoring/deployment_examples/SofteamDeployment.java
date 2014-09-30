@@ -16,6 +16,7 @@
  */
 package it.polimi.modaclouds.monitoring.deployment_examples;
 
+import it.polimi.modaclouds.monitoring.monitoring_manager.server.Model;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.CloudProvider;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.InternalComponent;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.VM;
@@ -23,20 +24,22 @@ import it.polimi.modaclouds.qos_models.monitoring_ontology.VM;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gson.Gson;
+
 public class SofteamDeployment {
 
 	public static void main(String[] args) {
 
 		int numberOfAgents = 2;
 
-		Set<Object> entities = new HashSet<Object>();
+		Model model = new Model();
 
 		CloudProvider amazonCloud = new CloudProvider();
-		entities.add(amazonCloud);
+		model.add(amazonCloud);
 		amazonCloud.setId("Amazon");
 
 		VM adminServer = new VM();
-		entities.add(adminServer);
+		model.add(adminServer);
 		adminServer.setId("AdministrationServer1");
 		adminServer.setType("AdministrationServer");
 		adminServer.setCloudProvider(amazonCloud.getId());
@@ -45,7 +48,7 @@ public class SofteamDeployment {
 		serverApp.setType("ServerApp");
 		serverApp.setId("ServerApp1");
 		serverApp.addRequiredComponent(adminServer.getId());
-		entities.add(serverApp);
+		model.add(serverApp);
 
 		for (int i = 0; i < numberOfAgents; i++) {
 			VM mainAgent = new VM();
@@ -53,17 +56,19 @@ public class SofteamDeployment {
 			;
 			mainAgent.setCloudProvider(amazonCloud.getId());
 			mainAgent.setType("MainAgent");
-			entities.add(mainAgent);
+			model.add(mainAgent);
 
 			InternalComponent agentApp = new InternalComponent();
 			agentApp.setId("agentApp" + (i + 1));
 			agentApp.setType("AgentApp");
 			agentApp.addRequiredComponent(mainAgent.getId());
-			entities.add(agentApp);
+			model.add(agentApp);
 
 			serverApp.addRequiredComponent(agentApp.getId());
 		}
-		System.out.println(entities);
+		Gson gson = new Gson();
+		String json = gson.toJson(model);
+		System.out.println(json);
 	}
 
 }

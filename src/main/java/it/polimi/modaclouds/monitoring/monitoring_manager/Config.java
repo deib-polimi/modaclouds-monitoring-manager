@@ -53,8 +53,8 @@ public class Config {
 		mmPort = getMandatoryEnvVar(Env.MODACLOUDS_MONITORING_MANAGER_PORT);
 		matlabSdaIP = getMandatoryEnvVar(Env.MODACLOUDS_MATLAB_SDA_IP);
 		matlabSdaPort = getMandatoryEnvVar(Env.MODACLOUDS_MATLAB_SDA_PORT);
-		javaSdaIP = getMandatoryEnvVar(Env.MODACLOUDS_JAVA_SDA_IP);
-		javaSdaPort = getMandatoryEnvVar(Env.MODACLOUDS_JAVA_SDA_PORT);
+		javaSdaIP = getMandatoryEnvVar(Env.MODACLOUDS_WEKA_SDA_IP);
+		javaSdaPort = getMandatoryEnvVar(Env.MODACLOUDS_WEKA_SDA_PORT);
 		
 		ddaUrl = "http://" + ddaIP + ":" + ddaPort;
 		kbUrl = "http://" + kbIP + ":" + kbPort + kbPath;
@@ -97,14 +97,18 @@ public class Config {
 		return kbUrl;
 	}
 	
+	
 	private String getMandatoryEnvVar(String varName)
 			throws ConfigurationException {
-		String var = System.getenv(varName);
-		if (var == null)
+		String var = System.getProperty(varName);
+		if (var == null) {
+			var = System.getenv(varName);
+		}
+		if (var == null) {
 			throw new ConfigurationException(varName
 					+ " variable was not defined");
+		}
 		return var;
 	}
-	
 
 }

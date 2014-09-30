@@ -2,10 +2,10 @@
 
 # Metrics
 
-	DELETE /metrics/:id/observers/:id
+	DELETE /model/resources/:id
 
 ## Description
-Detach the observer from the metric.
+Delete the specified resource from the knowledge base if it exists
 
 ***
 
@@ -23,11 +23,11 @@ None.
 
 ## Errors
 
-* **404 Resource not found** - Either the metric or the observer does not exist.
+* **404 Resource not found** - The resource does not exist (not implemented yet), answer is 204 even if it doesn't exist
 
 ***
 
 ## Example
 **Request**
 
-	DELETE v1/metrics/ResponseTime/observers/observer-1
+	DELETE v1/model/resources/vm1
