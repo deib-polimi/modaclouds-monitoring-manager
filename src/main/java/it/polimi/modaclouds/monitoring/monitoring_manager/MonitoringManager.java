@@ -217,12 +217,12 @@ public class MonitoringManager {
 		return observerId;
 	}
 
-	public void deleteInstance(String id) throws SerializationException, DeserializationException, ComponentDoesNotExistException {
+	public void deleteInstance(String id) throws SerializationException, DeserializationException, ResourceDoesNotExistException {
 		
 		Object component = knowledgeBase.getEntityById(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 		
 		if (component == null)
-			throw new ComponentDoesNotExistException();
+			throw new ResourceDoesNotExistException();
 		
 		//Resource resource = (Resource) component;
 		
