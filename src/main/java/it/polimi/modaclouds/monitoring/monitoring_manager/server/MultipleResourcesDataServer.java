@@ -17,6 +17,7 @@
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
+import it.polimi.modaclouds.qos_models.util.Model;
 
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;

@@ -19,7 +19,7 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 import it.polimi.modaclouds.monitoring.kb.api.DeserializationException;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.monitoring.kb.api.SerializationException;
-import it.polimi.modaclouds.monitoring.monitoring_manager.server.Model;
+import it.polimi.modaclouds.qos_models.util.Model;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Component;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.InternalComponent;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
@@ -67,7 +67,6 @@ public class MonitoringManager {
 		this.config = config;
 		validator = new Validator();
 		knowledgeBase = new FusekiKBAPI(config.getKbUrl());
-		// sdaDomainKB = new FusekiKBAPI(config.getKbUrl(), "");
 		installedRules = new ConcurrentHashMap<String, MonitoringRule>();
 		csparqlEngineManager = new CSPARQLEngineManager(this, config,
 				knowledgeBase);
@@ -75,6 +74,7 @@ public class MonitoringManager {
 		sdaFactoryManager = new SDAFactoryManager(knowledgeBase);
 
 		logger.info("Uploading ontology to KB");
+		//TODO controllo se knowledge base attiva, se non è attiva 5-10 secondi e riprovo
 		knowledgeBase.uploadOntology(MO.model, MODEL_GRAPH_NAME);
 	}
 
@@ -226,24 +226,20 @@ public class MonitoringManager {
 		if (component == null)
 			throw new ResourceDoesNotExistException();
 		
-		//Resource resource = (Resource) component;
-		
-		if (component instanceof VM){ //TODO check how to know what type of resource it is
+		if (component instanceof VM){
 			Set<?> internalComponents = knowledgeBase.getEntitiesByPropertyValue(id, MOVocabulary.requiredComponents, MODEL_GRAPH_NAME);
 			for(Object i : internalComponents){
 				if( i instanceof InternalComponent){
-				InternalComponent internalComponent = (InternalComponent) internalComponent;
-				deleteMethodsByRequiredInternalComponent(knowledgeBase, internalComponent.getId(), MOVocabulary.requiredInternalComponent,MODEL_GRAPH_NAME);
-				deleteMethodsByRequiredInternalComponent(knowledgeBase, internalComponent.getId(), MOVocabulary.resourceIdParameterName,MODEL_GRAPH_NAME);
+				InternalComponent internalComponentToRemove = (InternalComponent) i;
+				deleteMethodsByRequiredInternalComponent(knowledgeBase, internalComponentToRemove.getId(), MOVocabulary.providedBy, MODEL_GRAPH_NAME);
+				deleteMethodsByRequiredInternalComponent(knowledgeBase, internalComponentToRemove.getId(), MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 				}
 			}
 		} 
-		
-			if (component instanceof InternalComponent){ //TODO check how to know what type of resource it is
-				//TODO scommentare qui
-				deleteMethodsByRequiredInternalComponent(knowledgeBase, id, MOVocabulary.requiredInternalComponent,MODEL_GRAPH_NAME);
+			if (component instanceof InternalComponent){
+				deleteMethodsByRequiredInternalComponent(knowledgeBase, id, MOVocabulary.providedBy, MODEL_GRAPH_NAME);
 		}		
-			deleteMethodsByRequiredInternalComponent(knowledgeBase, id, MOVocabulary.resourceIdParameterName,MODEL_GRAPH_NAME);
+			deleteMethodsByRequiredInternalComponent(knowledgeBase, id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 	}
 	
 	private void deleteMethodsByRequiredInternalComponent(FusekiKBAPI fusekiKnowledgeBase, String id, String vocabulary, String graphName) throws SerializationException{
@@ -260,7 +256,6 @@ public class MonitoringManager {
 			knowledgeBase.deleteEntitiesByPropertyValues(ids,
 					MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 		}
-
 		updateModel(update);
 	}
 
@@ -268,6 +263,16 @@ public class MonitoringManager {
 			DeserializationException {
 		knowledgeBase.add(update.getResources(),
 				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+	}
+
+	public Resource getResource(String id) throws ResourceDoesNotExistException, DeserializationException {
+		
+		Object resource = knowledgeBase.getEntityById(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+
+		if (resource == null)
+			throw new ResourceDoesNotExistException();
+		
+		return (Resource) resource;
 	}
 
 }

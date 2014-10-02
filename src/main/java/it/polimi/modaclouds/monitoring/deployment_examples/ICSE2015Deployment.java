@@ -16,7 +16,7 @@
  */
 package it.polimi.modaclouds.monitoring.deployment_examples;
 
-import it.polimi.modaclouds.monitoring.monitoring_manager.server.Model;
+import it.polimi.modaclouds.qos_models.util.Model;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.CloudProvider;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.InternalComponent;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Method;
@@ -65,7 +65,7 @@ public class ICSE2015Deployment {
 	private static Method addMethod(InternalComponent iComponent, String methodType)
 			throws URISyntaxException {
 		Method method = new Method(iComponent.getId(), methodType);
-		iComponent.addProvidedMethod(method.getId());
+		//iComponent.addProvidedMethod(method.getId());
 		return method;
 	}
 

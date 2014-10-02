@@ -16,7 +16,7 @@
  */
 package it.polimi.modaclouds.monitoring.deployment_examples;
 
-import it.polimi.modaclouds.monitoring.monitoring_manager.server.Model;
+import it.polimi.modaclouds.qos_models.util.Model;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.CloudProvider;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.InternalComponent;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.VM;

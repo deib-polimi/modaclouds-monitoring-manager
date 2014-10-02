@@ -90,7 +90,7 @@ public class OFBizDeployment {
 	private static Method addMethod(InternalComponent iComponent, String methodType)
 			throws URISyntaxException {
 		Method method = new Method(iComponent.getId(), methodType);
-		iComponent.addProvidedMethod(method.getId());
+		//iComponent.addProvidedMethod(method.getId());
 		return method;
 	}
 
