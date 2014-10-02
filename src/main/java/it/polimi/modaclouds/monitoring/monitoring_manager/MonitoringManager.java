@@ -25,6 +25,7 @@ import it.polimi.modaclouds.qos_models.monitoring_ontology.InternalComponent;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Resource;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MOVocabulary;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.VM;
 import it.polimi.modaclouds.qos_models.monitoring_rules.Problem;
 import it.polimi.modaclouds.qos_models.monitoring_rules.Validator;
 import it.polimi.modaclouds.qos_models.schema.Metric;
@@ -227,20 +228,26 @@ public class MonitoringManager {
 		
 		//Resource resource = (Resource) component;
 		
-		/*if (component instanceof Component){ //TODO check how to know what type of resource it is
-			Set<?> internalComponents = knowledgeBase. getEntitiesByPropertyValue(MOVocabulary.requiredComponents, resource.getId(), MODEL_GRAPH_NAME);
+		if (component instanceof VM){ //TODO check how to know what type of resource it is
+			Set<?> internalComponents = knowledgeBase.getEntitiesByPropertyValue(id, MOVocabulary.requiredComponents, MODEL_GRAPH_NAME);
 			for(Object i : internalComponents){
-				Resource internalComponentResource = (Resource) i;
-				knowledgeBase.deleteEntitiesByPropertyValue(id, MOVocabulary.requiredInternalComponent, MODEL_GRAPH_NAME);
-				knowledgeBase.deleteEntitiesByPropertyValue(internalComponentResource.getId() , MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+				if( i instanceof InternalComponent){
+				InternalComponent internalComponent = (InternalComponent) internalComponent;
+				deleteMethodsByRequiredInternalComponent(knowledgeBase, internalComponent.getId(), MOVocabulary.requiredInternalComponent,MODEL_GRAPH_NAME);
+				deleteMethodsByRequiredInternalComponent(knowledgeBase, internalComponent.getId(), MOVocabulary.resourceIdParameterName,MODEL_GRAPH_NAME);
+				}
 			}
-		} else */
+		} 
 		
 			if (component instanceof InternalComponent){ //TODO check how to know what type of resource it is
 				//TODO scommentare qui
-			//knowledgeBase.deleteEntitiesByPropertyValue(id , MOVocabulary.requiredInternalComponent, MODEL_GRAPH_NAME);
+				deleteMethodsByRequiredInternalComponent(knowledgeBase, id, MOVocabulary.requiredInternalComponent,MODEL_GRAPH_NAME);
 		}		
-		knowledgeBase.deleteEntitiesByPropertyValue(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+			deleteMethodsByRequiredInternalComponent(knowledgeBase, id, MOVocabulary.resourceIdParameterName,MODEL_GRAPH_NAME);
+	}
+	
+	private void deleteMethodsByRequiredInternalComponent(FusekiKBAPI fusekiKnowledgeBase, String id, String vocabulary, String graphName) throws SerializationException{
+		fusekiKnowledgeBase.deleteEntitiesByPropertyValue(id, vocabulary, graphName);
 	}
 
 	public void uploadModel(Model update) throws SerializationException,
