@@ -18,7 +18,6 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 
 import it.polimi.csparqool.FunctionArgs;
 import it.polimi.modaclouds.monitoring.dcfactory.DCMetaData;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.StatisticalDataAnalyzer;
 import it.polimi.modaclouds.qos_models.schema.Action;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringMetricAggregation;
@@ -26,38 +25,13 @@ import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 
 import java.util.List;
 
-import org.apache.commons.lang.NotImplementedException;
-
 public class Util {
-
-	// public static Parameter getParameter(String parameterName,
-	// CollectedMetric collectedMetric) {
-	// for (it.polimi.modaclouds.qos_models.schema.Parameter par :
-	// collectedMetric
-	// .getParameters()) {
-	// if (par.getName().equals(parameterName)) {
-	// return new Parameter(par.getName(), par.getValue());
-	// }
-	// }
-	// return null;
-	// }
 
 	public static String getOutputValueVariable(MonitoringRule rule) {
 		if (!isGroupedMetric(rule))
 			return QueryVars.INPUT;
 		return QueryVars.OUTPUT;
 	}
-
-	// public static String getTargetVariable(MonitoringRule rule)
-	// throws RuleInstallationException {
-	// String targetVar;
-	// // if (isGroupedMetric(rule)) {
-	// // targetVar = getGroupingClassVariable(rule);
-	// // } else {
-	// targetVar = QueryVars.TARGET;
-	// // }
-	// return targetVar;
-	// }
 
 	public static String getOutputResourceIdVariable(MonitoringRule rule)
 			throws RuleInstallationException {
@@ -122,18 +96,6 @@ public class Util {
 		return targets;
 	}
 
-	// public static Parameter getParameter(String parameterName,
-	// MonitoringMetricAggregation metricAggregation) {
-	// for (it.polimi.modaclouds.qos_models.schema.Parameter par :
-	// metricAggregation
-	// .getParameters()) {
-	// if (par.getName().equals(parameterName)) {
-	// return new Parameter(par.getName(), par.getValue());
-	// }
-	// }
-	// return null;
-	// }
-
 	public static String getParameterValue(String parameterName,
 			MonitoringMetricAggregation metricAggregation) {
 		for (it.polimi.modaclouds.qos_models.schema.Parameter par : metricAggregation
@@ -177,13 +139,6 @@ public class Util {
 			dc.addParameter(p.getName(), p.getValue());
 		}
 
-	}
-
-	public static void addParameters(StatisticalDataAnalyzer sda,
-			List<it.polimi.modaclouds.qos_models.schema.Parameter> parameters) {
-		for (it.polimi.modaclouds.qos_models.schema.Parameter p : parameters) {
-			sda.addParameter(p.getName(), p.getValue());
-		}
 	}
 
 	public static boolean softEquals(String name1, String name2) {

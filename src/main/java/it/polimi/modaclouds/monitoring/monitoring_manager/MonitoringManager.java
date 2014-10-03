@@ -21,8 +21,8 @@ import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.monitoring.kb.api.SerializationException;
 import it.polimi.modaclouds.monitoring.monitoring_manager.server.Model;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
-import it.polimi.modaclouds.qos_models.monitoring_ontology.Resource;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MOVocabulary;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.Resource;
 import it.polimi.modaclouds.qos_models.monitoring_rules.Problem;
 import it.polimi.modaclouds.qos_models.monitoring_rules.Validator;
 import it.polimi.modaclouds.qos_models.schema.Metric;
@@ -30,10 +30,8 @@ import it.polimi.modaclouds.qos_models.schema.Metrics;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -50,43 +48,31 @@ public class MonitoringManager {
 
 	private CSPARQLEngineManager csparqlEngineManager;
 	private DCFactoriesManager dcFactoriesManager;
-	private SDAFactoryManager sdaFactoryManager;
 	private Map<String, MonitoringRule> installedRules;
-	private List<MonitoringRule> installingRules;
 
 	private Validator validator;
 
-	private Config config;
 
 	private FusekiKBAPI knowledgeBase;
 
 	public MonitoringManager(Config config) throws Exception {
-		this.config = config;
 		validator = new Validator();
 		knowledgeBase = new FusekiKBAPI(config.getKbUrl());
-		// sdaDomainKB = new FusekiKBAPI(config.getKbUrl(), "");
 		installedRules = new ConcurrentHashMap<String, MonitoringRule>();
-		csparqlEngineManager = new CSPARQLEngineManager(this, config,
+		csparqlEngineManager = new CSPARQLEngineManager(config,
 				knowledgeBase);
 		dcFactoriesManager = new DCFactoriesManager(knowledgeBase);
-		sdaFactoryManager = new SDAFactoryManager(knowledgeBase);
 
 		logger.info("Uploading ontology to KB");
 		knowledgeBase.uploadOntology(MO.model, MODEL_GRAPH_NAME);
 	}
 
-	// public void newInstance(Component instance) {
-	// systemDomainKB.add(instance);
-	// }
-
 	public synchronized void installRules(MonitoringRules rules)
 			throws RuleInstallationException {
 		validate(rules);
-		installingRules = rules.getMonitoringRules();
 		for (MonitoringRule rule : rules.getMonitoringRules()) {
 			installRule(rule);
 		}
-		installingRules = null;
 	}
 
 	private void validate(MonitoringRules rules)
@@ -123,7 +109,6 @@ public class MonitoringManager {
 			throw new RuleDoesNotExistException();
 		csparqlEngineManager.uninstallRule(rule);
 		dcFactoriesManager.uninstallRule(rule);
-		sdaFactoryManager.uninstallRule(rule);
 		installedRules.remove(id);
 
 	}
@@ -133,37 +118,9 @@ public class MonitoringManager {
 		if (installedRules.containsKey(rule.getId()))
 			throw new RuleInstallationException("A rule with id "
 					+ rule.getId() + " is already installed");
-		String requiredDataAnalyzer = null;
-		String sdaReturnedMetric = null;
-		String aggregateFunction = null;
-		String groupingClass = null;
-		if (rule.getMetricAggregation() != null) {
-			MonitoringRule pRule = rule;
-//			while (pRule.getMetricAggregation() != null
-//					&& rule.getMetricAggregation().isInherited()) {
-//				pRule = getParentRule(rule.getParentMonitoringRuleId());
-//			}
-			aggregateFunction = pRule.getMetricAggregation()
-					.getAggregateFunction();
-			groupingClass = pRule.getMetricAggregation().getGroupingClass();
-		}
-		if (aggregateFunction != null) {
-			requiredDataAnalyzer = validator
-					.getRequiredDataAnalyzer(aggregateFunction);
-		}
-		if (Util.softEquals(requiredDataAnalyzer, MMVocabulary.MATLAB_SDA)
-				|| Util.softEquals(requiredDataAnalyzer, MMVocabulary.JAVA_SDA)) {
-			sdaReturnedMetric = generateRandomMetricName();
-		}
 		try {
-			csparqlEngineManager.installRule(rule, requiredDataAnalyzer,
-					sdaReturnedMetric);
+			csparqlEngineManager.installRule(rule);
 			dcFactoriesManager.installRule(rule);
-			if (requiredDataAnalyzer.equals(MMVocabulary.MATLAB_SDA)
-					|| requiredDataAnalyzer.equals(MMVocabulary.JAVA_SDA)) {
-				sdaFactoryManager.installRule(rule, aggregateFunction,
-						sdaReturnedMetric);
-			}
 			installedRules.put(rule.getId(), rule);
 		} catch (Exception e) {
 			// TODO rollback
@@ -172,24 +129,6 @@ public class MonitoringManager {
 		}
 	}
 
-	protected MonitoringRule getParentRule(String parentMonitoringRuleId) {
-		MonitoringRule parent = installedRules.get(parentMonitoringRuleId);
-		if (parent == null && installingRules != null) {
-			for (MonitoringRule rule : installingRules) {
-				if (rule.getId().equals(parentMonitoringRuleId))
-					return rule;
-			}
-		}
-		return null;
-	}
-
-	private String generateRandomMetricName() {
-		return escape(UUID.randomUUID().toString());
-	}
-
-	private String escape(String string) {
-		return string.replaceAll("[^a-zA-Z0-9]", "");
-	}
 
 	public Metrics getMetrics() {
 		Metrics metrics = new Metrics();
