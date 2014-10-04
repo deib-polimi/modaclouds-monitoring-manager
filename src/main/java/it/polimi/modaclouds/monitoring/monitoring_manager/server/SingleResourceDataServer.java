@@ -38,12 +38,12 @@ public class SingleResourceDataServer extends ServerResource {
 			.getName());
 	
 	@Delete
-	public void deleteInstance() {
+	public void deleteResource() {
 		try {
 			MonitoringManager manager = (MonitoringManager) getContext()
 					.getAttributes().get("manager");
 			String id = (String) this.getRequest().getAttributes().get("id");			
-			manager.deleteInstance(id);
+			manager.deleteResource(id);
 			this.getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 		} catch (ResourceDoesNotExistException e) {
 			logger.error("The component does not exist", e);

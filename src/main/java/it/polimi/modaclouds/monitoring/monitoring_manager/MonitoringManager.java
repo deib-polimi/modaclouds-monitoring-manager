@@ -219,7 +219,7 @@ public class MonitoringManager {
 		return observerId;
 	}
 
-	public void deleteInstance(String id) throws SerializationException, DeserializationException, ResourceDoesNotExistException {
+	public void deleteResource(String id) throws SerializationException, DeserializationException, ResourceDoesNotExistException {
 		
 		Object component = knowledgeBase.getEntityById(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 		
@@ -231,18 +231,18 @@ public class MonitoringManager {
 			for(Object i : internalComponents){
 				if( i instanceof InternalComponent){
 				InternalComponent internalComponentToRemove = (InternalComponent) i;
-				deleteMethodsByRequiredInternalComponent(knowledgeBase, internalComponentToRemove.getId(), MOVocabulary.providedBy, MODEL_GRAPH_NAME);
-				deleteMethodsByRequiredInternalComponent(knowledgeBase, internalComponentToRemove.getId(), MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+				deleteByPropertyValue(knowledgeBase, internalComponentToRemove.getId(), MOVocabulary.providedBy, MODEL_GRAPH_NAME);
+				deleteByPropertyValue(knowledgeBase, internalComponentToRemove.getId(), MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 				}
 			}
 		} 
 			if (component instanceof InternalComponent){
-				deleteMethodsByRequiredInternalComponent(knowledgeBase, id, MOVocabulary.providedBy, MODEL_GRAPH_NAME);
+				deleteByPropertyValue(knowledgeBase, id, MOVocabulary.providedBy, MODEL_GRAPH_NAME);
 		}		
-			deleteMethodsByRequiredInternalComponent(knowledgeBase, id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+			deleteByPropertyValue(knowledgeBase, id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 	}
 	
-	private void deleteMethodsByRequiredInternalComponent(FusekiKBAPI fusekiKnowledgeBase, String id, String vocabulary, String graphName) throws SerializationException{
+	private void deleteByPropertyValue(FusekiKBAPI fusekiKnowledgeBase, String id, String vocabulary, String graphName) throws SerializationException{
 		fusekiKnowledgeBase.deleteEntitiesByPropertyValue(id, vocabulary, graphName);
 	}
 
@@ -256,10 +256,10 @@ public class MonitoringManager {
 			knowledgeBase.deleteEntitiesByPropertyValues(ids,
 					MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 		}
-		updateModel(update);
+		addResource(update);
 	}
 
-	public void updateModel(Model update) throws SerializationException,
+	public void addResource(Model update) throws SerializationException,
 			DeserializationException {
 		knowledgeBase.add(update.getResources(),
 				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);

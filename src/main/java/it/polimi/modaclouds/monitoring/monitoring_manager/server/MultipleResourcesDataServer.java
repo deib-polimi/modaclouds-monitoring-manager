@@ -37,7 +37,7 @@ public class MultipleResourcesDataServer extends ServerResource {
 			.getLogger(MultipleResourcesDataServer.class);
 
 	@Post
-	public void updateResources(Representation rep) {
+	public void addResources(Representation rep) {
 		try {
 			MonitoringManager manager = (MonitoringManager) getContext()
 					.getAttributes().get("manager");
@@ -47,7 +47,7 @@ public class MultipleResourcesDataServer extends ServerResource {
 			Model deserialised = gson.fromJson(payload, Model.class);
 
 			// update model and responde to the post request
-			manager.updateModel(deserialised);
+			manager.addResource(deserialised);
 			this.getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 
 		} catch (Exception e) {
