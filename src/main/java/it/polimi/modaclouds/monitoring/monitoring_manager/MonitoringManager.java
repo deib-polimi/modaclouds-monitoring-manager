@@ -22,7 +22,9 @@ import it.polimi.modaclouds.monitoring.kb.api.SerializationException;
 import it.polimi.modaclouds.qos_models.util.Model;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Component;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.InternalComponent;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.Location;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.Method;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Resource;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MOVocabulary;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.VM;
@@ -32,7 +34,10 @@ import it.polimi.modaclouds.qos_models.schema.Metric;
 import it.polimi.modaclouds.qos_models.schema.Metrics;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
+import it.polimi.modaclouds.qos_models.schema.PaasService;
+import it.polimi.modaclouds.qos_models.schema.Provider;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -175,23 +180,23 @@ public class MonitoringManager {
 		}
 	}
 
-	protected MonitoringRule getParentRule(String parentMonitoringRuleId) {
-		MonitoringRule parent = installedRules.get(parentMonitoringRuleId);
-		if (parent == null && installingRules != null) {
-			for (MonitoringRule rule : installingRules) {
-				if (rule.getId().equals(parentMonitoringRuleId))
-					return rule;
-			}
+protected MonitoringRule getParentRule(String parentMonitoringRuleId) {
+	MonitoringRule parent = installedRules.get(parentMonitoringRuleId);
+	if (parent == null && installingRules != null) {
+		for (MonitoringRule rule : installingRules) {
+			if (rule.getId().equals(parentMonitoringRuleId))
+				return rule;
 		}
-		return null;
 	}
+	return null;
+}
 
-	private String generateRandomMetricName() {
-		return escape(UUID.randomUUID().toString());
-	}
+private String generateRandomMetricName() {
+	return escape(UUID.randomUUID().toString());
+}
 
-	private String escape(String string) {
-		return string.replaceAll("[^a-zA-Z0-9]", "");
+private String escape(String string) {
+	return string.replaceAll("[^a-zA-Z0-9]", "");
 	}
 
 	public Metrics getMetrics() {
@@ -221,55 +226,94 @@ public class MonitoringManager {
 
 	public void deleteResource(String id) throws SerializationException, DeserializationException, ResourceDoesNotExistException {
 		
-		Object component = knowledgeBase.getEntityById(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+		Object resource = knowledgeBase.getEntityById(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 		
-		if (component == null){
-			logger.info("component is null");
+		if (resource == null){
 			throw new ResourceDoesNotExistException();
 		}
 		
-		if (component instanceof VM){
-			logger.info("component is vm");
-			Set<?> internalComponents = knowledgeBase.getEntitiesByPropertyValue(id, MOVocabulary.requiredComponents, MODEL_GRAPH_NAME);
-			for(Object i : internalComponents){				
-				if( i instanceof InternalComponent){
-					logger.info("eliminatig internal components and method associated");
-				InternalComponent internalComponentToRemove = (InternalComponent) i;
-				deleteByPropertyValue(knowledgeBase, internalComponentToRemove.getId(), MOVocabulary.providedBy, MODEL_GRAPH_NAME);
-				deleteByPropertyValue(knowledgeBase, internalComponentToRemove.getId(), MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+		if (resource instanceof VM){
+			Set<String> internalComponents = knowledgeBase.getIds(InternalComponent.class,
+					MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);	
+			
+			for(String idInternal : internalComponents){
+				InternalComponent internalComponent =(InternalComponent) knowledgeBase.getEntityById(idInternal, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+				Set<String> requiredComponents = internalComponent.getRequiredComponents();
+				for(String reqComp : requiredComponents){
+					if(reqComp.equals(id)){
+						Set<String> methods = knowledgeBase.getIds(Method.class, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+						for(String idMethod : methods){
+							Method methodToRemove = (Method) knowledgeBase.getEntityById(idMethod, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+							String providedBy = methodToRemove.getProvidedBy();
+							if(providedBy.equals(idInternal)){
+								deleteByPropertyValue(knowledgeBase, idMethod, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+							}
+						}
+						deleteByPropertyValue(knowledgeBase, idInternal, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+						break;
+					}
 				}
 			}
+			
+			//Set<?> internalComponents = knowledgeBase.getEntitiesByPropertyValue(id, MOVocabulary.requiredComponents, MODEL_GRAPH_NAME);
+	//for(Object i : internalComponents){								
+		//logger.info("eliminating internal components and method associated");
+		//InternalComponent internalComponentToRemove = (InternalComponent) i;
+		//deleteByPropertyValue(knowledgeBase, internalComponentToRemove.getId(), MOVocabulary.providedBy, MODEL_GRAPH_NAME);
+		//deleteByPropertyValue(knowledgeBase, internalComponentToRemove.getId(), MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+//}
 		} 
-			if (component instanceof InternalComponent){
-				logger.info("component is internal component, eliminating methods associated");
-				deleteByPropertyValue(knowledgeBase, id, MOVocabulary.providedBy, MODEL_GRAPH_NAME);
-		}		
-			logger.info("eliminating component");
-			deleteByPropertyValue(knowledgeBase, id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+		else if (resource instanceof InternalComponent){				
+		Set<String> methods = knowledgeBase.getIds(Method.class, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+		for(String idMethod : methods){
+			Method methodToRemove = (Method) knowledgeBase.getEntityById(idMethod, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+			String providedBy = methodToRemove.getProvidedBy();
+			logger.info("compare "+ providedBy +" "+ resource);
+		if(providedBy.equals(resource)){
+			deleteByPropertyValue(knowledgeBase, idMethod, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+		}
 	}
 	
-	private void deleteByPropertyValue(FusekiKBAPI fusekiKnowledgeBase, String id, String vocabulary, String graphName) throws SerializationException{
-		fusekiKnowledgeBase.deleteEntitiesByPropertyValue(id, vocabulary, graphName);
-	}
+	//deleteByPropertyValue(knowledgeBase, id, MOVocabulary.providedBy, MODEL_GRAPH_NAME);
+}		
+	deleteByPropertyValue(knowledgeBase, id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+}
 
-	public void uploadModel(Model update) throws SerializationException,
-			DeserializationException {
+private void deleteByPropertyValue(FusekiKBAPI fusekiKnowledgeBase, String id, String vocabulary, String graphName) throws SerializationException{
+	logger.info("deleting "+id);
+	fusekiKnowledgeBase.deleteEntitiesByPropertyValue(id, vocabulary, graphName);
+}
 
-		Set<String> ids = knowledgeBase.getIds(Resource.class,
+public void uploadModel(Model update) throws SerializationException,
+		DeserializationException {	
+	
+	Set<String> ids = new HashSet();
+
+	//retrieving all the resources stored in the model
+	ids.addAll(knowledgeBase.getIds(Location.class,
+			MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME));
+	ids.addAll(knowledgeBase.getIds(VM.class,
+			MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME));
+	ids.addAll(knowledgeBase.getIds(PaasService.class,
+			MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME));
+	ids.addAll(knowledgeBase.getIds(InternalComponent.class,
+			MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME));
+	ids.addAll(knowledgeBase.getIds(Method.class,
+			MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME));
+	ids.addAll(knowledgeBase.getIds(Provider.class,
+			MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME));
+	
+	if (!ids.isEmpty()) {
+		knowledgeBase.deleteEntitiesByPropertyValues(ids,
 				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
-
-		if (!ids.isEmpty()) {
-			logger.info("ids not empty, deletinf the model in the kb");
-			knowledgeBase.deleteEntitiesByPropertyValues(ids,
-					MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
-		}
-		
-		addResources(update);
 	}
+	
+	addResources(update);
+}
 
-	public void addResources(Model update) throws SerializationException,
-			DeserializationException {
-		logger.info("adding resources");
+public void addResources(Model update) throws SerializationException,
+		DeserializationException {
+	logger.info("adding resources");
 		knowledgeBase.add(update.getResources(),
 				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 	}
