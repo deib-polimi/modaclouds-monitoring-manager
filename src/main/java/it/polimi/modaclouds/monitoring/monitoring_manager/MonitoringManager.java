@@ -241,44 +241,31 @@ private String escape(String string) {
 				Set<String> requiredComponents = internalComponent.getRequiredComponents();
 				for(String reqComp : requiredComponents){
 					if(reqComp.equals(id)){
-						Set<String> methods = knowledgeBase.getIds(Method.class, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
-						for(String idMethod : methods){
-							Method methodToRemove = (Method) knowledgeBase.getEntityById(idMethod, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
-							String providedBy = methodToRemove.getProvidedBy();
-							if(providedBy.equals(idInternal)){
-								deleteByPropertyValue(knowledgeBase, idMethod, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
-							}
-						}
+						deleteMethodByInternalComponent(idInternal);
 						deleteByPropertyValue(knowledgeBase, idInternal, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 						break;
 					}
 				}
-			}
-			
-			//Set<?> internalComponents = knowledgeBase.getEntitiesByPropertyValue(id, MOVocabulary.requiredComponents, MODEL_GRAPH_NAME);
-	//for(Object i : internalComponents){								
-		//logger.info("eliminating internal components and method associated");
-		//InternalComponent internalComponentToRemove = (InternalComponent) i;
-		//deleteByPropertyValue(knowledgeBase, internalComponentToRemove.getId(), MOVocabulary.providedBy, MODEL_GRAPH_NAME);
-		//deleteByPropertyValue(knowledgeBase, internalComponentToRemove.getId(), MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
-//}
+			}		
 		} 
-		else if (resource instanceof InternalComponent){				
-		Set<String> methods = knowledgeBase.getIds(Method.class, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
-		for(String idMethod : methods){
-			Method methodToRemove = (Method) knowledgeBase.getEntityById(idMethod, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
-			String providedBy = methodToRemove.getProvidedBy();
-			logger.info("compare "+ providedBy +" "+ resource);
-		if(providedBy.equals(resource)){
-			deleteByPropertyValue(knowledgeBase, idMethod, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
-		}
-	}
-	
-	//deleteByPropertyValue(knowledgeBase, id, MOVocabulary.providedBy, MODEL_GRAPH_NAME);
+		
+		if (resource instanceof InternalComponent){				
+		deleteMethodByInternalComponent(id);
 }		
 	deleteByPropertyValue(knowledgeBase, id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 }
 
+	private void deleteMethodByInternalComponent(String internalComp) throws DeserializationException, SerializationException{
+		Set<String> methods = knowledgeBase.getIds(Method.class, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+		for(String idMethod : methods){
+			Method methodToRemove = (Method) knowledgeBase.getEntityById(idMethod, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+			String providedBy = methodToRemove.getProvidedBy();
+		if(providedBy.equals(internalComp)){
+			deleteByPropertyValue(knowledgeBase, idMethod, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+		}
+	}
+	}
+	
 private void deleteByPropertyValue(FusekiKBAPI fusekiKnowledgeBase, String id, String vocabulary, String graphName) throws SerializationException{
 	logger.info("deleting "+id);
 	fusekiKnowledgeBase.deleteEntitiesByPropertyValue(id, vocabulary, graphName);
