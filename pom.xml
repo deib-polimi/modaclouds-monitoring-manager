@@ -21,7 +21,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.polimi.modaclouds.monitoring.monitoring-manager</groupId>
 	<artifactId>monitoring-manager</artifactId>
-	<version>1.2</version>
+	<version>1.2-delete-update</version>
 	<packaging>jar</packaging>
 
 	<name>MODAClouds Monitoring Manager</name>

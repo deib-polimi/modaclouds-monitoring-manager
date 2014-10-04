@@ -73,8 +73,8 @@ public class SingleResourceDataServer extends ServerResource {
 			String id = (String) this.getRequest().getAttributes().get("id");
 			Resource resource = manager.getResource(id);
 			this.getResponse().setStatus(Status.SUCCESS_OK);
-			this.getResponse().setEntity(
-					new JaxbRepresentation<Resource>(resource));
+			//this.getResponse().setEntity(
+					//new JaxbRepresentation<Resource>(resource));
 		}catch (ResourceDoesNotExistException e) {
 			logger.error("The component does not exist", e);
 			this.getResponse().setStatus(Status.CLIENT_ERROR_NOT_FOUND,

@@ -223,13 +223,17 @@ public class MonitoringManager {
 		
 		Object component = knowledgeBase.getEntityById(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 		
-		if (component == null)
+		if (component == null){
+			logger.info("component is null");
 			throw new ResourceDoesNotExistException();
+		}
 		
 		if (component instanceof VM){
+			logger.info("component is vm");
 			Set<?> internalComponents = knowledgeBase.getEntitiesByPropertyValue(id, MOVocabulary.requiredComponents, MODEL_GRAPH_NAME);
-			for(Object i : internalComponents){
+			for(Object i : internalComponents){				
 				if( i instanceof InternalComponent){
+					logger.info("eliminatig internal components and method associated");
 				InternalComponent internalComponentToRemove = (InternalComponent) i;
 				deleteByPropertyValue(knowledgeBase, internalComponentToRemove.getId(), MOVocabulary.providedBy, MODEL_GRAPH_NAME);
 				deleteByPropertyValue(knowledgeBase, internalComponentToRemove.getId(), MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
@@ -237,8 +241,10 @@ public class MonitoringManager {
 			}
 		} 
 			if (component instanceof InternalComponent){
+				logger.info("component is internal component, eliminating methods associated");
 				deleteByPropertyValue(knowledgeBase, id, MOVocabulary.providedBy, MODEL_GRAPH_NAME);
 		}		
+			logger.info("eliminating component");
 			deleteByPropertyValue(knowledgeBase, id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 	}
 	
@@ -253,14 +259,17 @@ public class MonitoringManager {
 				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 
 		if (!ids.isEmpty()) {
+			logger.info("ids not empty, deletinf the model in the kb");
 			knowledgeBase.deleteEntitiesByPropertyValues(ids,
 					MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 		}
-		addResource(update);
+		
+		addResources(update);
 	}
 
-	public void addResource(Model update) throws SerializationException,
+	public void addResources(Model update) throws SerializationException,
 			DeserializationException {
+		logger.info("adding resources");
 		knowledgeBase.add(update.getResources(),
 				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 	}

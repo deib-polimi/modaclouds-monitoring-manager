@@ -47,7 +47,7 @@ public class MultipleResourcesDataServer extends ServerResource {
 			Model deserialised = gson.fromJson(payload, Model.class);
 
 			// update model and responde to the post request
-			manager.addResource(deserialised);
+			manager.addResources(deserialised);
 			this.getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 
 		} catch (Exception e) {
