@@ -44,8 +44,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.jena.atlas.web.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.hp.hpl.jena.ontology.OntModel;
 
 import polimi.deib.csparql_rest_api.exception.ObserverErrorException;
 import polimi.deib.csparql_rest_api.exception.ServerErrorException;
@@ -78,9 +81,28 @@ public class MonitoringManager {
 		dcFactoriesManager = new DCFactoriesManager(knowledgeBase);
 		sdaFactoryManager = new SDAFactoryManager(knowledgeBase);
 
-		logger.info("Uploading ontology to KB");
-		//TODO controllo se knowledge base attiva, se non è attiva 5-10 secondi e riprovo
-		knowledgeBase.uploadOntology(MO.model, MODEL_GRAPH_NAME);
+		boolean isKBActive = false;
+		while(!isKBActive){
+			isKBActive = uploadingOntology(MO.model, MODEL_GRAPH_NAME);
+		}
+		
+	}
+
+	private boolean uploadingOntology(OntModel model, String modelGraphName) {
+		try{
+			logger.info("Uploading ontology to KB");
+			knowledgeBase.uploadOntology(MO.model, MODEL_GRAPH_NAME);
+			return true;
+			}catch(HttpException e){
+				logger.info("Knowledge base not found, please start the knowledge base");
+				try {
+					Thread.sleep(30000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				return false;
+			}
 	}
 
 	// public void newInstance(Component instance) {
