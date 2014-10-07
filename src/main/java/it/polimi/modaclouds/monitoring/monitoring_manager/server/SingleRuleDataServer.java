@@ -17,7 +17,6 @@
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
-import it.polimi.modaclouds.monitoring.monitoring_manager.RuleDoesNotExistException;
 
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -40,12 +39,6 @@ public class SingleRuleDataServer extends ServerResource {
 			String id = (String) this.getRequest().getAttributes().get("id");
 			manager.uninstallRule(id);
 			this.getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
-		} catch (RuleDoesNotExistException e) {
-			logger.error("The monitoring rule does not exist", e);
-			this.getResponse().setStatus(Status.CLIENT_ERROR_NOT_FOUND,
-					"The monitoring rule does not exist");
-			this.getResponse().setEntity("The monitoring rule does not exist",
-					MediaType.TEXT_PLAIN);
 		} catch (Exception e) {
 			logger.error("Error while deleting the rule", e);
 			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL,

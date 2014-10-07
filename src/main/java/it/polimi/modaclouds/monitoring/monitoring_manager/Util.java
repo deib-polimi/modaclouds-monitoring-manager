@@ -28,7 +28,7 @@ import java.util.List;
 public class Util {
 
 	public static String getOutputValueVariable(MonitoringRule rule) {
-		if (!isGroupedMetric(rule))
+		if (!isAggregatedMetric(rule))
 			return QueryVars.INPUT;
 		return QueryVars.OUTPUT;
 	}
@@ -36,9 +36,11 @@ public class Util {
 	public static String getOutputResourceIdVariable(MonitoringRule rule)
 			throws RuleInstallationException {
 		String targetVar;
-		if (isGroupedMetric(rule)
+		if (isAggregatedMetric(rule)
 				&& !getTargetClass(rule).equals(getGroupingClass(rule))) {
-			targetVar = getGroupingClassVariable(rule) + "Id";
+			String groupingClassVariable = getGroupingClassVariable(rule);
+			if (groupingClassVariable==null) return null;
+			targetVar = groupingClassVariable + "Id";
 		} else {
 			targetVar = QueryVars.RESOURCE_ID;
 		}
@@ -46,7 +48,7 @@ public class Util {
 	}
 
 	public static String getAggregateFunction(MonitoringRule rule) {
-		if (!isGroupedMetric(rule))
+		if (!isAggregatedMetric(rule))
 			return null;
 		String aggregateFunction = rule.getMetricAggregation()
 				.getAggregateFunction();
@@ -59,8 +61,12 @@ public class Util {
 			return null;
 		String groupingClass = getGroupingClass(rule);
 		String targetClass = getTargetClass(rule);
-		if (groupingClass.equals(targetClass))
+		if (groupingClass==null) {
+			return null;
+		}
+		if (groupingClass.equals(targetClass)) {
 			return QueryVars.RESOURCE;
+		}
 		return "?" + groupingClass;
 	}
 
@@ -80,14 +86,18 @@ public class Util {
 	}
 
 	public static String getGroupingClass(MonitoringRule rule) {
-		if (isGroupedMetric(rule))
+		if (isAggregatedMetric(rule))
 			return rule.getMetricAggregation().getGroupingClass();
 		else
 			return null;
 	}
 
-	public static boolean isGroupedMetric(MonitoringRule rule) {
+	public static boolean isAggregatedMetric(MonitoringRule rule) {
 		return rule.getMetricAggregation() != null;
+	}
+	
+	public static boolean isGroupedMetric(MonitoringRule rule) {
+		return getGroupingClass(rule)!=null;
 	}
 
 	public static List<MonitoredTarget> getMonitoredTargets(MonitoringRule rule) {
@@ -149,5 +159,12 @@ public class Util {
 			throws RuleInstallationException {
 		return getGroupingClassVariable(rule) + "Id";
 	}
+
+	public static String getOutputTimestampVariable(MonitoringRule rule) {
+		if (isAggregatedMetric(rule)) return QueryVars.TIMESTAMP;
+		return QueryVars.INPUT_TIMESTAMP;
+	}
+
+	
 
 }

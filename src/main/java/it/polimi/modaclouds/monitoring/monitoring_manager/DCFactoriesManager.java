@@ -19,12 +19,16 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 import it.polimi.modaclouds.monitoring.dcfactory.DCFields;
 import it.polimi.modaclouds.monitoring.dcfactory.DCMetaData;
 import it.polimi.modaclouds.monitoring.dcfactory.DCVocabulary;
-import it.polimi.modaclouds.monitoring.dcfactory.kbconnectors.FusekiConnector;
 import it.polimi.modaclouds.monitoring.kb.api.DeserializationException;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.monitoring.kb.api.SerializationException;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,33 +38,51 @@ public class DCFactoriesManager {
 	private Logger logger = LoggerFactory.getLogger(DCFactoriesManager.class);
 
 	private FusekiKBAPI knowledgeBase;
+	private Map<String, List<String>> rulesIdByMetric;
 
 	public DCFactoriesManager(FusekiKBAPI knowledgeBase) {
 		this.knowledgeBase = knowledgeBase;
+		rulesIdByMetric = new HashMap<String, List<String>>();
 	}
 
-	public void uninstallRule(MonitoringRule rule)
-			throws FailedToUninstallRuleException {
+	public synchronized void uninstallRule(MonitoringRule rule) {
 		logger.info("Removing data collectors related to rule {} from KB",
 				rule.getId());
 		try {
-			knowledgeBase.deleteEntitiesByPropertyValue(rule.getId(),
-					DCFields.monitoringRuleId,
-					DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
+			String metricName = rule.getCollectedMetric().getMetricName().toLowerCase();
+			unregisterRuleFromMetric(rule, metricName);
+			if (noRulesRegisteredToMetric(metricName)) {
+				knowledgeBase.deleteEntitiesByPropertyValue(metricName,
+						DCFields.monitoredMetric,
+						DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
+			}
 		} catch (SerializationException e) {
-			throw new FailedToUninstallRuleException(e);
+			logger.error(
+					"Error while deleting data collector related to rule {} from KB",
+					rule.getId(), e);
 		}
 
 	}
 
-	public void installRule(MonitoringRule rule)
+	private boolean noRulesRegisteredToMetric(String metricName) {
+		return rulesIdByMetric.get(metricName) == null || rulesIdByMetric.get(metricName).isEmpty();
+	}
+
+	private void unregisterRuleFromMetric(MonitoringRule rule, String metricName) {
+		List<String> registeredRules = rulesIdByMetric.get(metricName);
+		if (registeredRules != null) {
+			registeredRules.remove(rule.getId());
+		}
+	}
+
+	public synchronized void installRule(MonitoringRule rule)
 			throws RuleInstallationException {
 		logger.info("Adding data collectors related to rule {} to KB",
 				rule.getId());
+		String metricName = rule.getCollectedMetric().getMetricName().toLowerCase();
 		DCMetaData dc = new DCMetaData();
-		dc.setMonitoringRuleId(rule.getId());
 		Util.addParameters(dc, rule.getCollectedMetric().getParameters());
-		dc.setMonitoredMetric(rule.getCollectedMetric().getMetricName());
+		dc.setMonitoredMetric(metricName);
 		for (MonitoredTarget target : rule.getMonitoredTargets()
 				.getMonitoredTargets()) {
 			if (target.getType() != null)
@@ -69,12 +91,22 @@ public class DCFactoriesManager {
 				dc.addMonitoredResourceClass(target.getClazz());
 		}
 		try {
-			dc.setId("dc" + dc.hashCode()); // identical dc won't be persisted
-			knowledgeBase.add(dc, DCFields.id, DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
+			knowledgeBase.add(dc, DCFields.monitoredMetric,
+					DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
+			registerRuleForMetric(rule, metricName);
 		} catch (SerializationException | DeserializationException e) {
 			throw new RuleInstallationException(e);
 		}
 
+	}
+
+	private void registerRuleForMetric(MonitoringRule rule, String metricName) {
+		List<String> registeredRules = rulesIdByMetric.get(metricName);
+		if (registeredRules == null) {
+			registeredRules = new ArrayList<String>();
+			rulesIdByMetric.put(metricName, registeredRules);
+		}
+		registeredRules.add(rule.getId());
 	}
 
 }

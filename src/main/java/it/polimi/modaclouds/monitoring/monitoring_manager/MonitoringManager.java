@@ -30,6 +30,9 @@ import it.polimi.modaclouds.qos_models.schema.Metrics;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,15 +55,13 @@ public class MonitoringManager {
 
 	private Validator validator;
 
-
 	private FusekiKBAPI knowledgeBase;
 
 	public MonitoringManager(Config config) throws Exception {
 		validator = new Validator();
 		knowledgeBase = new FusekiKBAPI(config.getKbUrl());
 		installedRules = new ConcurrentHashMap<String, MonitoringRule>();
-		csparqlEngineManager = new CSPARQLEngineManager(config,
-				knowledgeBase);
+		csparqlEngineManager = new CSPARQLEngineManager(config, knowledgeBase);
 		dcFactoriesManager = new DCFactoriesManager(knowledgeBase);
 
 		logger.info("Uploading ontology to KB");
@@ -70,22 +71,32 @@ public class MonitoringManager {
 	public synchronized void installRules(MonitoringRules rules)
 			throws RuleInstallationException {
 		validate(rules);
-		for (MonitoringRule rule : rules.getMonitoringRules()) {
-			installRule(rule);
+		String installedRules = "";
+		try {
+			for (MonitoringRule rule : rules.getMonitoringRules()) {
+				installRule(rule);
+				installedRules += " " + rule.getId();
+			}
+		} catch (RuleInstallationException e) {
+			throw new RuleInstallationException(
+					"Error while installing rules, only the following rules were successfully installed:"
+							+ installedRules, e);
 		}
 	}
 
 	private void validate(MonitoringRules rules)
 			throws RuleInstallationException {
+		Set<Problem> problems = new HashSet<Problem>();
+		List<MonitoringRule> otherRules = new ArrayList<MonitoringRule>(installedRules.values());
+		otherRules.addAll(rules.getMonitoringRules());
+		MonitoringRule previousRule = null;
 		for (MonitoringRule rule : rules.getMonitoringRules()) {
-			if (installedRules.containsKey(rule.getId()))
-				throw new RuleInstallationException("A rule with id "
-						+ rule.getId() + " is already installed");
+			if (previousRule!=null)
+				otherRules.add(previousRule);
+			otherRules.remove(rule);
+			problems.addAll(validator.validateRule(rule, otherRules));
+			previousRule = rule;
 		}
-		MonitoringRules allrules = new MonitoringRules();
-		allrules.getMonitoringRules().addAll(installedRules.values());
-		allrules.getMonitoringRules().addAll(rules.getMonitoringRules());
-		Set<Problem> problems = validator.validateAllRules(allrules);
 		if (!problems.isEmpty()) {
 			String message = "Rules could not be installed because of the following problems:\n";
 			for (Problem p : problems) {
@@ -102,33 +113,34 @@ public class MonitoringManager {
 		}
 	}
 
-	public synchronized void uninstallRule(String id)
-			throws RuleDoesNotExistException, FailedToUninstallRuleException {
+	public synchronized void uninstallRule(String id) {
 		MonitoringRule rule = installedRules.get(id);
-		if (rule == null)
-			throw new RuleDoesNotExistException();
-		csparqlEngineManager.uninstallRule(rule);
-		dcFactoriesManager.uninstallRule(rule);
-		installedRules.remove(id);
-
-	}
-
-	public synchronized void installRule(MonitoringRule rule)
-			throws RuleInstallationException {
-		if (installedRules.containsKey(rule.getId()))
-			throw new RuleInstallationException("A rule with id "
-					+ rule.getId() + " is already installed");
-		try {
-			csparqlEngineManager.installRule(rule);
-			dcFactoriesManager.installRule(rule);
-			installedRules.put(rule.getId(), rule);
-		} catch (Exception e) {
-			// TODO rollback
-			logger.error("Error while installing rule", e);
-			throw new RuleInstallationException(e);
+		if (rule != null) {
+			dcFactoriesManager.uninstallRule(rule);
+			csparqlEngineManager.uninstallRule(rule);
+			installedRules.remove(id);
+		} else {
+			logger.warn("Specified rule does not exist, nothing was uninstalled");
 		}
 	}
 
+	private void installRule(MonitoringRule rule)
+			throws RuleInstallationException {
+		try {
+			csparqlEngineManager.installRule(rule); // it's better to configure
+													// csparql engine first so
+													// to prepare the stream
+			dcFactoriesManager.installRule(rule);
+			installedRules.put(rule.getId(), rule);
+			logger.info("Rule {} installed successfully", rule.getId());
+		} catch (Exception e) {
+			logger.error("Error while installing rule {}, rolling back...",
+					rule.getId(), e);
+			dcFactoriesManager.uninstallRule(rule);
+			csparqlEngineManager.uninstallRule(rule);
+			throw new RuleInstallationException(e);
+		}
+	}
 
 	public Metrics getMetrics() {
 		Metrics metrics = new Metrics();
