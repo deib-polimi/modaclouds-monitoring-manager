@@ -116,8 +116,8 @@ public class MonitoringManager {
 	public synchronized void uninstallRule(String id) {
 		MonitoringRule rule = installedRules.get(id);
 		if (rule != null) {
-			dcFactoriesManager.uninstallRule(rule);
-			csparqlEngineManager.uninstallRule(rule);
+			dcFactoriesManager.uninstallRule(id);
+			csparqlEngineManager.uninstallRule(id);
 			installedRules.remove(id);
 		} else {
 			logger.warn("Specified rule does not exist, nothing was uninstalled");
@@ -136,8 +136,8 @@ public class MonitoringManager {
 		} catch (Exception e) {
 			logger.error("Error while installing rule {}, rolling back...",
 					rule.getId(), e);
-			dcFactoriesManager.uninstallRule(rule);
-			csparqlEngineManager.uninstallRule(rule);
+			dcFactoriesManager.uninstallRule(rule.getId());
+			csparqlEngineManager.uninstallRule(rule.getId());
 			throw new RuleInstallationException(e);
 		}
 	}

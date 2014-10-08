@@ -16,8 +16,8 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
+import it.polimi.modaclouds.monitoring.dcfactory.DCConfig;
 import it.polimi.modaclouds.monitoring.dcfactory.DCFields;
-import it.polimi.modaclouds.monitoring.dcfactory.DCMetaData;
 import it.polimi.modaclouds.monitoring.dcfactory.DCVocabulary;
 import it.polimi.modaclouds.monitoring.kb.api.DeserializationException;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
@@ -25,9 +25,7 @@ import it.polimi.modaclouds.monitoring.kb.api.SerializationException;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -38,49 +36,52 @@ public class DCFactoriesManager {
 	private Logger logger = LoggerFactory.getLogger(DCFactoriesManager.class);
 
 	private FusekiKBAPI knowledgeBase;
-	private Map<String, List<String>> rulesIdByMetric;
+	private Map<String, DCConfig> dcConfigByRuleId;
 
 	public DCFactoriesManager(FusekiKBAPI knowledgeBase) {
 		this.knowledgeBase = knowledgeBase;
-		rulesIdByMetric = new HashMap<String, List<String>>();
+		dcConfigByRuleId = new HashMap<String, DCConfig>();
 	}
 
-	public synchronized void uninstallRule(MonitoringRule rule) {
-		logger.info("Removing data collectors related to rule {} from KB",
-				rule.getId());
+	public synchronized void uninstallRule(String ruleId) {
+		logger.info(
+				"Removing data collectors configurations related to rule {} from KB",
+				ruleId);
 		try {
-			String metricName = rule.getCollectedMetric().getMetricName().toLowerCase();
-			unregisterRuleFromMetric(rule, metricName);
-			if (noRulesRegisteredToMetric(metricName)) {
-				knowledgeBase.deleteEntitiesByPropertyValue(metricName,
-						DCFields.monitoredMetric,
-						DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
+			DCConfig dcConfig = dcConfigByRuleId.get(ruleId);
+			if (dcConfig != null) {
+				knowledgeBase.deleteEntitiesByPropertyValue(dcConfig.getId(),
+						DCFields.id, DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
+			} else {
+				logger.warn("No dc configuration found for rule {}", ruleId);
 			}
 		} catch (SerializationException e) {
 			logger.error(
 					"Error while deleting data collector related to rule {} from KB",
-					rule.getId(), e);
+					ruleId, e);
 		}
 
-	}
-
-	private boolean noRulesRegisteredToMetric(String metricName) {
-		return rulesIdByMetric.get(metricName) == null || rulesIdByMetric.get(metricName).isEmpty();
-	}
-
-	private void unregisterRuleFromMetric(MonitoringRule rule, String metricName) {
-		List<String> registeredRules = rulesIdByMetric.get(metricName);
-		if (registeredRules != null) {
-			registeredRules.remove(rule.getId());
-		}
 	}
 
 	public synchronized void installRule(MonitoringRule rule)
 			throws RuleInstallationException {
 		logger.info("Adding data collectors related to rule {} to KB",
 				rule.getId());
-		String metricName = rule.getCollectedMetric().getMetricName().toLowerCase();
-		DCMetaData dc = new DCMetaData();
+		DCConfig dc = makeDCConfiguration(rule);
+		try {
+			knowledgeBase.add(dc, DCFields.id,
+					DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
+			dcConfigByRuleId.put(rule.getId(), dc);
+		} catch (SerializationException | DeserializationException e) {
+			throw new RuleInstallationException(e);
+		}
+
+	}
+
+	private DCConfig makeDCConfiguration(MonitoringRule rule) {
+		String metricName = rule.getCollectedMetric().getMetricName()
+				.toLowerCase();
+		DCConfig dc = new DCConfig();
 		Util.addParameters(dc, rule.getCollectedMetric().getParameters());
 		dc.setMonitoredMetric(metricName);
 		for (MonitoredTarget target : rule.getMonitoredTargets()
@@ -90,23 +91,7 @@ public class DCFactoriesManager {
 			if (target.getClazz() != null)
 				dc.addMonitoredResourceClass(target.getClazz());
 		}
-		try {
-			knowledgeBase.add(dc, DCFields.monitoredMetric,
-					DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
-			registerRuleForMetric(rule, metricName);
-		} catch (SerializationException | DeserializationException e) {
-			throw new RuleInstallationException(e);
-		}
-
-	}
-
-	private void registerRuleForMetric(MonitoringRule rule, String metricName) {
-		List<String> registeredRules = rulesIdByMetric.get(metricName);
-		if (registeredRules == null) {
-			registeredRules = new ArrayList<String>();
-			rulesIdByMetric.put(metricName, registeredRules);
-		}
-		registeredRules.add(rule.getId());
+		return dc;
 	}
 
 }

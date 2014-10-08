@@ -17,7 +17,7 @@
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
 import it.polimi.csparqool.FunctionArgs;
-import it.polimi.modaclouds.monitoring.dcfactory.DCMetaData;
+import it.polimi.modaclouds.monitoring.dcfactory.DCConfig;
 import it.polimi.modaclouds.qos_models.schema.Action;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringMetricAggregation;
@@ -143,7 +143,7 @@ public class Util {
 		return args;
 	}
 
-	public static void addParameters(DCMetaData dc,
+	public static void addParameters(DCConfig dc,
 			List<it.polimi.modaclouds.qos_models.schema.Parameter> parameters) {
 		for (it.polimi.modaclouds.qos_models.schema.Parameter p : parameters) {
 			dc.addParameter(p.getName(), p.getValue());

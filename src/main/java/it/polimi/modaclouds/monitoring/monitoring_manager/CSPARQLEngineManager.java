@@ -23,7 +23,7 @@ import it.polimi.csparqool._body;
 import it.polimi.csparqool._graph;
 import it.polimi.csparqool._union;
 import it.polimi.csparqool.graph;
-import it.polimi.modaclouds.monitoring.dcfactory.ddaconnectors.RCSOntology;
+import it.polimi.modaclouds.monitoring.dcfactory.wrappers.DDAOntology;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MOVocabulary;
@@ -63,9 +63,10 @@ public class CSPARQLEngineManager {
 	private Map<String, String> registeredQueriesById;
 	private Map<String, String> registeredStreamsByRuleId;
 	private Map<String, String> registeredQueriesByRuleId;
-	private ConcurrentHashMap<String, String> queryURIByMetric;
-	private ConcurrentHashMap<String, String> metricByObserverId;
+	private Map<String, String> queryURIByMetric;
+	private Map<String, String> metricByObserverId;
 	private String kbURL;
+	private Map<String, MonitoringRule> installedRules;
 
 	public CSPARQLEngineManager(Config config, FusekiKBAPI kb)
 			throws MalformedURLException {
@@ -77,6 +78,7 @@ public class CSPARQLEngineManager {
 		queryURIByMetric = new ConcurrentHashMap<String, String>();
 		metricByObserverId = new ConcurrentHashMap<String, String>();
 		csparqlAPI = new RSP_services_csparql_API(ddaURL.toString());
+		installedRules = new ConcurrentHashMap<String, MonitoringRule>();
 	}
 
 	public void installRule(MonitoringRule rule)
@@ -88,6 +90,7 @@ public class CSPARQLEngineManager {
 			registerInputStream(rule);
 			String queryURI = registerQuery(queryName, csparqlQuery, rule);
 			addObservableMetrics(rule, queryURI);
+			installedRules.put(rule.getId(),rule);
 		} catch (QueryErrorException | MalformedQueryException e) {
 			logger.error("Internal error", e);
 			throw new RuleInstallationException("Internal error", e);
@@ -121,12 +124,12 @@ public class CSPARQLEngineManager {
 				}
 				query.construct(graph
 						.add(CSquery.BLANK_NODE,
-								RCSOntology.metric,
+								DDAOntology.metric,
 								"\""
 										+ Util.getParameterValue(
 												MOVocabulary.metric, action)
 										+ "\"")
-						.add(RCSOntology.resourceId,
+						.add(DDAOntology.resourceId,
 								(Util.getParameterValue(
 										MOVocabulary.resourceId, action)
 										.equals("ID") ? outputResourceIdVariable
@@ -134,8 +137,8 @@ public class CSPARQLEngineManager {
 												+ Util.getParameterValue(
 														MOVocabulary.resourceId,
 														action) + "\""))
-						.add(RCSOntology.value, outputValueVariable)
-						.add(RCSOntology.timestamp, outputTimestampVariable));
+						.add(DDAOntology.value, outputValueVariable)
+						.add(DDAOntology.timestamp, outputTimestampVariable));
 				break;
 			// case MMVocabulary.EnableMonitoringRule:
 			// throw new NotImplementedException("Action " + action.getName()
@@ -186,7 +189,7 @@ public class CSPARQLEngineManager {
 				.setNsPrefix("rdf", RDF.getURI())
 				.setNsPrefix("rdfs", RDFS.getURI())
 				.setNsPrefix(MO.prefix, MO.URI)
-				.setNsPrefix(RCSOntology.prefix, RCSOntology.URI)
+				.setNsPrefix(DDAOntology.prefix, DDAOntology.URI)
 				.setNsPrefix(CSquery.getFunctionsPrefix(),
 						CSquery.getFunctionsURI());
 	}
@@ -204,7 +207,7 @@ public class CSPARQLEngineManager {
 			case QueryVars.INPUT_TIMESTAMP:
 				queryBody.selectFunction(QueryVars.INPUT_TIMESTAMP,
 						Function.TIMESTAMP, QueryVars.DATUM,
-						RCSOntology.shortForm(RCSOntology.resourceId),
+						DDAOntology.shortForm(DDAOntology.resourceId),
 						QueryVars.RESOURCE_ID);
 				break;
 			case QueryVars.OUTPUT:
@@ -272,9 +275,9 @@ public class CSPARQLEngineManager {
 		String groupingClass = Util.getGroupingClass(rule);
 
 		graphPattern
-				.add(QueryVars.DATUM, RCSOntology.resourceId,
+				.add(QueryVars.DATUM, DDAOntology.resourceId,
 						QueryVars.RESOURCE_ID)
-				.add(RCSOntology.value, QueryVars.INPUT)
+				.add(DDAOntology.value, QueryVars.INPUT)
 				.add(QueryVars.RESOURCE, MO.id, QueryVars.RESOURCE_ID);
 
 		_union unionOfTargets = new _union();
@@ -502,29 +505,33 @@ public class CSPARQLEngineManager {
 		return !registeredStreamsByRuleId.values().contains(stream);
 	}
 
-	public void uninstallRule(MonitoringRule rule) {
-		String relatedInstalledQuery = registeredQueriesByRuleId.get(rule
-				.getId());
+	public void uninstallRule(String ruleId) {
+		MonitoringRule rule = installedRules.get(ruleId);
+		if (rule==null) {
+			logger.error("Error while trying to uninstall rule {}: not installed", ruleId);
+			return;
+		}
 		try {
+			String relatedInstalledQuery = registeredQueriesByRuleId.get(ruleId);
 			deleteObservableMetrics(rule);
 			removeObservers(rule);
 			csparqlAPI.unregisterQuery(relatedInstalledQuery);
 			registeredQueriesById.remove(relatedInstalledQuery);
-			registeredQueriesByRuleId.remove(rule.getId());
+			registeredQueriesByRuleId.remove(ruleId);
 
 			String sourceStream = registeredStreamsByRuleId
-					.remove(rule.getId());
+					.remove(ruleId);
 			if (streamIsNotUsed(sourceStream)) {
 				try {
 					csparqlAPI.unregisterStream(sourceStream);
 				} catch (Exception e) {
-					registeredStreamsByRuleId.put(rule.getId(), sourceStream);
+					registeredStreamsByRuleId.put(ruleId, sourceStream);
 					throw e;
 				}
 			}
-
+			installedRules.remove(ruleId);
 		} catch (Exception e) {
-			logger.error("Error while uninstalling rule {}", rule.getId(), e);
+			logger.error("Error while uninstalling rule {}", ruleId, e);
 		}
 	}
 
