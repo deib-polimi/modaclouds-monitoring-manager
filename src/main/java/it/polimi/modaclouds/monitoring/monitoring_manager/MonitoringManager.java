@@ -20,6 +20,7 @@ import it.polimi.modaclouds.monitoring.kb.api.DeserializationException;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.monitoring.kb.api.SerializationException;
 import it.polimi.modaclouds.qos_models.util.Model;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.CloudProvider;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Component;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.InternalComponent;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Location;
@@ -309,7 +310,8 @@ public void uploadModel(Model update) throws SerializationException,
 			MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME));
 	ids.addAll(knowledgeBase.getIds(Method.class,
 			MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME));
-	ids.addAll(knowledgeBase.getIds(Provider.class,
+	ids.addAll(knowledgeBase.getIds(CloudProvider
+			.class,
 			MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME));
 	
 	if (!ids.isEmpty()) {
