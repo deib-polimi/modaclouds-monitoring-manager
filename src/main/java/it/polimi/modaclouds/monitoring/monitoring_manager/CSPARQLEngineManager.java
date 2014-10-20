@@ -162,7 +162,7 @@ public class CSPARQLEngineManager {
 		// TODO are we checking if metric already exist?
 		for (Action action : rule.getActions().getActions()) {
 			if (action.getName().equals(MMVocabulary.OutputMetric)) {
-				String metric = Util.getParameterValue(MOVocabulary.name,
+				String metric = Util.getParameterValue(MOVocabulary.metric,
 						action);
 				queryURIByMetric.put(metric.toLowerCase(), queryURI);
 			}
@@ -377,7 +377,7 @@ public class CSPARQLEngineManager {
 	private void deleteObservableMetrics(MonitoringRule rule) {
 		for (Action action : rule.getActions().getActions()) {
 			if (action.getName().equals(MMVocabulary.OutputMetric)) {
-				String metric = Util.getParameterValue(MOVocabulary.name,
+				String metric = Util.getParameterValue(MOVocabulary.metric,
 						action);
 				queryURIByMetric.remove(metric.toLowerCase());
 			}
@@ -486,7 +486,7 @@ public class CSPARQLEngineManager {
 		Set<String> observersToRemove = new HashSet<String>();
 		for (Action action : rule.getActions().getActions()) {
 			if (action.getName().equals(MMVocabulary.OutputMetric)) {
-				String metric = Util.getParameterValue(MOVocabulary.name,
+				String metric = Util.getParameterValue(MOVocabulary.metric,
 						action);
 				for (String observerId : metricByObserverId.keySet()) {
 					if (metricByObserverId.get(observerId).equals(metric)) {
