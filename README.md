@@ -21,6 +21,11 @@ Take a look at the [documentation table of contents](doc/TOC.md).
 
 ## Change List
 
+v1.2:
+* internalComponents can now be a monitoredTarget
+* system properties can be used now besides environemnt variables
+* inheritance was removed
+
 v1.1.2:
 
 * Fixed a bug that didn't allow to upload a new model the first time using the PUT method
