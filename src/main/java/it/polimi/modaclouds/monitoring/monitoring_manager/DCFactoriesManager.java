@@ -16,15 +16,17 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
+import it.polimi.modaclouds.monitoring.dcfactory.DCConfig;
 import it.polimi.modaclouds.monitoring.dcfactory.DCFields;
-import it.polimi.modaclouds.monitoring.dcfactory.DCMetaData;
 import it.polimi.modaclouds.monitoring.dcfactory.DCVocabulary;
-import it.polimi.modaclouds.monitoring.dcfactory.kbconnectors.FusekiConnector;
 import it.polimi.modaclouds.monitoring.kb.api.DeserializationException;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.monitoring.kb.api.SerializationException;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,33 +36,54 @@ public class DCFactoriesManager {
 	private Logger logger = LoggerFactory.getLogger(DCFactoriesManager.class);
 
 	private FusekiKBAPI knowledgeBase;
+	private Map<String, DCConfig> dcConfigByRuleId;
 
 	public DCFactoriesManager(FusekiKBAPI knowledgeBase) {
 		this.knowledgeBase = knowledgeBase;
+		dcConfigByRuleId = new HashMap<String, DCConfig>();
 	}
 
-	public void uninstallRule(MonitoringRule rule)
-			throws FailedToUninstallRuleException {
-		logger.info("Removing data collectors related to rule {} from KB",
-				rule.getId());
+	public synchronized void uninstallRule(String ruleId) {
+		logger.info(
+				"Removing data collectors configurations related to rule {} from KB",
+				ruleId);
 		try {
-			knowledgeBase.deleteEntitiesByPropertyValue(rule.getId(),
-					DCFields.monitoringRuleId,
-					DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
+			DCConfig dcConfig = dcConfigByRuleId.get(ruleId);
+			if (dcConfig != null) {
+				knowledgeBase.deleteEntitiesByPropertyValue(dcConfig.getId(),
+						DCFields.id, DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
+			} else {
+				logger.warn("No dc configuration found for rule {}", ruleId);
+			}
 		} catch (SerializationException e) {
-			throw new FailedToUninstallRuleException(e);
+			logger.error(
+					"Error while deleting data collector related to rule {} from KB",
+					ruleId, e);
 		}
 
 	}
 
-	public void installRule(MonitoringRule rule)
+	public synchronized void installRule(MonitoringRule rule)
 			throws RuleInstallationException {
 		logger.info("Adding data collectors related to rule {} to KB",
 				rule.getId());
-		DCMetaData dc = new DCMetaData();
-		dc.setMonitoringRuleId(rule.getId());
+		DCConfig dc = makeDCConfiguration(rule);
+		try {
+			knowledgeBase.add(dc, DCFields.id,
+					DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
+			dcConfigByRuleId.put(rule.getId(), dc);
+		} catch (SerializationException | DeserializationException e) {
+			throw new RuleInstallationException(e);
+		}
+
+	}
+
+	private DCConfig makeDCConfiguration(MonitoringRule rule) {
+		String metricName = rule.getCollectedMetric().getMetricName()
+				.toLowerCase();
+		DCConfig dc = new DCConfig();
 		Util.addParameters(dc, rule.getCollectedMetric().getParameters());
-		dc.setMonitoredMetric(rule.getCollectedMetric().getMetricName());
+		dc.setMonitoredMetric(metricName);
 		for (MonitoredTarget target : rule.getMonitoredTargets()
 				.getMonitoredTargets()) {
 			if (target.getType() != null)
@@ -68,13 +91,7 @@ public class DCFactoriesManager {
 			if (target.getClazz() != null)
 				dc.addMonitoredResourceClass(target.getClazz());
 		}
-		try {
-			dc.setId("dc" + dc.hashCode()); // identical dc won't be persisted
-			knowledgeBase.add(dc, DCFields.id, DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
-		} catch (SerializationException | DeserializationException e) {
-			throw new RuleInstallationException(e);
-		}
-
+		return dc;
 	}
 
 }
