@@ -24,6 +24,7 @@ Version 1
 - **[<code>POST</code> /model/resources](rest/model/POST-model-resources.md)**
 - **[<code>PUT</code> /model/resources](rest/model/PUT-model-resources.md)**
 - **[<code>DELETE</code> /model/resources/:id](rest/model/DELETE-model-resources-id.md)**
+- **[<code>GET</code> /model/resources/:id](rest/model/GET-model-resources-id.md)**
 
 ## Java API
 

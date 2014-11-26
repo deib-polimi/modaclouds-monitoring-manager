@@ -193,4 +193,8 @@ public class MonitoringManager {
 				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 	}
 
+	public Resource getInstance(String id) throws DeserializationException {
+		return (Resource) knowledgeBase.getEntityById(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+	}
+
 }
