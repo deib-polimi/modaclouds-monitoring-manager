@@ -29,7 +29,7 @@ v1.3:
 * updated to [qos-models 2.2](https://github.com/deib-polimi/modaclouds-qos-models/releases/tag/v2.2)
 * queries are now created according to the new qos-models 2.2 version of monitoring rules:
   * metricAggregation is optional
-  * outputMetric action now accepts 3 parameters (resourceId, metric, value) 
+* outputMetric action in monitoring rules now accepts 3 parameters (resourceId, metric, value), check the updated [list](https://github.com/deib-polimi/modaclouds-qos-models/blob/master/src/main/resources/monitoring_actions.xml)
 * sda are now just observers & data collectors from the monitoring manager perspective
 * bug fixes
 
