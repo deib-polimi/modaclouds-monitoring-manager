@@ -21,6 +21,18 @@ Take a look at the [documentation table of contents](doc/TOC.md).
 
 ## Change List
 
+v1.3:
+* implemented API: `GET /model/resources/:id`
+* updated to [csparqool 1.2.1](https://github.com/deib-polimi/csparqool/releases/tag/v1.2.1)
+* updated to [knowledge-base-api 2.2](https://github.com/deib-polimi/modaclouds-knowledge-base-api/releases/tag/v2.2)
+* updatad to [data-collector-factory 0.3](https://github.com/deib-polimi/modaclouds-data-collector-factory/releases/tag/v0.3)
+* updated to [qos-models 2.2](https://github.com/deib-polimi/modaclouds-qos-models/releases/tag/v2.2)
+* queries are now created according to the new qos-models 2.2 version of monitoring rules:
+  * metricAggregation is optional
+  * outputMetric action now accepts 3 parameters (resourceId, metric, value) 
+* sda are now just observers & data collectors from the monitoring manager perspective
+* bug fixes
+
 v1.2:
 * internalComponents can now be a monitoredTarget
 * system properties can be used now besides environemnt variables
