@@ -21,6 +21,11 @@ Take a look at the [documentation table of contents](doc/TOC.md).
 
 ## Change List
 
+v1.3.1:
+* packaged together with executable
+* package assembly automated
+* updated to [data-collector-factory 0.3.1](https://github.com/deib-polimi/modaclouds-data-collector-factory/releases/tag/v0.3.1)
+
 v1.3:
 * implemented API: `GET /model/resources/:id`
 * updated to [csparqool 1.2.1](https://github.com/deib-polimi/csparqool/releases/tag/v1.2.1)

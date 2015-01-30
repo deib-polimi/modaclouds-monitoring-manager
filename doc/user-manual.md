@@ -5,19 +5,9 @@
 ## Installation
 
 Requirements:
-* Java 7 JDK
-* Apache Maven 3+
-* git
+* JRE 7
 
-```
-git clone https://github.com/deib-polimi/modaclouds-monitoring-manager.git
-cd modaclouds-monitoring-manager
-git checkout tags/v1.1.2
-mvn package
-cd ..
-```
-
-Set the following environment variables:
+Set the following environment variables (or system properties):
 
 ```
 MODACLOUDS_KNOWLEDGEBASE_ENDPOINT_IP=<KB_IP> (e.g., "127.0.0.1")
@@ -31,7 +21,6 @@ MODACLOUDS_MATLAB_SDA_PORT=<MATLAB_SDA_PORT> (e.g., "8176")
 MODACLOUDS_WEKA_SDA_IP=<WEKA_SDA_IP> (e.g., "127.0.0.1")
 MODACLOUDS_WEKA_SDA_PORT=<WEKA_SDA_PORT> (e.g., "8177")
 ```
-
 
 
 ## Usage
