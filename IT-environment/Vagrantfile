@@ -11,13 +11,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.network "forwarded_port", guest: 3030, host: 3030
     config.vm.network "forwarded_port", guest: 8175, host: 8175
 
-    config.vm.provision "docker" do |d|
-      d.build_image "/vagrant/kb", args: "-t modaclouds/kb"
-      d.build_image "/vagrant/dda", args: "-t modaclouds/dda"
-    end
+    # config.vm.provision "docker" do |d|
+    #   d.build_image "/vagrant/kb", args: "-t modaclouds/kb"
+    #   d.build_image "/vagrant/dda", args: "-t modaclouds/dda"
+    # end
     config.vm.provision "docker", run: "always" do |d|
-      d.run "modaclouds/kb", args: "-p 3030:3030"
-      d.run "modaclouds/dda", args: "-p 8175:8175"
+      d.run "mmiglier/modaclouds-kb", args: "-p 3030:3030"
+      d.run "mmiglier/modaclouds-dda", args: "-p 8175:8175"
     end
 
     # http://fgrehm.viewdocs.io/vagrant-cachier
