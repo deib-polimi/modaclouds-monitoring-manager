@@ -2,21 +2,19 @@
 
 #User Manual
 
-## Usage
-
 The monitoring manager can be configured by means of different options (latters replaces the formers):
 * Default Configuration
 * Environment Variables
 * System Properties
 * CLI Arguments
 
-### Default Configuration
+## Default Configuration
 
 * DDA URL: `http://127.0.0.1:8175`
 * KB URL: `http://127.0.0.1:3030/modaclouds/kb`
 * Monitoring Manager Port: `8170`
 
-### Environment Variables
+## Environment Variables
 
 ```
 MODACLOUDS_MONITORING_DDA_ENDPOINT_IP
@@ -32,11 +30,11 @@ where:
 * KB URL: `http://${MODACLOUDS_KNOWLEDGEBASE_ENDPOINT_IP}:${MODACLOUDS_KNOWLEDGEBASE_ENDPOINT_PORT}${MODACLOUDS_KNOWLEDGEBASE_DATASET_PATH}`
 * Monitoring Manager Port: `${MODACLOUDS_MONITORING_MANAGER_PORT}`
 
-### System Properties
+## System Properties
 
 Same names used for [Environment Variables]{#environment-variables}.
 
-### CLI Arguments
+## CLI Arguments
 
 Usage available by running `./monitoring-manager -help`:
 
