@@ -36,12 +36,17 @@
 	</licenses>
 
 	<properties>
-		<!-- <runSuite>**/AllTests.class</runSuite> -->
 		<github.global.server>github</github.global.server>
 		<github.repository.name>modaclouds-monitoring-manager</github.repository.name>
 		<github.user.name>deib-polimi</github.user.name>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		
+		<!-- Integration Test Environment - Vagrant required -->
+		<skipIT>false</skipIT>
+		<skipVagrantUp>false</skipVagrantUp>
+		<skipVagrantHalt>false</skipVagrantHalt>
+		<skipVagrantDestroy>true</skipVagrantDestroy>
 	</properties>
 
 	<distributionManagement>
@@ -203,6 +208,12 @@
 			<artifactId>gson</artifactId>
 			<version>2.2.4</version>
 		</dependency>
+		<dependency>
+			<groupId>com.jayway.restassured</groupId>
+			<artifactId>rest-assured</artifactId>
+			<version>2.4.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -361,41 +372,92 @@
 				</executions>
 			</plugin>
 			<plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.1.1</version>
-                <executions>
-                    <execution>
-                        <id>start-vagrant-vm</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <workingDirectory>IT-environment</workingDirectory>
-                            <executable>vagrant</executable>
-                            <arguments>
-                                <argument>up</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>destroy-vagrant-vm</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <workingDirectory>IT-environment</workingDirectory>
-                            <executable>vagrant</executable>
-                            <arguments>
-                                <argument>destroy</argument>
-                                <argument>--force</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.1.1</version>
+				<executions>
+					<execution>
+						<id>start-vagrant-vm</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<workingDirectory>IT-environment</workingDirectory>
+							<executable>vagrant</executable>
+							<arguments>
+								<argument>up</argument>
+							</arguments>
+							<skip>${skipVagrantUp}</skip>
+						</configuration>
+					</execution>
+					<execution>
+						<id>halt-vagrant-vm</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<workingDirectory>IT-environment</workingDirectory>
+							<executable>vagrant</executable>
+							<arguments>
+								<argument>halt</argument>
+							</arguments>
+							<skip>${skipVagrantHalt}</skip>
+						</configuration>
+					</execution>
+					<execution>
+						<id>destroy-vagrant-vm</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<workingDirectory>IT-environment</workingDirectory>
+							<executable>vagrant</executable>
+							<arguments>
+								<argument>destroy</argument>
+								<argument>--force</argument>
+							</arguments>
+							<skip>${skipVagrantDestroy}</skip>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin> <!-- Wait 10 seconds before dda and kb are up -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<configuration>
+					<tasks>
+						<sleep seconds="10" />
+					</tasks>
+				</configuration>
+				<executions>
+					<execution>
+						<id>sleep-for-10-seconds</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.18.1</version>
+				<configuration>
+					<skipTests>${skipIT}</skipTests>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>
