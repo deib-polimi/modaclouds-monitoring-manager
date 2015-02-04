@@ -32,7 +32,7 @@ where:
 
 ## System Properties
 
-Same names used for [Environment Variables]{#environment-variables}.
+Same names used for [Environment Variables](#EnvironmentVariables).
 
 ## CLI Arguments
 
