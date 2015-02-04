@@ -16,33 +16,66 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
-import static org.junit.Assert.*;
-import static com.jayway.restassured.RestAssured.*;
-import static com.jayway.restassured.matcher.RestAssuredMatchers.*;
-import static org.hamcrest.Matchers.*;
-import it.polimi.modaclouds.monitoring.monitoring_manager.Config;
-import it.polimi.modaclouds.monitoring.monitoring_manager.ConfigurationException;
-import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
+import static com.jayway.restassured.RestAssured.given;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MonitoringPlatformIT {
-	
-//	@BeforeClass
-//	public static void setupMM() throws Exception{
-//		Config config = Config.getInstance();
-//		MonitoringManager mm = new MonitoringManager(config);
-//	}
+
+	// @BeforeClass
+	// public static void setupMM() throws Exception{
+	// Config config = Config.getInstance();
+	// MonitoringManager mm = new MonitoringManager(config);
+	// }
+
+	private Logger logger = LoggerFactory.getLogger(MonitoringPlatformIT.class);
 
 	@Test
-	public void kbIsUp() {
-		given().port(3030).when().get("/").then().statusCode(200);
+	public void kbIsUp() throws InterruptedException {
+		if (!serviceIsUp(3030, "/", 3, "KB"))
+			fail();
+		int statusCode = given().port(3030).get("/").statusCode();
+		assertEquals(statusCode, 200);
 	}
-	
+
 	@Test
-	public void ddaIsUp() {
-		given().port(8175).when().get("/queries").then().statusCode(200);
+	public void ddaIsUp() throws InterruptedException {
+		if (!serviceIsUp(8175, "/queries", 3, "DDA"))
+			fail();
+		int statusCode = given().port(8175).get("/queries").statusCode();
+		assertEquals(statusCode, 200);
+	}
+
+	private boolean serviceIsUp(int port, String path) {
+		boolean isUp = true;
+		try {
+			given().port(port).get(path);
+		} catch (Exception e) {
+			isUp = false;
+		}
+		return isUp;
+	}
+
+	private boolean serviceIsUp(int port, String path, int retry,
+			String serviceName) {
+		while (!serviceIsUp(port, path)) {
+			if (retry <= 0) {
+				logger.error("{} unreachable", serviceName);
+				return false;
+			}
+			logger.info("{}: {} unreachable, retrying in 5 seconds...",
+					--retry, serviceName);
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				fail();
+			}
+		}
+		return true;
 	}
 
 }

@@ -429,24 +429,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin> <!-- Wait 10 seconds before dda and kb are up -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<configuration>
-					<tasks>
-						<sleep seconds="10" />
-					</tasks>
-				</configuration>
-				<executions>
-					<execution>
-						<id>sleep-for-10-seconds</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
