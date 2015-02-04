@@ -21,6 +21,10 @@ Take a look at the [documentation table of contents](doc/TOC.md).
 
 ## Change List
 
+v1.3.3:
+* multiple configuration options added, see the [doc](https://github.com/deib-polimi/modaclouds-monitoring-manager/blob/master/doc/user-manual.md#usage)
+* updated to [qos-models 2.2.1](https://github.com/deib-polimi/modaclouds-qos-models/releases/tag/v2.2.1)
+
 v1.3.1:
 * packaged together with executable
 * package assembly automated
