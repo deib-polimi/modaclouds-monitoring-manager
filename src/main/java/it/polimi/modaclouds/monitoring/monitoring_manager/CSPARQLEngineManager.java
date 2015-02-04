@@ -369,7 +369,7 @@ public class CSPARQLEngineManager {
 		return graphPattern;
 	}
 
-	private URL createURL(String address, String port)
+	private URL createURL(String address, int port)
 			throws MalformedURLException {
 		return new URL("http://" + cleanAddress(address) + ":" + port);
 	}

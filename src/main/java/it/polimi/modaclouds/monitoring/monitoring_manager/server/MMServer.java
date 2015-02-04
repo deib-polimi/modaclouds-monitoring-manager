@@ -20,7 +20,7 @@ import it.polimi.modaclouds.monitoring.monitoring_manager.Config;
 import it.polimi.modaclouds.monitoring.monitoring_manager.ConfigurationException;
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
 
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.jena.atlas.web.HttpException;
 import org.restlet.Application;
 import org.restlet.Component;
 import org.restlet.Restlet;
@@ -38,29 +38,37 @@ public class MMServer extends Application {
 	private static Logger logger = LoggerFactory.getLogger(MMServer.class);
 
 	public static void main(String[] args) {
+
 		
-		Config config;
 		try {
-			config = Config.getInstance();
+			Config.init(args);
 		} catch (ConfigurationException e) {
-			logger.error("Environment variables not set correctly", e);
+			System.err.println("Environment variables not set correctly: " + e.getMessage());
+			System.err.println("Run \"monitoring-manager -help\" for help");
 			return;
 		}
+		if (Config.getInstance().isHelp()) {
+			System.out.println(Config.usage);
+			return;
+		}
+		
+		logger.info("Current configuration:\n{}", Config.getInstance().toString());
 
 		try {
-			manager = new MonitoringManager(config);
+			manager = new MonitoringManager(Config.getInstance());
 
 			System.setProperty("org.restlet.engine.loggerFacadeClass",
 					"org.restlet.ext.slf4j.Slf4jLoggerFacade");
 			component = new Component();
-			component.getServers().add(Protocol.HTTP,
-					Integer.parseInt(config.getMmPort()));
+			component.getServers().add(Protocol.HTTP, Config.getInstance().getMmPort());
 			component.getClients().add(Protocol.FILE);
 
 			MMServer mmServer = new MMServer();
 			component.getDefaultHost().attach("", mmServer);
 
 			component.start();
+		} catch (HttpException e) {
+			logger.error("Could not connect to Knowledge Base: {}", e.getMessage());
 		} catch (Exception e) {
 			logger.error("Unknown error", e);
 		}
@@ -97,9 +105,11 @@ public class MMServer extends Application {
 		router.attach(
 				"/" + apiVersion + "/metrics/{metricname}/observers/{id}",
 				SingleObserverDataServer.class);
-		
-		router.attach("/"+ apiVersion +"/model/resources", MultipleResourcesDataServer.class);
-		router.attach("/"+ apiVersion +"/model/resources/{id}", SingleResourceDataServer.class);
+
+		router.attach("/" + apiVersion + "/model/resources",
+				MultipleResourcesDataServer.class);
+		router.attach("/" + apiVersion + "/model/resources/{id}",
+				SingleResourceDataServer.class);
 
 		return router;
 	}
