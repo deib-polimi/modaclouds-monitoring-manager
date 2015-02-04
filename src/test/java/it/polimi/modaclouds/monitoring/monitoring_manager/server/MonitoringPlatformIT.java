@@ -1,0 +1,48 @@
+/**
+ * Copyright 2014 deib-polimi
+ * Contact: deib-polimi <marco.miglierina@polimi.it>
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+package it.polimi.modaclouds.monitoring.monitoring_manager.server;
+
+import static org.junit.Assert.*;
+import static com.jayway.restassured.RestAssured.*;
+import static com.jayway.restassured.matcher.RestAssuredMatchers.*;
+import static org.hamcrest.Matchers.*;
+import it.polimi.modaclouds.monitoring.monitoring_manager.Config;
+import it.polimi.modaclouds.monitoring.monitoring_manager.ConfigurationException;
+import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class MonitoringPlatformIT {
+	
+//	@BeforeClass
+//	public static void setupMM() throws Exception{
+//		Config config = Config.getInstance();
+//		MonitoringManager mm = new MonitoringManager(config);
+//	}
+
+	@Test
+	public void kbIsUp() {
+		given().port(3030).when().get("/").then().statusCode(200);
+	}
+	
+	@Test
+	public void ddaIsUp() {
+		given().port(8175).when().get("/queries").then().statusCode(200);
+	}
+
+}
