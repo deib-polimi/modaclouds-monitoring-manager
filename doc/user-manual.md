@@ -7,7 +7,7 @@
 * DDA URL: the Deterministic Data Analzyer endpoint
 * KB URL: the Knowledge Base endpoint
 * Monitoring Manager Port: the port the Monitoring Mager should listen to
-* Monitoring metrics file: the xml file list of metrics used for validating monitoring rules. The list should contain all metrics data collectors can provide. The file should be validated by the [metrics_schema](https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/master/metamodels/commons/metrics_schema.xsd). [default list](https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/master/src/main/resources/monitoring_metrics.xml) can be overridden by a custom one either using a local file or a public URL.
+* Monitoring metrics file: the xml file list of metrics used for validating monitoring rules. The list should contain all metrics data collectors can provide. The file should be validated by the [metrics_schema](https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/master/metamodels/commons/metrics_schema.xsd).The [default list](https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/master/src/main/resources/monitoring_metrics.xml) can be overridden by a custom one either using a local file or a public URL.
 * Upload ontology to KB: uploading the ontology to the KB can be disabled. This can be useful if the ontology is uploaded in a different way or is already in the KB.
 
 ## How to configure
