@@ -25,6 +25,7 @@ import it.polimi.csparqool._union;
 import it.polimi.csparqool.graph;
 import it.polimi.modaclouds.monitoring.dcfactory.wrappers.DDAOntology;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
+import it.polimi.modaclouds.monitoring.monitoring_manager.configuration.ManagerConfig;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MOVocabulary;
 import it.polimi.modaclouds.qos_models.schema.Action;
@@ -68,7 +69,7 @@ public class CSPARQLEngineManager {
 	private String kbURL;
 	private Map<String, MonitoringRule> installedRules;
 
-	public CSPARQLEngineManager(Config config, FusekiKBAPI kb)
+	public CSPARQLEngineManager(ManagerConfig config, FusekiKBAPI kb)
 			throws MalformedURLException {
 		this.kbURL = config.getKbUrl();
 		ddaURL = createURL(config.getDdaIP(), config.getDdaPort());

@@ -14,16 +14,24 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package it.polimi.modaclouds.monitoring.monitoring_manager;
+package it.polimi.modaclouds.monitoring.monitoring_manager.configuration;
 
-public class ConfigurationException extends Exception {
+import org.junit.Test;
 
-	public ConfigurationException(String message) {
-		super(message);
+import com.beust.jcommander.ParameterException;
+
+public class FileExistsValidatorTest {
+
+	@Test
+	public void shouldValidateValidURL() {
+		FileExistsValidator validator = new FileExistsValidator();
+		validator.validate("whatever","https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/v2.2.1/src/main/resources/monitoring_metrics.xml");
 	}
-
-	public ConfigurationException(String message, Exception cause) {
-		super(message,cause);
+	
+	@Test(expected = ParameterException.class)
+	public void shouldNotValidateInvalidURL() {
+		FileExistsValidator validator = new FileExistsValidator();
+		validator.validate("whatever","notvalidurl");
 	}
 
 }

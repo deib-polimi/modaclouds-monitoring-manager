@@ -16,9 +16,9 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
-import it.polimi.modaclouds.monitoring.monitoring_manager.Config;
 import it.polimi.modaclouds.monitoring.monitoring_manager.ConfigurationException;
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
+import it.polimi.modaclouds.monitoring.monitoring_manager.configuration.ManagerConfig;
 
 import org.apache.jena.atlas.web.HttpException;
 import org.restlet.Application;
@@ -41,26 +41,26 @@ public class MMServer extends Application {
 
 		
 		try {
-			Config.init(args);
+			ManagerConfig.init(args);
 		} catch (ConfigurationException e) {
-			System.err.println("Environment variables not set correctly: " + e.getMessage());
+			System.err.println("Configuration problem: " + e.getMessage());
 			System.err.println("Run \"monitoring-manager -help\" for help");
 			return;
 		}
-		if (Config.getInstance().isHelp()) {
-			System.out.println(Config.usage);
+		if (ManagerConfig.getInstance().isHelp()) {
+			System.out.println(ManagerConfig.usage);
 			return;
 		}
 		
-		logger.info("Current configuration:\n{}", Config.getInstance().toString());
+		logger.info("Current configuration:\n{}", ManagerConfig.getInstance().toString());
 
 		try {
-			manager = new MonitoringManager(Config.getInstance());
+			manager = new MonitoringManager(ManagerConfig.getInstance());
 
 			System.setProperty("org.restlet.engine.loggerFacadeClass",
 					"org.restlet.ext.slf4j.Slf4jLoggerFacade");
 			component = new Component();
-			component.getServers().add(Protocol.HTTP, Config.getInstance().getMmPort());
+			component.getServers().add(Protocol.HTTP, ManagerConfig.getInstance().getMmPort());
 			component.getClients().add(Protocol.FILE);
 
 			MMServer mmServer = new MMServer();
@@ -69,6 +69,8 @@ public class MMServer extends Application {
 			component.start();
 		} catch (HttpException e) {
 			logger.error("Could not connect to Knowledge Base: {}", e.getMessage());
+		} catch (ConfigurationException e) {
+			logger.error("Configuration problem: {}", e.getMessage());
 		} catch (Exception e) {
 			logger.error("Unknown error", e);
 		}

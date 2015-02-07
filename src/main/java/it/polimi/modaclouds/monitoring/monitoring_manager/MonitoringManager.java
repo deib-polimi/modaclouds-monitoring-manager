@@ -19,6 +19,7 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 import it.polimi.modaclouds.monitoring.kb.api.DeserializationException;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.monitoring.kb.api.SerializationException;
+import it.polimi.modaclouds.monitoring.monitoring_manager.configuration.ManagerConfig;
 import it.polimi.modaclouds.monitoring.monitoring_manager.server.Model;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MOVocabulary;
@@ -29,13 +30,22 @@ import it.polimi.modaclouds.qos_models.schema.Metric;
 import it.polimi.modaclouds.qos_models.schema.Metrics;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
+import it.polimi.modaclouds.qos_models.util.Config;
+import it.polimi.modaclouds.qos_models.util.XMLHelper;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,15 +67,19 @@ public class MonitoringManager {
 
 	private FusekiKBAPI knowledgeBase;
 
-	public MonitoringManager(Config config) throws Exception {
+	public MonitoringManager(ManagerConfig config) throws Exception {
+		Config.setDefaultConfiguration(null, null, null, null,
+				config.getMonitoringMetrics(), null);
 		validator = new Validator();
 		knowledgeBase = new FusekiKBAPI(config.getKbUrl());
 		installedRules = new ConcurrentHashMap<String, MonitoringRule>();
 		csparqlEngineManager = new CSPARQLEngineManager(config, knowledgeBase);
 		dcFactoriesManager = new DCFactoriesManager(knowledgeBase);
 
-		logger.info("Uploading ontology to KB");
-		knowledgeBase.uploadOntology(MO.model, MODEL_GRAPH_NAME);
+		if (config.isUploadOntology()) {
+			logger.info("Uploading ontology to KB");
+			knowledgeBase.uploadOntology(MO.model, MODEL_GRAPH_NAME);
+		}
 	}
 
 	public synchronized void installRules(MonitoringRules rules)
@@ -87,11 +101,12 @@ public class MonitoringManager {
 	private void validate(MonitoringRules rules)
 			throws RuleInstallationException {
 		Set<Problem> problems = new HashSet<Problem>();
-		List<MonitoringRule> otherRules = new ArrayList<MonitoringRule>(installedRules.values());
+		List<MonitoringRule> otherRules = new ArrayList<MonitoringRule>(
+				installedRules.values());
 		otherRules.addAll(rules.getMonitoringRules());
 		MonitoringRule previousRule = null;
 		for (MonitoringRule rule : rules.getMonitoringRules()) {
-			if (previousRule!=null)
+			if (previousRule != null)
 				otherRules.add(previousRule);
 			otherRules.remove(rule);
 			problems.addAll(validator.validateRule(rule, otherRules));
@@ -194,7 +209,8 @@ public class MonitoringManager {
 	}
 
 	public Resource getInstance(String id) throws DeserializationException {
-		return (Resource) knowledgeBase.getEntityById(id, MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+		return (Resource) knowledgeBase.getEntityById(id,
+				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 	}
 
 }

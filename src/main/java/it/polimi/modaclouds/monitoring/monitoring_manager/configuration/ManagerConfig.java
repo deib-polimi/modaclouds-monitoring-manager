@@ -14,7 +14,20 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package it.polimi.modaclouds.monitoring.monitoring_manager;
+package it.polimi.modaclouds.monitoring.monitoring_manager.configuration;
+
+import it.polimi.modaclouds.monitoring.monitoring_manager.ConfigurationException;
+import it.polimi.modaclouds.monitoring.monitoring_manager.Env;
+import it.polimi.modaclouds.qos_models.schema.Metrics;
+import it.polimi.modaclouds.qos_models.util.XMLHelper;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.validator.routines.UrlValidator;
 
@@ -22,13 +35,13 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
-public class Config {
+public class ManagerConfig {
 
-	private static Config _instance = null;
+	private static ManagerConfig _instance = null;
 	public static String usage = null;
 
 	public static void init(String[] CLIargs) throws ConfigurationException {
-		_instance = new Config();
+		_instance = new ManagerConfig();
 		if (CLIargs != null) {
 			StringBuilder stringBuilder = new StringBuilder();
 			try {
@@ -38,19 +51,21 @@ public class Config {
 			} catch (ParameterException e) {
 				throw new ConfigurationException(e.getMessage());
 			}
+			_instance.initMonitoringMetrics();
 			usage = stringBuilder.toString();
 		}
 	}
 
 	public static void init() throws ConfigurationException {
-		_instance = new Config();
+		_instance = new ManagerConfig();
+		_instance.initMonitoringMetrics();
 	}
 
-	public static Config getInstance() {
+	public static ManagerConfig getInstance() {
 		return _instance;
 	}
 
-	private Config() throws ConfigurationException {
+	private ManagerConfig() throws ConfigurationException {
 		UrlValidator validator = new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS);
 
 		try {
@@ -64,6 +79,11 @@ public class Config {
 			throw new ConfigurationException(
 					"The chosen port is not a valid number");
 		}
+
+		monitoringMetricsFileName = getEnvVar(
+				Env.MODACLOUDS_MONITORING_MONITORING_METRICS_FILE, null);
+		uploadOntology = Boolean.parseBoolean(getEnvVar(
+				Env.MODACLOUDS_MONITORING_UPLOAD_ONTOLOGY, "true"));
 
 		ddaIP = getEnvVar(Env.MODACLOUDS_MONITORING_DDA_ENDPOINT_IP,
 				"127.0.0.1");
@@ -104,6 +124,23 @@ public class Config {
 
 	@Parameter(names = "-mmport", description = "Monitoring Manager endpoint port")
 	private int mmPort;
+
+	@Parameter(names = "-uploadontology", description = "Upload ontology to kb at startup", arity = 1)
+	private boolean uploadOntology;
+
+	@Parameter(names = "-validmetrics", description = "The xml file containing the list of valid metrics. "
+			+ "Will overwrite default ones", validateWith = FileExistsValidator.class)
+	private String monitoringMetricsFileName;
+
+	private Metrics monitoringMetrics;
+
+	public String getMonitoringMetricsFileName() {
+		return monitoringMetricsFileName;
+	}
+
+	public boolean isUploadOntology() {
+		return uploadOntology;
+	}
 
 	public boolean isHelp() {
 		return help;
@@ -184,8 +221,68 @@ public class Config {
 
 	@Override
 	public String toString() {
-		return "DDA URL: " + ddaUrl + "\nKB URL: " + kbUrl
-				+ "\nMonitoring Manager Port: " + mmPort;
+		return "DDA URL: "
+				+ ddaUrl
+				+ "\n"
+				+ "KB URL: "
+				+ kbUrl
+				+ "\n"
+				+ "Monitoring Manager Port: "
+				+ mmPort
+				+ "\n"
+				+ "Upload ontology to KB: "
+				+ uploadOntology
+				+ (monitoringMetricsFileName == null ? ""
+						: "\nMonitoring metrics file: "
+								+ monitoringMetricsFileName);
+	}
+
+	private void initMonitoringMetrics() throws ConfigurationException {
+		if (monitoringMetricsFileName != null) {
+			InputStream is = null;
+			try {
+				is = new FileInputStream(monitoringMetricsFileName);
+				monitoringMetrics = unmarshallMonitoringMetrics(is);
+			} catch (FileNotFoundException e) {
+				try {
+					is = new URL(monitoringMetricsFileName).openStream();
+					monitoringMetrics = unmarshallMonitoringMetrics(is);
+				} catch (IOException e1) {
+					throw new ConfigurationException("File "
+							+ monitoringMetricsFileName + " does not exist!",
+							e1);
+				}
+			} finally {
+				close(is);
+			}
+		}
+	}
+
+	private Metrics unmarshallMonitoringMetrics(InputStream is)
+			throws ConfigurationException {
+		Metrics metrics;
+		try {
+			metrics = XMLHelper.deserialize(is, Metrics.class);
+		} catch (JAXBException e) {
+			throw new ConfigurationException("Could not open file "
+					+ monitoringMetricsFileName, e);
+		}
+		return metrics;
+	}
+
+	private void close(InputStream is) {
+		if (is != null) {
+			try {
+				is.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public Metrics getMonitoringMetrics() {
+		return monitoringMetrics;
 	}
 
 }

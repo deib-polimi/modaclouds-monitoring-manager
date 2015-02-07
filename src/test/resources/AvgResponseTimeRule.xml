@@ -1,0 +1,19 @@
+<monitoringRules xmlns="http://www.modaclouds.eu/xsd/1.0/monitoring_rules_schema">
+    <monitoringRule id="AvgResponseTimeRule" label="Avg RT Rule"
+        startEnabled="true" timeStep="60" timeWindow="60">
+        <monitoredTargets>
+            <monitoredTarget class="Method" type="register"/>
+        </monitoredTargets>
+        <collectedMetric metricName="ResponseTime">
+            <parameter name="samplingProbability">1</parameter>
+        </collectedMetric>
+        <metricAggregation aggregateFunction="Average" groupingClass="Method"/>
+        <actions>
+            <action name="OutputMetric">
+                <parameter name="resourceId">ID</parameter>
+                <parameter name="metric">AverageResponseTime</parameter>
+                <parameter name="value">METRIC</parameter>
+            </action>
+        </actions>
+    </monitoringRule>
+</monitoringRules>
