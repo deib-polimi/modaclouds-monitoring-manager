@@ -46,10 +46,9 @@ All known errors cause the resource to return HTTP error code header together wi
 	<monitoringRule id="mr_1" label="CPU Utilization Rule"
 		startEnabled="true" timeStep="60" timeWindow="60">
 		<monitoredTargets>
-			<monitoredTarget id="tr_1" class="VM"/>
+			<monitoredTarget type="tr_1" class="VM"/>
 		</monitoredTargets>
 		<collectedMetric inherited="false" metricName="CpuUtilization">
-			<parameter name="samplingProbability">1</parameter>
 			<parameter name="samplingTime">10</parameter>
 		</collectedMetric>
 		<metricAggregation groupingClass="CloudProvider"
@@ -58,7 +57,9 @@ All known errors cause the resource to return HTTP error code header together wi
 		<condition>METRIC &gt;= 0.6</condition>
 		<actions>
 			<action name="OutputMetric">
-				<parameter name="name">CpuUtilizationViolation</parameter>
+				<parameter name="resourceId">ID</parameter>
+				<parameter name="metric">CpuUtilizationViolation</parameter>
+				<parameter name="value">METRIC</parameter>
 			</action>
 		</actions>
 	</monitoringRule>
