@@ -16,7 +16,7 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
-public class InternalErrorException extends Exception {
+public class InternalErrorException extends RuntimeException {
 
 	public InternalErrorException(Exception e) {
 		super(e);
@@ -24,6 +24,10 @@ public class InternalErrorException extends Exception {
 
 	public InternalErrorException(String message) {
 		super(message);
+	}
+
+	public InternalErrorException(String message, Exception e) {
+		super(message,e);
 	}
 
 }

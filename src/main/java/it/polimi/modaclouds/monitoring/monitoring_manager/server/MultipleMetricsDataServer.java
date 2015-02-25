@@ -17,16 +17,19 @@
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
-import it.polimi.modaclouds.qos_models.schema.Metrics;
-import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
+
+import java.util.Set;
 
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
-import org.restlet.ext.jaxb.JaxbRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 public class MultipleMetricsDataServer extends ServerResource {
 
@@ -38,10 +41,12 @@ public class MultipleMetricsDataServer extends ServerResource {
 		try {
 			MonitoringManager manager = (MonitoringManager) getContext()
 					.getAttributes().get("manager");
-			Metrics metrics = manager.getMetrics();
+			Set<String> metrics = manager.getMetrics();
 			this.getResponse().setStatus(Status.SUCCESS_OK);
-			this.getResponse().setEntity(
-					new JaxbRepresentation<Metrics>(metrics));
+			JsonObject json = new JsonObject();
+			json.add("metrics", new Gson().toJsonTree(metrics));
+			this.getResponse().setEntity(json.toString(),
+					MediaType.APPLICATION_JSON);
 		} catch (Exception e) {
 			logger.error("Error while getting metrics", e);
 			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL,

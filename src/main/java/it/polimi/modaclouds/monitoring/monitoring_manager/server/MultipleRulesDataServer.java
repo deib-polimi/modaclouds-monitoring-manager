@@ -63,7 +63,7 @@ public class MultipleRulesDataServer extends ServerResource {
 		} catch (RuleInstallationException e) {
 			logger.error("Error while installing monitoring rules", e);
 			this.getResponse().setStatus(Status.CLIENT_ERROR_BAD_REQUEST,e.getMessage());
-			this.getResponse().setEntity("Error while installing monitoring rules: " + e.toString(), MediaType.TEXT_PLAIN);
+			this.getResponse().setEntity("Error while installing monitoring rules: " + e.getMessage(), MediaType.TEXT_PLAIN);
 		} catch(Exception e){
 			logger.error("Error while installing monitoring rules", e);
 			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL,e.getMessage());

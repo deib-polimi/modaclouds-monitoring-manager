@@ -36,6 +36,38 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
 public class ManagerConfig {
+	
+	
+	@Parameter(names = "-help", help = true, description = "Shows this message")
+	private boolean help;
+
+	@Parameter(names = "-ddaip", description = "DDA endpoint IP address")
+	private String ddaIP;
+
+	@Parameter(names = "-ddaport", description = "DDA endpoint port")
+	private int ddaPort;
+
+	@Parameter(names = "-kbip", description = "KB endpoint IP address")
+	private String kbIP;
+
+	@Parameter(names = "-kbport", description = "KB endpoint port")
+	private int kbPort;
+
+	@Parameter(names = "-kbpath", description = "KB URL path")
+	private String kbPath;
+
+	@Parameter(names = "-mmport", description = "Monitoring Manager endpoint port")
+	private int mmPort;
+
+	@Parameter(names = "-validmetrics", description = "The xml file containing the list of valid metrics. "
+			+ "Will overwrite default ones", validateWith = FileExistsValidator.class)
+	private String monitoringMetricsFileName;
+	
+	
+
+	private Metrics monitoringMetrics;
+	private String ddaUrl;
+	private String kbUrl;
 
 	private static ManagerConfig _instance = null;
 	public static String usage = null;
@@ -51,9 +83,9 @@ public class ManagerConfig {
 			} catch (ParameterException e) {
 				throw new ConfigurationException(e.getMessage());
 			}
-			_instance.initMonitoringMetrics();
 			usage = stringBuilder.toString();
 		}
+		_instance.initMonitoringMetrics();
 	}
 
 	public static void init() throws ConfigurationException {
@@ -82,8 +114,6 @@ public class ManagerConfig {
 
 		monitoringMetricsFileName = getEnvVar(
 				Env.MODACLOUDS_MONITORING_MONITORING_METRICS_FILE, null);
-		uploadOntology = Boolean.parseBoolean(getEnvVar(
-				Env.MODACLOUDS_MONITORING_UPLOAD_ONTOLOGY, "true"));
 
 		ddaIP = getEnvVar(Env.MODACLOUDS_MONITORING_DDA_ENDPOINT_IP,
 				"127.0.0.1");
@@ -100,46 +130,27 @@ public class ManagerConfig {
 			throw new ConfigurationException(kbUrl + " is not a valid URL");
 
 	}
+	
+	@Override
+	public String toString() {
+		return "DDA URL: "
+				+ ddaUrl
+				+ "\n"
+				+ "KB URL: "
+				+ kbUrl
+				+ "\n"
+				+ "Monitoring Manager Port: "
+				+ mmPort
+				+ "\n"
+				+ (monitoringMetricsFileName == null ? ""
+						: "\nMonitoring metrics file: "
+								+ monitoringMetricsFileName);
+	}
 
-	@Parameter(names = "-help", help = true, description = "Shows this message")
-	private boolean help;
-
-	@Parameter(names = "-ddaip", description = "DDA endpoint IP address")
-	private String ddaIP;
-
-	@Parameter(names = "-ddaport", description = "DDA endpoint port")
-	private int ddaPort;
-
-	@Parameter(names = "-kbip", description = "KB endpoint IP address")
-	private String kbIP;
-
-	@Parameter(names = "-kbport", description = "KB endpoint port")
-	private int kbPort;
-
-	@Parameter(names = "-kbpath", description = "KB URL path")
-	private String kbPath;
-
-	private String ddaUrl;
-	private String kbUrl;
-
-	@Parameter(names = "-mmport", description = "Monitoring Manager endpoint port")
-	private int mmPort;
-
-	@Parameter(names = "-uploadontology", description = "Upload ontology to kb at startup", arity = 1)
-	private boolean uploadOntology;
-
-	@Parameter(names = "-validmetrics", description = "The xml file containing the list of valid metrics. "
-			+ "Will overwrite default ones", validateWith = FileExistsValidator.class)
-	private String monitoringMetricsFileName;
-
-	private Metrics monitoringMetrics;
+	
 
 	public String getMonitoringMetricsFileName() {
 		return monitoringMetricsFileName;
-	}
-
-	public boolean isUploadOntology() {
-		return uploadOntology;
 	}
 
 	public boolean isHelp() {
@@ -219,23 +230,7 @@ public class ManagerConfig {
 		return var;
 	}
 
-	@Override
-	public String toString() {
-		return "DDA URL: "
-				+ ddaUrl
-				+ "\n"
-				+ "KB URL: "
-				+ kbUrl
-				+ "\n"
-				+ "Monitoring Manager Port: "
-				+ mmPort
-				+ "\n"
-				+ "Upload ontology to KB: "
-				+ uploadOntology
-				+ (monitoringMetricsFileName == null ? ""
-						: "\nMonitoring metrics file: "
-								+ monitoringMetricsFileName);
-	}
+	
 
 	private void initMonitoringMetrics() throws ConfigurationException {
 		if (monitoringMetricsFileName != null) {

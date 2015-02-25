@@ -16,6 +16,8 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
+import it.polimi.deib.csparql_rest_api.exception.ObserverErrorException;
+import it.polimi.deib.csparql_rest_api.exception.ServerErrorException;
 import it.polimi.modaclouds.monitoring.kb.api.DeserializationException;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.monitoring.kb.api.SerializationException;
@@ -26,18 +28,10 @@ import it.polimi.modaclouds.qos_models.monitoring_ontology.MOVocabulary;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Resource;
 import it.polimi.modaclouds.qos_models.monitoring_rules.Problem;
 import it.polimi.modaclouds.qos_models.monitoring_rules.Validator;
-import it.polimi.modaclouds.qos_models.schema.Metric;
-import it.polimi.modaclouds.qos_models.schema.Metrics;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
 import it.polimi.modaclouds.qos_models.util.Config;
-import it.polimi.modaclouds.qos_models.util.XMLHelper;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -45,17 +39,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.xml.bind.JAXBException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import polimi.deib.csparql_rest_api.exception.ObserverErrorException;
-import polimi.deib.csparql_rest_api.exception.ServerErrorException;
-
 public class MonitoringManager {
 
-	public static final String MODEL_GRAPH_NAME = "model";
+	static final String MODEL_GRAPH_NAME = "model";
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -69,17 +58,25 @@ public class MonitoringManager {
 
 	public MonitoringManager(ManagerConfig config) throws Exception {
 		Config.setDefaultConfiguration(null, null, null, null,
-				config.getMonitoringMetrics(), null);
+				config.getMonitoringMetrics());
+
+		logger.info("Checking if KB is reachable");
+		NetUtil.waitForResponseCode(
+				"http://" + config.getKbIP() + ":" + config.getKbPort(), 200,
+				5, 5000);
+		logger.info("Checking if DDA is reachable");
+		NetUtil.waitForResponseCode(config.getDdaUrl() + "/queries", 200, 5,
+				5000);
+
 		validator = new Validator();
 		knowledgeBase = new FusekiKBAPI(config.getKbUrl());
 		installedRules = new ConcurrentHashMap<String, MonitoringRule>();
 		csparqlEngineManager = new CSPARQLEngineManager(config, knowledgeBase);
 		dcFactoriesManager = new DCFactoriesManager(knowledgeBase);
-
-		if (config.isUploadOntology()) {
-			logger.info("Uploading ontology to KB");
-			knowledgeBase.uploadOntology(MO.model, MODEL_GRAPH_NAME);
-		}
+		logger.info("Clearing KB");
+		knowledgeBase.clearAll();
+		logger.info("Uploading ontology to KB");
+		knowledgeBase.uploadOntology(MO.model, MODEL_GRAPH_NAME);
 	}
 
 	public synchronized void installRules(MonitoringRules rules)
@@ -94,7 +91,7 @@ public class MonitoringManager {
 		} catch (RuleInstallationException e) {
 			throw new RuleInstallationException(
 					"Error while installing rules, only the following rules were successfully installed:"
-							+ installedRules, e);
+							+ installedRules + ". Problems: " + e.getMessage(), e);
 		}
 	}
 
@@ -113,7 +110,7 @@ public class MonitoringManager {
 			previousRule = rule;
 		}
 		if (!problems.isEmpty()) {
-			String message = "Rules could not be installed because of the following problems:\n";
+			String message = "Rules could not be installed: ";
 			for (Problem p : problems) {
 				message += "Rule "
 						+ p.getId()
@@ -135,7 +132,7 @@ public class MonitoringManager {
 			csparqlEngineManager.uninstallRule(id);
 			installedRules.remove(id);
 		} else {
-			logger.warn("Specified rule does not exist, nothing was uninstalled");
+			logger.warn("Rule {} does not exist, nothing was uninstalled", id);
 		}
 	}
 
@@ -147,7 +144,13 @@ public class MonitoringManager {
 													// to prepare the stream
 			dcFactoriesManager.installRule(rule);
 			installedRules.put(rule.getId(), rule);
-			logger.info("Rule {} installed successfully", rule.getId());
+			logger.info("Rule {} installed successfully", rule.getId());	
+		} catch (RuleInstallationException e) {
+			logger.error("Error while installing rule {}, rolling back...",
+					rule.getId(), e);
+			dcFactoriesManager.uninstallRule(rule.getId());
+			csparqlEngineManager.uninstallRule(rule.getId());
+			throw e;
 		} catch (Exception e) {
 			logger.error("Error while installing rule {}, rolling back...",
 					rule.getId(), e);
@@ -157,15 +160,8 @@ public class MonitoringManager {
 		}
 	}
 
-	public Metrics getMetrics() {
-		Metrics metrics = new Metrics();
-		for (String observableMetric : csparqlEngineManager
-				.getObservableMetrics()) {
-			Metric metric = new Metric();
-			metric.setName(observableMetric);
-			metrics.getMetrics().add(metric);
-		}
-		return metrics;
+	public Set<String> getMetrics() {
+		return csparqlEngineManager.getObservableMetrics();
 	}
 
 	public MonitoringRules getMonitoringRules() {
@@ -182,23 +178,26 @@ public class MonitoringManager {
 		return observerId;
 	}
 
+	public List<Observer> getObservers(String metricname)
+			throws ServerErrorException, ObserverErrorException,
+			MetricDoesNotExistException {
+		return csparqlEngineManager.getObservers(metricname);
+	}
+
+	public void removeObserver(String metricName, String observerId)
+			throws ServerErrorException, ObserverErrorException,
+			MetricDoesNotExistException {
+		csparqlEngineManager.removeObserver(metricName, observerId);
+	}
+
 	public void deleteInstance(String id) throws SerializationException {
 		knowledgeBase.deleteEntitiesByPropertyValue(id,
 				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
-
 	}
 
 	public void uploadModel(Model update) throws SerializationException,
 			DeserializationException {
-
-		Set<String> ids = knowledgeBase.getIds(Resource.class,
-				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
-
-		if (!ids.isEmpty()) {
-			knowledgeBase.deleteEntitiesByPropertyValues(ids,
-					MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
-		}
-
+		knowledgeBase.clearGraph(MODEL_GRAPH_NAME);
 		updateModel(update);
 	}
 

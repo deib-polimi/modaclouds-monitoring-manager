@@ -23,7 +23,12 @@ import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringMetricAggregation;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
+
+import org.apache.commons.httpclient.util.HttpURLConnection;
 
 public class Util {
 

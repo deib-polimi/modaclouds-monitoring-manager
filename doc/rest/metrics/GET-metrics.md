@@ -20,7 +20,7 @@ None
 
 **Status:** **200 OK**
 
-**Body:** An XML object with a list of metrics.
+**Body:** A json object with a list of metrics.
 
 ***
 
@@ -39,13 +39,10 @@ None
 
 	Status: 200 OK
 
-``` xml
-<metrics>
-	<metric>CpuUtilization</metric>
-	<metric>ResponseTime</metric>
-	<metric>CpuUtilizationViolation</metric>
-	<metric>CpuUtilizationForecast</metric>
-	<metric>Availability</metric>
-	<metric>ThreadsRunning</metric>
-</metrics>
+``` json
+{
+	"metrics": [
+		"CpuUtilization","ResponseTime","CpuUtilizationViolation"
+	]
+}
 ```

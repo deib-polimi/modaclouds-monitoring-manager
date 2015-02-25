@@ -16,8 +16,45 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
+import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
+
+import org.restlet.data.MediaType;
+import org.restlet.data.Status;
+import org.restlet.resource.Delete;
 import org.restlet.resource.ServerResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SingleObserverDataServer extends ServerResource {
+
+	private static final Logger logger = LoggerFactory
+			.getLogger(SingleObserverDataServer.class);
+
+	@Delete
+	public void deleteObserver() {
+		try {
+			MonitoringManager manager = (MonitoringManager) getContext()
+					.getAttributes().get("manager");
+			String observerId = (String) this.getRequest().getAttributes()
+					.get("id");
+			String metricName = (String) this.getRequest().getAttributes()
+					.get("metricname");
+
+			manager.removeObserver(metricName, observerId);
+			this.getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
+
+		} catch (Exception e) {
+			logger.error("Error while deleting observer", e);
+			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL,
+					e.getMessage());
+			this.getResponse().setEntity(
+					"Error while deleting observer: " + e.getMessage(),
+					MediaType.TEXT_PLAIN);
+		} finally {
+			this.getResponse().commit();
+			this.commit();
+			this.release();
+		}
+	}
 
 }

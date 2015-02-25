@@ -18,4 +18,8 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 
 public class MetricDoesNotExistException extends Exception {
 
+	public MetricDoesNotExistException(String metricName) {
+		super("Metric " + metricName + " does not exist");
+	}
+
 }

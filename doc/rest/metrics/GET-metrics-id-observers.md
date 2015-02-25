@@ -19,7 +19,7 @@ None
 
 **Status:** **200 OK**
 
-**Body:** An XML object with a list of information about attached observers.
+**Body:** A json object with a list of information about attached observers.
 
 ***
 
@@ -38,9 +38,17 @@ None
 
 	Status: 200 OK
 
-``` xml
-<observers>
-	<observer id="observer-1">http://url.to.observer.1:8176/response-time</observer>
-	<observer id="observer-2">http://url.to.observer.2:8222/data</observer>
-</observers>
+``` json
+{
+	"observers": [
+		{
+			"id"="109384935893",
+			"callbackUrl"="http://url.to.observer.1:9999/path"
+		},
+		{
+			"id"="109384314891",
+			"callbackUrl"="http://url.to.observer.2:9999/another/path"
+		},
+	]
+}
 ```

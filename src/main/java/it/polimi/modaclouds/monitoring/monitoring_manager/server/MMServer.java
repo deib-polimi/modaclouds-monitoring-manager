@@ -31,12 +31,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MMServer extends Application {
-	private static Component component;
-	private static MonitoringManager manager = null;
+	private Component component;
+	private MonitoringManager manager = null;
 	private static final String apiVersion = "v1";
 
 	private static Logger logger = LoggerFactory.getLogger(MMServer.class);
 
+	public MMServer(MonitoringManager manager, Component component) {
+		this.manager = manager;
+		this.component = component;
+	}
+	
 	public static void main(String[] args) {
 
 		
@@ -55,15 +60,15 @@ public class MMServer extends Application {
 		logger.info("Current configuration:\n{}", ManagerConfig.getInstance().toString());
 
 		try {
-			manager = new MonitoringManager(ManagerConfig.getInstance());
+			MonitoringManager manager = new MonitoringManager(ManagerConfig.getInstance());
 
-			System.setProperty("org.restlet.engine.loggerFacadeClass",
-					"org.restlet.ext.slf4j.Slf4jLoggerFacade");
-			component = new Component();
+//			System.setProperty("org.restlet.engine.loggerFacadeClass",
+//					"org.restlet.ext.slf4j.Slf4jLoggerFacade");
+			Component component = new Component();
 			component.getServers().add(Protocol.HTTP, ManagerConfig.getInstance().getMmPort());
 			component.getClients().add(Protocol.FILE);
 
-			MMServer mmServer = new MMServer();
+			MMServer mmServer = new MMServer(manager, component);
 			component.getDefaultHost().attach("", mmServer);
 
 			component.start();
