@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # Copyright 2014 deib-polimi
 # Contact: deib-polimi <marco.miglierina@polimi.it>
@@ -16,11 +15,17 @@
 #    limitations under the License.
 #
 
+apt-get update
+apt-get install -y tar openjdk-7-jre
 
-if [ ! -d /opt/fuseki/ds ];
-	then mkdir -p /opt/fuseki/ds
+if [ -d /opt/dda ];
+	then rm -r /opt/dda
 fi
-rm -rf /opt/fuseki/ds/*
-cd /opt/fuseki/jena-fuseki-1.1.1/
-echo "Starting kb..."
-./fuseki-server --update --loc /opt/fuseki/ds /modaclouds/kb > /opt/fuseki/log.txt 2>&1 &
+
+mkdir -p /opt/dda
+cd /opt/dda
+
+echo "Downloading dda..."
+wget --quiet -O rsp-services-csparql-0.4.6.2-modaclouds-distribution.tar.gz https://github.com/deib-polimi/rsp-services-csparql/releases/download/0.4.6.2-modaclouds/rsp-services-csparql-0.4.6.2-modaclouds-distribution.tar.gz
+tar -xvzf rsp-services-csparql-0.4.6.2-modaclouds-distribution.tar.gz -C .
+chmod +x rsp-services-csparql-0.4.6.2-modaclouds/rsp-services-csparql

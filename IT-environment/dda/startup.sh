@@ -18,4 +18,5 @@
 
 
 cd /opt/dda/rsp-services-csparql-0.4.6.2-modaclouds
-./rsp-services-csparql
+echo "Starting dda..."
+./rsp-services-csparql > /opt/dda/log.txt 2>&1 &

@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # Copyright 2014 deib-polimi
 # Contact: deib-polimi <marco.miglierina@polimi.it>
@@ -16,11 +15,17 @@
 #    limitations under the License.
 #
 
+apt-get update
+apt-get install -y tar openjdk-7-jre
 
-if [ ! -d /opt/fuseki/ds ];
-	then mkdir -p /opt/fuseki/ds
+if [ -d /opt/fuseki ];
+	then rm -r /opt/fuseki
 fi
-rm -rf /opt/fuseki/ds/*
-cd /opt/fuseki/jena-fuseki-1.1.1/
-echo "Starting kb..."
-./fuseki-server --update --loc /opt/fuseki/ds /modaclouds/kb > /opt/fuseki/log.txt 2>&1 &
+
+mkdir -p /opt/fuseki
+cd /opt/fuseki
+
+echo "Downloading fuseki..."
+wget --quiet -O jena-fuseki-1.1.1-distribution.tar.gz http://archive.apache.org/dist/jena/binaries/jena-fuseki-1.1.1-distribution.tar.gz
+tar -xvzf jena-fuseki-1.1.1-distribution.tar.gz -C .
+chmod +x jena-fuseki-1.1.1/fuseki-server

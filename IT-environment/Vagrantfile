@@ -4,23 +4,19 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.define "docker-vm" do |config|
+  config.vm.define "vm-4-mm-IT" do |config|
     
     config.vm.box = "ubuntu/trusty64"
     config.vm.hostname = "docker-vm"
     config.vm.network "forwarded_port", guest: 3030, host: 3030
     config.vm.network "forwarded_port", guest: 8175, host: 8175
 
-    # docker images have been published on the docker hub
-    # config.vm.provision "docker" do |d|
-    #   d.build_image "/vagrant/kb", args: "-t mmiglier/modaclouds-kb"
-    #   d.build_image "/vagrant/dda", args: "-t mmiglier/modaclouds-dda"
-    # end
-    
-    config.vm.provision "docker", run: "always" do |d|
-      d.run "mmiglier/modaclouds-kb", args: "-p 3030:3030"
-      d.run "mmiglier/modaclouds-dda", args: "-p 8175:8175"
-    end
+    config.vm.provision "shell", path: "kb/bootstrap.sh"
+    config.vm.provision "shell", run: "always", path: "kb/startup.sh"
+
+    config.vm.provision "shell", path: "dda/bootstrap.sh"
+    config.vm.provision "shell", run: "always", path: "dda/startup.sh"
+
 
     # http://fgrehm.viewdocs.io/vagrant-cachier
     if Vagrant.has_plugin?("vagrant-cachier")
