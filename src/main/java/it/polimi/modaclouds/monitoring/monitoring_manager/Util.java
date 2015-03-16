@@ -33,8 +33,8 @@ import org.apache.commons.httpclient.util.HttpURLConnection;
 public class Util {
 
 	public static String getOutputValueVariable(MonitoringRule rule) {
-		if (!isAggregatedMetric(rule))
-			return QueryVars.INPUT;
+//		if (!isAggregatedMetric(rule))
+//			return QueryVars.INPUT;
 		return QueryVars.OUTPUT;
 	}
 

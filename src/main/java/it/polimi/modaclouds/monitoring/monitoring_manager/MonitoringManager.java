@@ -57,7 +57,7 @@ public class MonitoringManager {
 	private FusekiKBAPI knowledgeBase;
 
 	public MonitoringManager(ManagerConfig config) throws Exception {
-		Config.setDefaultConfiguration(null, null, null, null,
+		Config.setDefaultConfiguration(null,
 				config.getMonitoringMetrics());
 
 		logger.info("Checking if KB is reachable");

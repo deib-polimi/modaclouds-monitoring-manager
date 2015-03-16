@@ -110,33 +110,6 @@
 			<artifactId>org.restlet.ext.slf4j</artifactId>
 			<version>2.2.2</version>
 		</dependency>
-		<!-- <dependency>
-			<groupId>it.polimi.deib</groupId>
-			<artifactId>rsp-services-api</artifactId>
-			<version>0.4.4</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-log4j12</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>logback-classic</artifactId>
-					<groupId>ch.qos.logback</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>logback-core</artifactId>
-					<groupId>ch.qos.logback</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jena-tdb</artifactId>
-					<groupId>org.apache.jena</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency> -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -167,7 +140,7 @@
 		<dependency>
 			<groupId>it.polimi.csparqool</groupId>
 			<artifactId>csparqool</artifactId>
-			<version>1.2.1</version>
+			<version>1.2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>

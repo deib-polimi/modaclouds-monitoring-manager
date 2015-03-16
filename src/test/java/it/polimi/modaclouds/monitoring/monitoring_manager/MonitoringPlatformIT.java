@@ -16,9 +16,14 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager;
 
-import static com.jayway.restassured.RestAssured.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static com.jayway.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.emptyIterable;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import it.polimi.modaclouds.monitoring.dcfactory.DCConfig;
 import it.polimi.modaclouds.monitoring.dcfactory.DCVocabulary;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
@@ -31,19 +36,15 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
-
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.restlet.Component;
 import org.restlet.data.Protocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -236,6 +237,14 @@ public class MonitoringPlatformIT {
 		return getClass().getClassLoader().getResourceAsStream(filenName);
 	}
 
-	
+	@Test
+	public void ruleWithAggregationInValueShouldBeInstalledCorrectly()
+			throws Exception {
+		MonitoringRules rules = XMLHelper.deserialize(
+				getResourceAsStream("EffectiveResponseTimeRule.xml"),
+				MonitoringRules.class);
+		mm.installRules(rules);
+		assertFalse(mm.getMonitoringRules().getMonitoringRules().isEmpty());
+	}
 
 }

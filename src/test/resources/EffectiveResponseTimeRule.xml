@@ -1,0 +1,38 @@
+<monitoringRules xmlns="http://www.modaclouds.eu/xsd/1.0/monitoring_rules_schema">
+    <monitoringRule id="EffectiveResponseTimeRule"
+        startEnabled="true" timeStep="60" timeWindow="60">
+        <monitoredTargets>
+            <monitoredTarget class="Method" type="login"/>
+            <monitoredTarget class="Method" type="register"/>
+            <monitoredTarget class="Method" type="logout"/>
+        </monitoredTargets>
+        <collectedMetric metricName="EffectiveResponseTime">
+            <parameter name="samplingProbability">1</parameter>
+        </collectedMetric>
+        <actions>
+            <action name="OutputMetric">
+                <parameter name="resourceId">AllMethods</parameter>
+                <parameter name="metric">AverageEffectiveResponseTime</parameter>
+                <parameter name="value">SUM(METRIC)/COUNT(METRIC)</parameter>
+            </action>
+        </actions>
+    </monitoringRule>
+     <monitoringRule id="EffectiveResponseTimeRule2"
+        startEnabled="true" timeStep="60" timeWindow="60">
+        <monitoredTargets>
+            <monitoredTarget class="Method" type="login"/>
+            <monitoredTarget class="Method" type="register"/>
+            <monitoredTarget class="Method" type="logout"/>
+        </monitoredTargets>
+        <collectedMetric metricName="EffectiveResponseTime">
+            <parameter name="samplingProbability">1</parameter>
+        </collectedMetric>
+        <actions>
+            <action name="OutputMetric">
+                <parameter name="resourceId">ID</parameter>
+                <parameter name="metric">EffectiveResponseTimeObservable</parameter>
+                <parameter name="value">METRIC</parameter>
+            </action>
+        </actions>
+    </monitoringRule>
+</monitoringRules>

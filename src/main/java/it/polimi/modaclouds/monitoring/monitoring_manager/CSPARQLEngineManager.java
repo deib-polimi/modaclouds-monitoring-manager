@@ -145,8 +145,12 @@ public class CSPARQLEngineManager {
 		for (Action action : rule.getActions().getActions()) {
 			switch (action.getName()) {
 			case OutputMetric.ID:
-				String outputResourceIdVariable = Util
-						.getOutputResourceIdVariable(rule);
+				String outputResourceIdVariable = null;
+				if (Util.getParameterValue(OutputMetric.resourceId, action)
+						.equals("ID")) {
+					outputResourceIdVariable = Util
+							.getOutputResourceIdVariable(rule);
+				}
 				String outputValueVariable = Util.getOutputValueVariable(rule);
 				String outputTimestampVariable = Util
 						.getOutputTimestampVariable(rule);
@@ -160,18 +164,14 @@ public class CSPARQLEngineManager {
 				query.construct(graph
 						.add(CSquery.BLANK_NODE,
 								DDAOntology.metric,
-								"\""
-										+ Util.getParameterValue(
-												OutputMetric.metric, action)
-										+ "\"")
+								Util.getParameterValue(OutputMetric.metric,
+										action))
 						.add(DDAOntology.resourceId,
 								(Util.getParameterValue(
 										OutputMetric.resourceId, action)
 										.equals("ID") ? outputResourceIdVariable
-										: "\""
-												+ Util.getParameterValue(
-														OutputMetric.resourceId,
-														action) + "\""))
+										: Util.getParameterValue(
+												OutputMetric.resourceId, action)))
 						.add(DDAOntology.value, outputValueVariable)
 						.add(DDAOntology.timestamp, outputTimestampVariable));
 				break;
@@ -248,13 +248,66 @@ public class CSPARQLEngineManager {
 	}
 
 	private static void addPrefixes(CSquery query) {
-		query.setNsPrefix("xsd", XSD.getURI())
-				.setNsPrefix("rdf", RDF.getURI())
+		query.setNsPrefix("xsd", XSD.getURI()).setNsPrefix("rdf", RDF.getURI())
 				.setNsPrefix("rdfs", RDFS.getURI())
 				.setNsPrefix(MO.prefix, MO.URI)
 				.setNsPrefix(DDAOntology.prefix, DDAOntology.URI)
-				.setNsPrefix(CSquery.getFunctionsPrefix(),
-						CSquery.getFunctionsURI());
+				.setNsPrefix("f", "http://larkc.eu/csparql/sparql/jena/ext#")
+				.setNsPrefix("afn", "http://jena.hpl.hp.com/ARQ/function#");
+	}
+
+	// TODO porcata temporanea
+	private static void addNotAggregatedMetricSelect(_body queryBody,
+			String[] variables, MonitoringRule rule)
+			throws MalformedQueryException, RuleInstallationException {
+		String aggregateFunction = Util.getAggregateFunction(rule);
+		String value = Util.getParameterValue(OutputMetric.value, rule
+				.getActions().getActions().get(0));
+		for (String var : variables) {
+			switch (var) {
+			case QueryVars.TIMESTAMP:
+				queryBody.selectFunction(QueryVars.TIMESTAMP, Function.MAX,
+						QueryVars.INPUT_TIMESTAMP);
+				break;
+			case QueryVars.INPUT_TIMESTAMP:
+				if (value.contains("AVG(") || value.contains("SUM(")
+						|| value.contains("PERCENTILE(")
+						|| value.contains("MAX(") || value.contains("MIN(")
+						|| value.contains("COUNT(")) {
+					queryBody
+							.selectFunction(QueryVars.INPUT_TIMESTAMP,
+									Function.MAX,
+									"f:timestamp(?datum, modamd:resourceId, ?resourceId)");
+				} else {
+					queryBody.selectFunction(QueryVars.INPUT_TIMESTAMP,
+							Function.TIMESTAMP, QueryVars.DATUM,
+							DDAOntology.shortForm(DDAOntology.resourceId),
+							QueryVars.RESOURCE_ID);
+				}
+				break;
+			case QueryVars.OUTPUT:
+				if (Util.isAggregatedMetric(rule)) {
+					String[] parameters = Util.getAggregateFunctionArgs(rule);
+					queryBody.selectFunction(QueryVars.OUTPUT,
+							aggregateFunction, parameters);
+				} else {
+					if (value.contains("AVG(") || value.contains("SUM(")
+							|| value.contains("PERCENTILE(")
+							|| value.contains("MAX(") || value.contains("MIN(")
+							|| value.contains("COUNT(")) {
+						queryBody.selectFunction(QueryVars.OUTPUT, null,
+								value.replaceAll("METRIC", QueryVars.INPUT));
+					} else {
+						queryBody.selectFunction(QueryVars.OUTPUT, null,
+								new String[] { QueryVars.INPUT });
+					}
+				}
+				break;
+			default:
+				queryBody.select(var);
+				break;
+			}
+		}
 	}
 
 	private static void addSelect(_body queryBody, String[] variables,
@@ -279,7 +332,8 @@ public class CSPARQLEngineManager {
 					queryBody.selectFunction(QueryVars.OUTPUT,
 							aggregateFunction, parameters);
 				} else {
-					queryBody.select(QueryVars.OUTPUT);
+					queryBody.selectFunction(QueryVars.OUTPUT, null,
+							new String[] { QueryVars.INPUT });
 				}
 				break;
 			default:
@@ -306,9 +360,9 @@ public class CSPARQLEngineManager {
 		String[] outputRequiredVars = addActions(rule, query);
 
 		_body mainQueryBody = new _body();
-		addSelect(mainQueryBody, outputRequiredVars, rule);
 
 		if (Util.isAggregatedMetric(rule)) {
+			addSelect(mainQueryBody, outputRequiredVars, rule);
 			if (Util.isGroupedMetric(rule))
 				mainQueryBody.groupby(Util.getGroupingClassIdVariable(rule));
 			_body innerQueryBody = new _body();
@@ -316,6 +370,8 @@ public class CSPARQLEngineManager {
 					getInnerQueryRequiredVars(outputRequiredVars), rule);
 			mainQueryBody.where(innerQueryBody.where(createGraphPattern(rule)));
 		} else {
+			addNotAggregatedMetricSelect(mainQueryBody, outputRequiredVars,
+					rule);
 			mainQueryBody.where(createGraphPattern(rule));
 		}
 		if (rule.getCondition() != null) {
@@ -491,7 +547,7 @@ public class CSPARQLEngineManager {
 	}
 
 	private static String getTargetIDLiteral(MonitoredTarget monitoredTarget) {
-		return "\"" + monitoredTarget.getType() + "\"";
+		return monitoredTarget.getType();
 	}
 
 	private static String parseCondition(String condition,

@@ -39,13 +39,19 @@ public class NetUtil {
 
 	public static void waitForResponseCode(String url, int expectedCode,
 			int retryTimes, int retryPeriodInMilliseconds) throws IOException {
-		while (!isResponseCode(url, expectedCode)) {
+		while (true) {
+			try {
+				if (isResponseCode(url, expectedCode))
+					return;
+			} catch (Exception e) {
+			}
 			retryTimes--;
 			if (retryTimes <= 0) {
 				throw new IOException();
 			}
 			try {
-				logger.info("Service is down, retrying in {} seconds...", retryPeriodInMilliseconds/1000);
+				logger.info("Service is down, retrying in {} seconds...",
+						retryPeriodInMilliseconds / 1000);
 				Thread.sleep(retryPeriodInMilliseconds);
 			} catch (InterruptedException e) {
 				throw new IOException();
