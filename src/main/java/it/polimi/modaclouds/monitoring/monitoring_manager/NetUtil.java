@@ -47,10 +47,10 @@ public class NetUtil {
 			}
 			retryTimes--;
 			if (retryTimes <= 0) {
-				throw new IOException();
+				throw new IOException("Could not connect to the service.");
 			}
 			try {
-				logger.info("Service is down, retrying in {} seconds...",
+				logger.info("Connection failed, retrying in {} seconds...",
 						retryPeriodInMilliseconds / 1000);
 				Thread.sleep(retryPeriodInMilliseconds);
 			} catch (InterruptedException e) {

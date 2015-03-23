@@ -23,4 +23,4 @@ fi
 rm -rf /opt/fuseki/ds/*
 cd /opt/fuseki/jena-fuseki-1.1.1/
 echo "Starting kb..."
-./fuseki-server --update --loc /opt/fuseki/ds /modaclouds/kb > /opt/fuseki/log.txt 2>&1 &
+./fuseki-server --update --loc /opt/fuseki/ds /modaclouds/kb > /vagrant/kb/kb.log 2>&1 &

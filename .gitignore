@@ -5,3 +5,6 @@
 /target
 .*.md.html
 .vagrant
+*.log
+*tar.gz
+tmp

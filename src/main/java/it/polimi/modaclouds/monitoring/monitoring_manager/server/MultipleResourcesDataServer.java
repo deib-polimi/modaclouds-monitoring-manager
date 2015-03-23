@@ -21,6 +21,7 @@ import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.representation.Representation;
+import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ServerResource;
@@ -34,6 +35,29 @@ public class MultipleResourcesDataServer extends ServerResource {
 
 	private Logger logger = LoggerFactory
 			.getLogger(MultipleResourcesDataServer.class);
+	
+	@Get
+	public void getResources() {
+		try {
+			MonitoringManager manager = (MonitoringManager) getContext()
+					.getAttributes().get("manager");
+			Model model = manager.getCurrentModel();
+			this.getResponse().setStatus(Status.SUCCESS_OK);
+			this.getResponse().setEntity(new Gson().toJson(model),
+					MediaType.APPLICATION_JSON);
+		} catch (Exception e) {
+			logger.error("Error while getting current model", e);
+			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL,
+					e.getMessage());
+			this.getResponse().setEntity(
+					"Error while getting current model: " + e.toString(),
+					MediaType.TEXT_PLAIN);
+		} finally {
+			this.getResponse().commit();
+			this.commit();
+			this.release();
+		}
+	}
 
 	@Post
 	public void updateResources(Representation rep) {

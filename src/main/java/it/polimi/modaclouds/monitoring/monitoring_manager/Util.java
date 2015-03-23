@@ -19,6 +19,7 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 import it.polimi.csparqool.FunctionArgs;
 import it.polimi.modaclouds.monitoring.dcfactory.DCConfig;
 import it.polimi.modaclouds.qos_models.schema.Action;
+import it.polimi.modaclouds.qos_models.schema.Metric.RequiredParameter;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringMetricAggregation;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
@@ -33,20 +34,28 @@ import org.apache.commons.httpclient.util.HttpURLConnection;
 public class Util {
 
 	public static String getOutputValueVariable(MonitoringRule rule) {
-//		if (!isAggregatedMetric(rule))
-//			return QueryVars.INPUT;
+		// if (!isAggregatedMetric(rule))
+		// return QueryVars.INPUT;
 		return QueryVars.OUTPUT;
 	}
 
+	/**
+	 * 
+	 * @param rule
+	 * @return the variable for resource id, null if the rule is aggregated
+	 *         without grouping class
+	 * @throws RuleInstallationException
+	 */
 	public static String getOutputResourceIdVariable(MonitoringRule rule)
 			throws RuleInstallationException {
-		String targetVar;
-		if (isAggregatedMetric(rule)
-				&& !getTargetClass(rule).equals(getGroupingClass(rule))) {
-			String groupingClassVariable = getGroupingClassVariable(rule);
-			if (groupingClassVariable==null) return null;
-			targetVar = groupingClassVariable + "Id";
-		} else {
+		String targetVar = null;
+		if (isAggregatedMetric(rule) && isGroupedMetric(rule)) {
+			if (getTargetClass(rule).equals(getGroupingClass(rule))) {
+				targetVar = QueryVars.RESOURCE_ID;
+			} else {
+				targetVar = getGroupingClassVariable(rule) + "Id";
+			}
+		} else if (!isAggregatedMetric(rule)) {
 			targetVar = QueryVars.RESOURCE_ID;
 		}
 		return targetVar;
@@ -66,7 +75,7 @@ public class Util {
 			return null;
 		String groupingClass = getGroupingClass(rule);
 		String targetClass = getTargetClass(rule);
-		if (groupingClass==null) {
+		if (groupingClass == null) {
 			return null;
 		}
 		if (groupingClass.equals(targetClass)) {
@@ -100,9 +109,9 @@ public class Util {
 	public static boolean isAggregatedMetric(MonitoringRule rule) {
 		return rule.getMetricAggregation() != null;
 	}
-	
+
 	public static boolean isGroupedMetric(MonitoringRule rule) {
-		return getGroupingClass(rule)!=null;
+		return getGroupingClass(rule) != null;
 	}
 
 	public static List<MonitoredTarget> getMonitoredTargets(MonitoringRule rule) {
@@ -148,10 +157,22 @@ public class Util {
 		return args;
 	}
 
-	public static void addParameters(DCConfig dc,
-			List<it.polimi.modaclouds.qos_models.schema.Parameter> parameters) {
-		for (it.polimi.modaclouds.qos_models.schema.Parameter p : parameters) {
-			dc.addParameter(p.getName(), p.getValue());
+	public static void addParameters(
+			DCConfig dc,
+			List<it.polimi.modaclouds.qos_models.schema.Parameter> parameters,
+			List<RequiredParameter> defaultParameters) {
+		for (RequiredParameter defaultParameter : defaultParameters) {
+			String currentName = defaultParameter.getValue();
+			String currentValue = defaultParameter.getDefaultValue();
+			for (it.polimi.modaclouds.qos_models.schema.Parameter parameter : parameters) {
+				if (currentName.equalsIgnoreCase(
+						parameter.getName())) {
+					currentName = parameter.getName();
+					currentValue = parameter.getValue();
+					break;
+				}
+			}
+			dc.addParameter(currentName, currentValue);
 		}
 
 	}
@@ -166,10 +187,9 @@ public class Util {
 	}
 
 	public static String getOutputTimestampVariable(MonitoringRule rule) {
-		if (isAggregatedMetric(rule)) return QueryVars.TIMESTAMP;
+		if (isAggregatedMetric(rule))
+			return QueryVars.TIMESTAMP;
 		return QueryVars.INPUT_TIMESTAMP;
 	}
-
-	
 
 }

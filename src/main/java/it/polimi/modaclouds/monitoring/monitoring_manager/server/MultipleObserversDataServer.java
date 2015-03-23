@@ -20,7 +20,7 @@ import it.polimi.modaclouds.monitoring.monitoring_manager.MetricDoesNotExistExce
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
 import it.polimi.modaclouds.monitoring.monitoring_manager.Observer;
 
-import java.util.List;
+import java.util.Set;
 
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -76,7 +76,7 @@ public class MultipleObserversDataServer extends ServerResource {
 					.getAttributes().get("manager");
 			String metricname = (String) this.getRequest().getAttributes().get("metricname");
 			
-			List<Observer> observers = manager.getObservers(metricname);
+			Set<Observer> observers = manager.getObservers(metricname);
 			JsonObject json = new JsonObject();
 			json.add("observers", new Gson().toJsonTree(observers));
 			this.getResponse().setStatus(Status.SUCCESS_CREATED);

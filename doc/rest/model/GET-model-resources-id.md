@@ -1,6 +1,6 @@
 [Documentation table of contents](../../TOC.md) / [API Reference](../../api.md) / GET-metrics-id-observers-id
 
-# Metrics
+# Model
 
 	GET /model/resources/:id
 

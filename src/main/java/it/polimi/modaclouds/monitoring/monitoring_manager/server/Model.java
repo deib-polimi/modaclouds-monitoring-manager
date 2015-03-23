@@ -117,6 +117,24 @@ public class Model {
 		return collection == null? new HashSet<T>() : collection;
 	}
 	
+	public void addAll(Set<Resource> resources) {
+		for (Resource resource : resources) {
+			if (resource instanceof CloudProvider) {
+				add((CloudProvider)resource);
+			} else if (resource instanceof Location) {
+				add((Location)resource);
+			} else if (resource instanceof VM) {
+				add((VM)resource);
+			} else if (resource instanceof PaaSService) {
+				add((PaaSService)resource);
+			} else if (resource instanceof InternalComponent) {
+				add((InternalComponent)resource);
+			} else if (resource instanceof Method) {
+				add((Method)resource);
+			}
+		}
+	}
+	
 	
 
 }

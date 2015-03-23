@@ -1,0 +1,18 @@
+<monitoringRules xmlns="http://www.modaclouds.eu/xsd/1.0/monitoring_rules_schema">
+    <monitoringRule id="RestCallRule"
+        startEnabled="true" timeStep="5" timeWindow="5">
+        <monitoredTargets>
+            <monitoredTarget class="Method" type="register"/>
+        </monitoredTargets>
+        <collectedMetric metricName="ResponseTime">
+            <parameter name="samplingProbability">1</parameter>
+        </collectedMetric>
+        <metricAggregation aggregateFunction="Average" groupingClass="Method"/>
+        <actions>
+            <action name="RestCall">
+                <parameter name="url">http://localhost:8170/v1/monitoring-rules/RestCallRule</parameter>
+                <parameter name="method">DELETE</parameter>
+            </action>
+        </actions>
+    </monitoringRule>
+</monitoringRules>

@@ -1,6 +1,6 @@
 [Documentation table of contents](../../TOC.md) / [API Reference](../../api.md) / DELETE-metrics-id-observers-id
 
-# Metrics
+# Model
 
 	DELETE /model/resources/:id
 

@@ -1,0 +1,21 @@
+{ 
+  "_:2e3b9373:1481c487766:-7ffa" : { 
+    "http://www.modaclouds.eu/rdfs/1.0/monitoringdata#metric" : [ { 
+      "type" : "literal" ,
+      "value" : "responsetime"
+    }
+     ] ,
+    "http://www.modaclouds.eu/rdfs/1.0/monitoringdata#value" : [ { 
+      "type" : "literal" ,
+      "value" : "2000" ,
+      "datatype" : "http://www.w3.org/2001/XMLSchema#double"
+    }
+     ] ,
+    "http://www.modaclouds.eu/rdfs/1.0/monitoringdata#resourceId" : [ { 
+      "type" : "literal" ,
+      "value" : "register1" ,
+      "datatype" : "http://www.w3.org/2001/XMLSchema#string"
+    }
+     ]
+  }
+}

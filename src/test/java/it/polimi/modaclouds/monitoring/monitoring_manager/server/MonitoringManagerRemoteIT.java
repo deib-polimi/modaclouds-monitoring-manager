@@ -14,131 +14,117 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package it.polimi.modaclouds.monitoring.monitoring_manager;
+package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import it.polimi.modaclouds.monitoring.dcfactory.DCConfig;
 import it.polimi.modaclouds.monitoring.dcfactory.DCVocabulary;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
-import it.polimi.modaclouds.monitoring.monitoring_manager.configuration.ManagerConfig;
-import it.polimi.modaclouds.monitoring.monitoring_manager.server.MMServer;
+import it.polimi.modaclouds.monitoring.monitoring_manager.NetUtil;
+import it.polimi.modaclouds.monitoring.monitoring_manager.Observer;
+import it.polimi.modaclouds.monitoring.monitoring_manager.server.Model;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.Method;
+import it.polimi.modaclouds.qos_models.monitoring_ontology.Resource;
+import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
 import it.polimi.modaclouds.qos_models.util.XMLHelper;
 
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.restlet.Component;
-import org.restlet.data.Protocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.jayway.restassured.RestAssured;
 
-public class MonitoringPlatformIT {
+public class MonitoringManagerRemoteIT {
+
+	private static final int DDA_PORT = 8175;
+	private static final int KB_PORT = 3030;
+	private static final int MM_PORT = 8170;
+	private static final int MM_PRIVATE_PORT = 8070;
+	private static final String knowledgeBaseURL = "http://localhost:3030/modaclouds/kb";
+	private FusekiKBAPI knowledgeBaseAPI = new FusekiKBAPI(knowledgeBaseURL);
 
 	private static Logger logger = LoggerFactory
-			.getLogger(MonitoringPlatformIT.class);
-	private static MonitoringManager mm;
-	private static ManagerConfig config;
-	private Component component;
-	private FusekiKBAPI knowledgeBaseAPI;
+			.getLogger(MonitoringManagerRemoteIT.class);
 
 	@Before
 	public void setUp() throws Exception {
-		ManagerConfig.init();
-		config = ManagerConfig.getInstance();
+		NetUtil.waitForResponseCode("http://localhost:" + KB_PORT, 200, 5, 5000);
 		NetUtil.waitForResponseCode(
-				"http://" + config.getKbIP() + ":" + config.getKbPort(), 200,
-				5, 5000);
-		NetUtil.waitForResponseCode(config.getDdaUrl() + "/queries", 200, 5,
-				5000);
-		mm = new MonitoringManager(config);
-		component = new Component();
-		component.getServers().add(Protocol.HTTP,
-				ManagerConfig.getInstance().getMmPort());
-		component.getClients().add(Protocol.FILE);
-		component.getDefaultHost().attach("", new MMServer(mm, component));
-		component.start();
-		knowledgeBaseAPI = new FusekiKBAPI(config.getKbUrl());
+				"http://localhost:" + DDA_PORT + "/queries", 200, 5, 5000);
+		resetPlatform();
+		RestAssured.urlEncodingEnabled = false;
+	}
+
+	private void resetPlatform() throws JAXBException, SAXException {
+		InputStream response = given()
+				.get("http://localhost:8170/v1/monitoring-rules").andReturn()
+				.asInputStream();
+		MonitoringRules rules = XMLHelper.deserialize(response,
+				MonitoringRules.class);
+		for (MonitoringRule rule : rules.getMonitoringRules()) {
+			given().delete(
+					"http://localhost:8170/v1/monitoring-rules/" + rule.getId())
+					.then().statusCode(204);
+		}
+		String modeljson = given()
+				.get("http://localhost:8170/v1/model/resources").andReturn()
+				.asString();
+		Model model = new Gson().fromJson(modeljson, Model.class);
+
+		for (Resource res : model.getResources()) {
+			given().delete(
+					"http://localhost:8170/v1/model/resources/" + res.getId())
+					.then().statusCode(204);
+		}
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		component.stop();
+		resetPlatform();
 	}
 
 	@Test
 	public void csparqlShouldBeClear() throws Exception {
-		given().port(config.getDdaPort()).get("/queries").then()
+		given().port(DDA_PORT).get("/queries").then()
 				.body("$", emptyIterable());
-		given().port(config.getDdaPort()).get("/streams").then()
+		given().port(DDA_PORT).get("/streams").then()
 				.body("$", emptyIterable());
 	}
 
 	@Test
 	public void kbDCGraphShouldBeEmpty() throws Exception {
-		given().port(config.getKbPort())
+		given().port(KB_PORT)
 				.param("graph",
 						FusekiKBAPI
 								.getGraphURI(DCVocabulary.DATA_COLLECTORS_GRAPH_NAME))
-				.get(config.getKbPath() + "/data").then().statusCode(404);
-	}
-
-	@Test
-	public void rulesShouldBeInstalledAndUninstalledCorrectly()
-			throws Exception {
-		MonitoringRules rules = XMLHelper.deserialize(
-				getResourceAsStream("AvgResponseTimeRule.xml"),
-				MonitoringRules.class);
-		mm.installRules(rules);
-		assertEquals(
-				knowledgeBaseAPI.getAll(DCConfig.class,
-						DCVocabulary.DATA_COLLECTORS_GRAPH_NAME).size(), 1);
-		mm.uninstallRule(rules.getMonitoringRules().get(0).getId());
-		assertTrue(mm.getMonitoringRules().getMonitoringRules().isEmpty());
-		assertTrue(knowledgeBaseAPI.getAll(DCConfig.class,
-				DCVocabulary.DATA_COLLECTORS_GRAPH_NAME).isEmpty());
-	}
-
-	@Test
-	public void observersShouldBeAddedAndDeleted() throws Exception {
-		MonitoringRules rules = XMLHelper.deserialize(
-				getResourceAsStream("AvgResponseTimeRule.xml"),
-				MonitoringRules.class);
-		assertEquals(rules.getMonitoringRules().size(), 1);
-		mm.installRules(rules);
-		assertEquals(mm.getMetrics().size(), 1);
-		assertThat(mm.getMetrics().iterator().next(),
-				equalToIgnoringCase("AverageResponseTime"));
-		String observerId = mm.addObserver("AverageResponseTime",
-				"http://127.0.0.1/null");
-		List<Observer> observers = mm.getObservers("AverageResponseTime");
-		assertEquals(observers.get(0).getId(), observerId);
-		assertEquals(observers.size(), 1);
-		mm.removeObserver("AverageResponseTime", observerId);
-		assertTrue(mm.getObservers("AverageResponseTime").isEmpty());
+				.get("/modaclouds/kb/data").then().statusCode(404);
 	}
 
 	@Test
 	public void rulesShouldBeInstalledAndUninstalledCorrectlyThroughREST()
 			throws Exception {
-		given().port(config.getMmPort())
+		given().port(MM_PORT)
 				.body(IOUtils
 						.toString(getResourceAsStream("AvgResponseTimeRule.xml")))
 				.post("/v1/monitoring-rules").then().assertThat()
@@ -146,74 +132,76 @@ public class MonitoringPlatformIT {
 		assertEquals(
 				knowledgeBaseAPI.getAll(DCConfig.class,
 						DCVocabulary.DATA_COLLECTORS_GRAPH_NAME).size(), 1);
-		String jsonMetrics = given().port(config.getMmPort())
-				.get("/v1/metrics").asString();
+		String jsonMetrics = given().port(MM_PORT).get("/v1/metrics")
+				.asString();
 		assertEquals(getListFromJsonField(jsonMetrics, String.class, "metrics")
 				.size(), 1);
 		assertThat(getListFromJsonField(jsonMetrics, String.class, "metrics")
 				.get(0), equalToIgnoringCase("AverageResponseTime"));
-		given().port(config.getMmPort())
-				.body(IOUtils
-						.toString(getResourceAsStream("AvgResponseTimeRule.xml")))
+		given().port(MM_PORT)
 				.delete("/v1/monitoring-rules/AvgResponseTimeRule").then()
 				.assertThat().statusCode(204);
-		InputStream emptyMonitoringRulesIS = given().port(config.getMmPort())
+		InputStream emptyMonitoringRulesIS = given().port(MM_PORT)
 				.get("/v1/monitoring-rules").asInputStream();
 		assertTrue(XMLHelper
 				.deserialize(emptyMonitoringRulesIS, MonitoringRules.class)
 				.getMonitoringRules().isEmpty());
-		given().port(config.getMmPort()).get("/v1/metrics").then().assertThat()
+		given().port(MM_PORT).get("/v1/metrics").then().assertThat()
 				.body(equalToIgnoringWhiteSpace("{\"metrics\":[]}"));
 		assertTrue(knowledgeBaseAPI.getAll(DCConfig.class,
 				DCVocabulary.DATA_COLLECTORS_GRAPH_NAME).isEmpty());
+		given().port(DDA_PORT).get("/queries").then()
+				.body("$", emptyIterable());
+		given().port(DDA_PORT).get("/streams").then()
+				.body("$", emptyIterable());
 	}
 
 	@Test
 	public void observersShouldBeAddedAndDeletedThroughREST() throws Exception {
-		given().port(config.getMmPort())
+		given().port(MM_PORT)
 				.body(IOUtils
 						.toString(getResourceAsStream("AvgResponseTimeRule.xml")))
 				.post("/v1/monitoring-rules").then().assertThat()
 				.statusCode(204);
 		String callbackurl = "http://127.0.0.1/null";
-		String observerId = given().port(config.getMmPort()).body(callbackurl)
+		String observerId = given().port(MM_PORT).body(callbackurl)
 				.post("/v1/metrics/AverageResponseTime/observers").andReturn()
 				.body().asString();
-		String jsonObservers = given().port(config.getMmPort())
+		String jsonObservers = given().port(MM_PORT)
 				.get("/v1/metrics/AverageResponseTime/observers").asString();
 		List<Observer> observers = getListFromJsonField(jsonObservers,
 				Observer.class, "observers");
 		assertEquals(observers.get(0).getId(), observerId);
 		assertEquals(observers.get(0).getCallbackUrl(), callbackurl);
+		assertNull(observers.get(0).getQueryUri());
 		assertEquals(observers.size(), 1);
-		given().port(config.getMmPort())
+		given().port(MM_PORT)
 				.delete("/v1/metrics/AverageResponseTime/observers/"
 						+ observerId).then().assertThat().statusCode(204);
-		given().port(config.getMmPort())
-				.get("/v1/metrics/AverageResponseTime/observers").then()
-				.assertThat()
+		given().port(MM_PORT).get("/v1/metrics/AverageResponseTime/observers")
+				.then().assertThat()
 				.body(equalToIgnoringWhiteSpace("{\"observers\":[]}"));
 	}
 
 	@Test
 	public void rulesWithSameIdShouldNotBeInstalled() throws Exception {
-		given().port(config.getMmPort())
+		given().port(MM_PORT)
 				.body(IOUtils
 						.toString(getResourceAsStream("AvgResponseTimeRule.xml")))
 				.post("/v1/monitoring-rules").then().assertThat()
 				.statusCode(204);
-		given().port(config.getMmPort())
+		given().port(MM_PORT)
 				.body(IOUtils
 						.toString(getResourceAsStream("AvgResponseTimeRule.xml")))
 				.post("/v1/monitoring-rules").then().assertThat()
 				.statusCode(400);
-		InputStream emptyMonitoringRulesIS = given().port(config.getMmPort())
+		InputStream emptyMonitoringRulesIS = given().port(MM_PORT)
 				.get("/v1/monitoring-rules").asInputStream();
 		assertTrue(XMLHelper
 				.deserialize(emptyMonitoringRulesIS, MonitoringRules.class)
 				.getMonitoringRules().size() == 1);
-		String jsonMetrics = given().port(config.getMmPort())
-				.get("/v1/metrics").asString();
+		String jsonMetrics = given().port(MM_PORT).get("/v1/metrics")
+				.asString();
 		assertEquals(getListFromJsonField(jsonMetrics, String.class, "metrics")
 				.size(), 1);
 		assertThat(getListFromJsonField(jsonMetrics, String.class, "metrics")
@@ -238,13 +226,55 @@ public class MonitoringPlatformIT {
 	}
 
 	@Test
-	public void ruleWithAggregationInValueShouldBeInstalledCorrectly()
-			throws Exception {
-		MonitoringRules rules = XMLHelper.deserialize(
-				getResourceAsStream("EffectiveResponseTimeRule.xml"),
-				MonitoringRules.class);
-		mm.installRules(rules);
-		assertFalse(mm.getMonitoringRules().getMonitoringRules().isEmpty());
+	public void restCallRuleShouldSelfDestroy() throws Exception {
+		Method method = new Method();
+		method.setId("register1");
+		method.setType("register");
+		Model model = new Model();
+		model.add(method);
+		given().port(MM_PORT).body(new Gson().toJson(model))
+				.post("/v1/model/resources").then().assertThat()
+				.statusCode(204);
+		given().port(MM_PORT)
+				.body(IOUtils
+						.toString(getResourceAsStream("RestCallRule4SelfDestroy.xml")))
+				.post("/v1/monitoring-rules").then().assertThat()
+				.statusCode(204);
+
+		// TODO temp fix: first datum is ignored by csparql engine
+		given().body(
+				IOUtils.toString(getResourceAsStream("MonitoringDatumRT.json")))
+				.port(DDA_PORT)
+				.post("/streams/"
+						+ URLEncoder
+								.encode("http://www.modaclouds.eu/streams/responsetime",
+										"UTF-8")).then().assertThat()
+				.statusCode(200);
+
+		// TODO temp fix: some time not to have this datum ignored as well
+		Thread.sleep(1000);
+		given().body(
+				IOUtils.toString(getResourceAsStream("MonitoringDatumRT.json")))
+				.port(DDA_PORT)
+				.post("/streams/"
+						+ URLEncoder
+								.encode("http://www.modaclouds.eu/streams/responsetime",
+										"UTF-8")).then().assertThat()
+				.statusCode(200);
+
+		// The rule have a 5 seconds period
+		Thread.sleep(10000);
+		InputStream emptyMonitoringRulesIS = given().port(MM_PORT)
+				.get("/v1/monitoring-rules").asInputStream();
+		assertTrue(XMLHelper
+				.deserialize(emptyMonitoringRulesIS, MonitoringRules.class)
+				.getMonitoringRules().isEmpty());
+		assertTrue(knowledgeBaseAPI.getAll(DCConfig.class,
+				DCVocabulary.DATA_COLLECTORS_GRAPH_NAME).isEmpty());
+		given().port(DDA_PORT).get("/queries").then()
+				.body("$", emptyIterable());
+		given().port(DDA_PORT).get("/streams").then()
+				.body("$", emptyIterable());
 	}
 
 }

@@ -21,6 +21,11 @@ Take a look at the [documentation table of contents](doc/TOC.md).
 
 ## Change List
 
+v1.5:
+* integrated with [qos-models 2.4](https://github.com/deib-polimi/modaclouds-qos-models/releases/tag/v2.4) for actions execution
+* a private endpoint was implemented for internal communication and the port can be specified through the configuration, see the user manual
+* implemented a new REST API for retrieving all resources in the model (GET /model/resources), see the doc 
+
 v1.4:
 * Aggregations and mathematical expressions can now be expressed in the OutputAction value parameter.
 * The monitoring manager waits for the availability of the DDA and KB for 30 seconds before failing the startup 

@@ -75,7 +75,7 @@ public class SingleResourceDataServer extends ServerResource {
 					.getAttributes().get("manager");
 			String id = (String) this.getRequest().getAttributes().get("id");
 
-			Resource resource = manager.getInstance(id);
+			Resource resource = manager.getResource(id);
 
 			if (resource == null) {
 				logger.error("Resource {} does not exist", id);

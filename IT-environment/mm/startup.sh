@@ -16,7 +16,8 @@
 #    limitations under the License.
 #
 
-
-cd /opt/dda/rsp-services-csparql-0.4.6.2-modaclouds
-echo "Starting dda..."
-./rsp-services-csparql > /vagrant/dda/dda.log 2>&1 &
+tar -xvzf /vagrant/tmp/monitoring-manager.tar.gz -C /vagrant/tmp/
+cd /vagrant/tmp/monitoring-manager*
+chmod +x monitoring-manager
+echo "Starting remote mm..."
+./monitoring-manager > /vagrant/mm/mm.log 2>&1 &

@@ -16,6 +16,9 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
+import java.io.IOException;
+
+import it.polimi.deib.csparql_rest_api.exception.ServerErrorException;
 import it.polimi.modaclouds.monitoring.monitoring_manager.ConfigurationException;
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
 import it.polimi.modaclouds.monitoring.monitoring_manager.configuration.ManagerConfig;
@@ -62,18 +65,25 @@ public class MMServer extends Application {
 		try {
 			MonitoringManager manager = new MonitoringManager(ManagerConfig.getInstance());
 
-//			System.setProperty("org.restlet.engine.loggerFacadeClass",
-//					"org.restlet.ext.slf4j.Slf4jLoggerFacade");
+			System.setProperty("org.restlet.engine.loggerFacadeClass",
+					"org.restlet.ext.slf4j.Slf4jLoggerFacade");
 			Component component = new Component();
 			component.getServers().add(Protocol.HTTP, ManagerConfig.getInstance().getMmPort());
-			component.getClients().add(Protocol.FILE);
-
 			MMServer mmServer = new MMServer(manager, component);
 			component.getDefaultHost().attach("", mmServer);
-
+			logger.info("Starting Monitoring Manager public server on port " + ManagerConfig.getInstance().getMmPort());
 			component.start();
-		} catch (HttpException e) {
-			logger.error("Could not connect to Knowledge Base: {}", e.getMessage());
+			
+			Component privateComponent = new Component();
+			privateComponent.getServers().add(Protocol.HTTP, ManagerConfig.getInstance().getMmPrivatePort());
+			PrivateServer privateServer = new PrivateServer(manager, privateComponent);
+			privateComponent.getDefaultHost().attach("", privateServer);
+			logger.info("Starting Monitoring Manager private server on port " + ManagerConfig.getInstance().getMmPrivatePort());
+			privateComponent.start();
+			
+			
+		} catch (HttpException | IOException | ServerErrorException e) {
+			logger.error("Connection problem: {}", e.getMessage());
 		} catch (ConfigurationException e) {
 			logger.error("Configuration problem: {}", e.getMessage());
 		} catch (Exception e) {

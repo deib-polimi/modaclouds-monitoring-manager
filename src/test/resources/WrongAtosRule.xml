@@ -1,0 +1,29 @@
+<monitoringRules
+	xmlns="http://www.modaclouds.eu/xsd/1.0/monitoring_rules_schema">
+	<monitoringRule
+		id="35c19584-2cca-40ad-8a42-7e522a35f85f_af54b44f-2f93-408b-87d4-f3540fdc49a5_2468ecf1-18e3-42ef-af4b-a94e3d78d823_6ca5e99c-0e39-4d9f-a599-fc110246361e_seff"
+		label="ResponseTime_gui_listOfPatients"
+		relatedQosConstraintId="af54b44f-2f93-408b-87d4-f3540fdc49a5_2468ecf1-18e3-42ef-af4b-a94e3d78d823_6ca5e99c-0e39-4d9f-a599-fc110246361e_seff"
+		startEnabled="true" timeStep="60" timeWindow="60">
+		<collectedMetric collectedMetric="ResponseTime" />
+		<monitoredTargets>
+			<monitoredTarget class="Method"
+				type="2468ecf1-18e3-42ef-af4b-a94e3d78d823_6ca5e99c-0e39-4d9f-a599-fc110246361e_seff" />
+		</monitoredTargets>
+		<metricAggregation aggregateFunction="Average" />
+		<condition>METRIC &gt; 2500.0</condition>
+		<actions>
+			<action name="outputMetric">
+				<parameter name="metric">gui_listOfPatients_violated</parameter>
+				<parameter name="value">ResponseTime</parameter>
+				<parameter name="resourceId">ID</parameter>
+			</action>
+			<action name="Business">
+				<parameter name="type" />
+				<parameter name="value" />
+				<parameter name="unit" />
+				<parameter name="validity" />
+			</action>
+		</actions>
+	</monitoringRule>
+</monitoringRules>

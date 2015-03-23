@@ -8,9 +8,8 @@
 		</encoder>
 	</appender>
 
-	<logger name="it.polimi.modaclouds.monitoring.monitoring_manager" level="INFO" />
-	<logger name="it.polimi.modaclouds.qos_models.monitoring_rules.actions" level="INFO" />
-	
+	<logger name="it.polimi.modaclouds" level="DEBUG" />
+	<logger name="org.restlet" level="INFO" />
 
 	<root level="OFF">
 		<appender-ref ref="STDERR" />

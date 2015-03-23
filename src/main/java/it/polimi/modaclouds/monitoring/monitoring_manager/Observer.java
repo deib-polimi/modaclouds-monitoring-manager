@@ -20,10 +20,12 @@ public class Observer {
 
 	private String id;
 	private String callbackUrl;
+	private transient String queryUri;
 
-	public Observer(String id, String callbackUrl) {
+	public Observer(String id, String callbackUrl, String queryUri) {
 		this.id = id;
 		this.callbackUrl = callbackUrl;
+		this.queryUri = queryUri;
 	}
 
 	public String getId() {
@@ -32,6 +34,18 @@ public class Observer {
 
 	public String getCallbackUrl() {
 		return callbackUrl;
+	}
+
+	public String getQueryUri() {
+		return queryUri;
+	}
+
+	public void setQueryUri(String queryUri) {
+		this.queryUri = queryUri;
+	}
+
+	public String getUri() {
+		return queryUri + "/observers/" + id;
 	}
 
 }

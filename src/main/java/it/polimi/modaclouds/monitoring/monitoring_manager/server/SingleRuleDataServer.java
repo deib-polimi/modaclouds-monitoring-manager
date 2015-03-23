@@ -33,7 +33,7 @@ public class SingleRuleDataServer extends ServerResource {
 
 	@Delete
 	public void uninstallMonitoringRule(Representation rep) {
-		try { // TODO
+		try {
 			MonitoringManager manager = (MonitoringManager) getContext()
 					.getAttributes().get("manager");
 			String id = (String) this.getRequest().getAttributes().get("id");

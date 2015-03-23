@@ -26,6 +26,7 @@ import it.polimi.modaclouds.monitoring.monitoring_manager.server.Model;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MO;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.MOVocabulary;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Resource;
+import it.polimi.modaclouds.qos_models.monitoring_rules.AbstractAction;
 import it.polimi.modaclouds.qos_models.monitoring_rules.Problem;
 import it.polimi.modaclouds.qos_models.monitoring_rules.Validator;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
@@ -48,17 +49,16 @@ public class MonitoringManager {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-	private CSPARQLEngineManager csparqlEngineManager;
+	CSPARQLEngineManager csparqlEngineManager;
 	private DCFactoriesManager dcFactoriesManager;
 	private Map<String, MonitoringRule> installedRules;
 
 	private Validator validator;
 
-	private FusekiKBAPI knowledgeBase;
+	FusekiKBAPI knowledgeBase;
 
 	public MonitoringManager(ManagerConfig config) throws Exception {
-		Config.setDefaultConfiguration(null,
-				config.getMonitoringMetrics());
+		Config.setDefaultConfiguration(null, config.getMonitoringMetrics());
 
 		logger.info("Checking if KB is reachable");
 		NetUtil.waitForResponseCode(
@@ -81,6 +81,8 @@ public class MonitoringManager {
 
 	public synchronized void installRules(MonitoringRules rules)
 			throws RuleInstallationException {
+		logger.info("Rules to install received.");
+		logger.info("Validating rules.");
 		validate(rules);
 		String installedRules = "";
 		try {
@@ -91,7 +93,8 @@ public class MonitoringManager {
 		} catch (RuleInstallationException e) {
 			throw new RuleInstallationException(
 					"Error while installing rules, only the following rules were successfully installed:"
-							+ installedRules + ". Problems: " + e.getMessage(), e);
+							+ installedRules + ". Problems: " + e.getMessage(),
+					e);
 		}
 	}
 
@@ -110,16 +113,16 @@ public class MonitoringManager {
 			previousRule = rule;
 		}
 		if (!problems.isEmpty()) {
-			String message = "Rules could not be installed: ";
+			String message = "Rules could not be installed. Problems:";
 			for (Problem p : problems) {
-				message += "Rule "
+				message += " [Rule "
 						+ p.getId()
 						+ ", error: "
 						+ p.getError()
 						+ " at position "
 						+ p.getTagName()
 						+ (p.getDescription() != null ? ", details: "
-								+ p.getDescription() : "") + "\n";
+								+ p.getDescription() : "") + "]";
 			}
 			throw new RuleInstallationException(message);
 		}
@@ -138,13 +141,14 @@ public class MonitoringManager {
 
 	private void installRule(MonitoringRule rule)
 			throws RuleInstallationException {
+		logger.info("Installing rule {}", rule.getId());
 		try {
 			csparqlEngineManager.installRule(rule); // it's better to configure
 													// csparql engine first so
 													// to prepare the stream
 			dcFactoriesManager.installRule(rule);
 			installedRules.put(rule.getId(), rule);
-			logger.info("Rule {} installed successfully", rule.getId());	
+			logger.info("Rule {} installed successfully", rule.getId());
 		} catch (RuleInstallationException e) {
 			logger.error("Error while installing rule {}, rolling back...",
 					rule.getId(), e);
@@ -178,7 +182,7 @@ public class MonitoringManager {
 		return observerId;
 	}
 
-	public List<Observer> getObservers(String metricname)
+	public Set<Observer> getObservers(String metricname)
 			throws ServerErrorException, ObserverErrorException,
 			MetricDoesNotExistException {
 		return csparqlEngineManager.getObservers(metricname);
@@ -207,9 +211,22 @@ public class MonitoringManager {
 				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 	}
 
-	public Resource getInstance(String id) throws DeserializationException {
+	public Resource getResource(String id) throws DeserializationException {
 		return (Resource) knowledgeBase.getEntityById(id,
 				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
+	}
+
+	public AbstractAction getActionImplByRuleId(String ruleId) {
+		return csparqlEngineManager.getActionImplByRuleId(ruleId);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Model getCurrentModel() throws DeserializationException {
+		Model model = new Model();
+		Set<Resource> resources = (Set<Resource>) knowledgeBase
+				.getAllEntities(MODEL_GRAPH_NAME);
+		model.addAll(resources);
+		return model;
 	}
 
 }

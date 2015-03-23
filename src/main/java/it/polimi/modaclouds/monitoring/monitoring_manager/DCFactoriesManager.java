@@ -19,13 +19,17 @@ package it.polimi.modaclouds.monitoring.monitoring_manager;
 import it.polimi.modaclouds.monitoring.dcfactory.DCConfig;
 import it.polimi.modaclouds.monitoring.dcfactory.DCFields;
 import it.polimi.modaclouds.monitoring.dcfactory.DCVocabulary;
-import it.polimi.modaclouds.monitoring.kb.api.DeserializationException;
 import it.polimi.modaclouds.monitoring.kb.api.FusekiKBAPI;
 import it.polimi.modaclouds.monitoring.kb.api.SerializationException;
+import it.polimi.modaclouds.qos_models.schema.Metric;
+import it.polimi.modaclouds.qos_models.schema.Metric.RequiredParameter;
+import it.polimi.modaclouds.qos_models.schema.Metrics;
 import it.polimi.modaclouds.qos_models.schema.MonitoredTarget;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
+import it.polimi.modaclouds.qos_models.util.Config;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -44,7 +48,7 @@ public class DCFactoriesManager {
 	}
 
 	public synchronized void uninstallRule(String ruleId) {
-		logger.info(
+		logger.debug(
 				"Removing data collectors configurations related to rule {} from KB",
 				ruleId);
 		try {
@@ -57,7 +61,7 @@ public class DCFactoriesManager {
 			}
 		} catch (SerializationException e) {
 			logger.error(
-					"Error while deleting data collector related to rule {} from KB",
+					"Error while deleting data collector configuration related to rule {} from KB",
 					ruleId, e);
 		}
 
@@ -65,24 +69,27 @@ public class DCFactoriesManager {
 
 	public synchronized void installRule(MonitoringRule rule)
 			throws RuleInstallationException {
-		logger.info("Adding data collectors related to rule {} to KB",
+		logger.debug("Adding data collectors related to rule {} to KB",
 				rule.getId());
-		DCConfig dc = makeDCConfiguration(rule);
 		try {
+			DCConfig dc = makeDCConfiguration(rule, Config.getInstance()
+					.getMonitoringMetrics());
 			knowledgeBase.add(dc, DCFields.id,
 					DCVocabulary.DATA_COLLECTORS_GRAPH_NAME);
 			dcConfigByRuleId.put(rule.getId(), dc);
-		} catch (SerializationException | DeserializationException e) {
+		} catch (Exception e) {
 			throw new RuleInstallationException(e);
 		}
 
 	}
 
-	private DCConfig makeDCConfiguration(MonitoringRule rule) {
+	private DCConfig makeDCConfiguration(MonitoringRule rule,
+			Metrics availableMetrics) {
 		String metricName = rule.getCollectedMetric().getMetricName()
 				.toLowerCase();
 		DCConfig dc = new DCConfig();
-		Util.addParameters(dc, rule.getCollectedMetric().getParameters());
+		Util.addParameters(dc, rule.getCollectedMetric().getParameters(),
+				getMetricParameters(metricName, availableMetrics));
 		dc.setMonitoredMetric(metricName);
 		for (MonitoredTarget target : rule.getMonitoredTargets()
 				.getMonitoredTargets()) {
@@ -92,6 +99,15 @@ public class DCFactoriesManager {
 				dc.addMonitoredResourceClass(target.getClazz());
 		}
 		return dc;
+	}
+
+	public List<RequiredParameter> getMetricParameters(String metricName,
+			Metrics metrics) {
+		for (Metric metric : metrics.getMetrics()) {
+			if (metric.getName().equalsIgnoreCase(metricName))
+				return metric.getRequiredParameters();
+		}
+		return null;
 	}
 
 }
