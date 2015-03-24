@@ -2,7 +2,15 @@
 
 #User Manual
 
-## What to configure
+## Ready to go Monitoring Platform with Vagrant
+
+If you installed [Vagrant](http://www.vagrantup.com) on your machine, you can simply have a ready to go monitoring platform by extracting the latest release package (for versions >= 1.6) and run `vagrant up`.
+
+The platform will be up and running with KB, DDA and Monitoring Manager configured with the default configuration.
+
+## Monitoring Manager configuration
+
+### What to configure
 
 * DDA URL: the Deterministic Data Analyzer endpoint
 * KB URL: the Knowledge Base endpoint
@@ -11,7 +19,7 @@
 * Monitoring Manager private IP: the private Monitoring Manager IP address for internal communication among platform components, must be accessible by the DDA
 * Monitoring metrics file: the xml file list of metrics used for validating monitoring rules. The list should contain all metrics data collectors can provide. The file should be validated by the [metrics_schema](https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/master/metamodels/commons/metrics_schema.xsd). The [default list](https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/master/src/main/resources/monitoring_metrics.xml) can be overridden by a custom one either using a local file or a public URL.
 
-## How to configure
+### How to configure
 
 The monitoring manager can be configured by means of different options (latters replaces the formers):
 * Default Configuration
@@ -19,7 +27,7 @@ The monitoring manager can be configured by means of different options (latters 
 * System Properties
 * CLI Arguments
 
-### Default Configuration
+#### Default Configuration
 
 * DDA URL: `http://127.0.0.1:8175`
 * KB URL: `http://127.0.0.1:3030/modaclouds/kb`
@@ -28,7 +36,7 @@ The monitoring manager can be configured by means of different options (latters 
 * Monitoring Manager private IP address: `127.0.0.1`
 * Monitoring metrics file: [default list of monitoring metrics](https://raw.githubusercontent.com/deib-polimi/modaclouds-qos-models/master/src/main/resources/monitoring_metrics.xml)
 
-### Environment Variables
+#### Environment Variables
 
 ```
 MODACLOUDS_MONITORING_DDA_ENDPOINT_IP
@@ -50,11 +58,11 @@ where:
 * Monitoring Manager private IP address: `${MODACLOUDS_MONITORING_MANAGER_PRIVATE_IP}`
 * Monitoring metrics file: `${MODACLOUDS_MONITORING_MONITORING_METRICS_FILE}`
 
-### System Properties
+#### System Properties
 
 Same names used for Environment Variables.
 
-### CLI Arguments
+#### CLI Arguments
 
 Usage available by running `./monitoring-manager -help`:
 
