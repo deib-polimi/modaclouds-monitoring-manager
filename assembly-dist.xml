@@ -33,12 +33,11 @@
   <files>
     <file>
       <source>${project.build.directory}/${project.artifactId}-${project.version}.jar</source>
-      <outputDirectory></outputDirectory>
       <destName>monitoring-manager.jar</destName>
     </file>
     <file>
-      <source>LICENSE</source>
-      <destName>LICENSE</destName>
+      <source>release.Vagrantfile</source>
+      <destName>Vagrantfile</destName>
     </file>
   </files>
 
@@ -48,14 +47,14 @@
       <includes>
         <include>README*</include>
         <include>doc/**</include>
-      </includes>
-    </fileSet>
-
-    <fileSet>
-      <outputDirectory></outputDirectory>
-      <includes>
+        <include>scripts/**</include>
         <include>monitoring-manager</include>
+        <include>LICENSE</include>
       </includes>
+      <excludes>
+      	<exclude>scripts/mm/bootstrap-from*.sh</exclude>
+      	<exclude>scripts/mm/compile.sh</exclude>
+      </excludes>
     </fileSet>
   </fileSets>
 </assembly>

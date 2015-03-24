@@ -16,20 +16,24 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
-import java.io.IOException;
-
 import it.polimi.deib.csparql_rest_api.exception.ServerErrorException;
 import it.polimi.modaclouds.monitoring.monitoring_manager.ConfigurationException;
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
 import it.polimi.modaclouds.monitoring.monitoring_manager.configuration.ManagerConfig;
 
+import java.io.IOException;
+
 import org.apache.jena.atlas.web.HttpException;
 import org.restlet.Application;
 import org.restlet.Component;
 import org.restlet.Restlet;
+import org.restlet.data.LocalReference;
 import org.restlet.data.Protocol;
+import org.restlet.resource.Directory;
+import org.restlet.routing.Redirector;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
+import org.restlet.routing.TemplateRoute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,10 +48,9 @@ public class MMServer extends Application {
 		this.manager = manager;
 		this.component = component;
 	}
-	
+
 	public static void main(String[] args) {
 
-		
 		try {
 			ManagerConfig.init(args);
 		} catch (ConfigurationException e) {
@@ -59,29 +62,37 @@ public class MMServer extends Application {
 			System.out.println(ManagerConfig.usage);
 			return;
 		}
-		
-		logger.info("Current configuration:\n{}", ManagerConfig.getInstance().toString());
+
+		logger.info("Current configuration:\n{}", ManagerConfig.getInstance()
+				.toString());
 
 		try {
-			MonitoringManager manager = new MonitoringManager(ManagerConfig.getInstance());
+			MonitoringManager manager = new MonitoringManager(
+					ManagerConfig.getInstance());
 
 			System.setProperty("org.restlet.engine.loggerFacadeClass",
 					"org.restlet.ext.slf4j.Slf4jLoggerFacade");
 			Component component = new Component();
-			component.getServers().add(Protocol.HTTP, ManagerConfig.getInstance().getMmPort());
-			MMServer mmServer = new MMServer(manager, component);
-			component.getDefaultHost().attach("", mmServer);
-			logger.info("Starting Monitoring Manager public server on port " + ManagerConfig.getInstance().getMmPort());
+			component.getServers().add(Protocol.HTTP,
+					ManagerConfig.getInstance().getMmPort());
+			component.getClients().add(Protocol.CLAP);
+			component.getDefaultHost().attach("",
+					new MMServer(manager, component));
+
+			logger.info("Starting Monitoring Manager public server on port "
+					+ ManagerConfig.getInstance().getMmPort());
 			component.start();
-			
+
 			Component privateComponent = new Component();
-			privateComponent.getServers().add(Protocol.HTTP, ManagerConfig.getInstance().getMmPrivatePort());
-			PrivateServer privateServer = new PrivateServer(manager, privateComponent);
+			privateComponent.getServers().add(Protocol.HTTP,
+					ManagerConfig.getInstance().getMmPrivatePort());
+			PrivateServer privateServer = new PrivateServer(manager,
+					privateComponent);
 			privateComponent.getDefaultHost().attach("", privateServer);
-			logger.info("Starting Monitoring Manager private server on port " + ManagerConfig.getInstance().getMmPrivatePort());
+			logger.info("Starting Monitoring Manager private server on port "
+					+ ManagerConfig.getInstance().getMmPrivatePort());
 			privateComponent.start();
-			
-			
+
 		} catch (HttpException | IOException | ServerErrorException e) {
 			logger.error("Connection problem: {}", e.getMessage());
 		} catch (ConfigurationException e) {
@@ -127,6 +138,21 @@ public class MMServer extends Application {
 				MultipleResourcesDataServer.class);
 		router.attach("/" + apiVersion + "/model/resources/{id}",
 				SingleResourceDataServer.class);
+
+		Redirector redirector = new Redirector(getContext(),
+				"/webapp/index.html", Redirector.MODE_CLIENT_PERMANENT);
+		router.attach("/webapp",redirector);
+		router.attach("/webapp/",redirector);
+		
+		final Directory dir = new Directory(getContext(), new LocalReference(
+				"clap://class/webapp"));
+		dir.setListingAllowed(false);
+		dir.setDeeplyAccessible(true);
+		dir.setIndexName("index");
+		TemplateRoute route = router.attach("/webapp/", dir);
+		route.setMatchingMode(Template.MODE_STARTS_WITH);
+
+		
 
 		return router;
 	}

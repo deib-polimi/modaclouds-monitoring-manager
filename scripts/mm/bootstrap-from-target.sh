@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # Copyright 2014 deib-polimi
 # Contact: deib-polimi <marco.miglierina@polimi.it>
@@ -15,17 +16,22 @@
 #    limitations under the License.
 #
 
-apt-get update
-apt-get install -y tar openjdk-7-jre
+cd /vagrant
 
-if [ -d /opt/dda ];
-	then rm -r /opt/dda
+ls -1 target/monitoring-manager-*-distribution.tar.gz > /dev/null 2>&1
+
+if [ "$?" != "0" ]; then 
+	echo "Cannot find monitoring-manager-*-distribution.tar.gz in target folder"
+	exit 1
 fi
 
-mkdir -p /opt/dda
-cd /opt/dda
+latest=`ls -1 target/monitoring-manager-*-distribution.tar.gz | tail -1`
 
-echo "Downloading dda..."
-wget --quiet -O rsp-services-csparql-0.4.6.2-modaclouds-distribution.tar.gz https://github.com/deib-polimi/rsp-services-csparql/releases/download/0.4.6.2-modaclouds/rsp-services-csparql-0.4.6.2-modaclouds-distribution.tar.gz
-tar -xvzf rsp-services-csparql-0.4.6.2-modaclouds-distribution.tar.gz -C .
-chmod +x rsp-services-csparql-0.4.6.2-modaclouds/rsp-services-csparql
+if [ -d /opt/mm ];
+	then rm -r /opt/mm
+fi
+mkdir -p /opt/mm
+
+tar -xvzf $latest -C /opt/mm
+cd /opt/mm/monitoring-manager*
+chmod +x monitoring-manager

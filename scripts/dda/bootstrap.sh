@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # Copyright 2014 deib-polimi
 # Contact: deib-polimi <marco.miglierina@polimi.it>
@@ -16,8 +15,14 @@
 #    limitations under the License.
 #
 
-tar -xvzf /vagrant/tmp/monitoring-manager.tar.gz -C /vagrant/tmp/
-cd /vagrant/tmp/monitoring-manager*
-chmod +x monitoring-manager
-echo "Starting remote mm..."
-./monitoring-manager > /vagrant/mm/mm.log 2>&1 &
+if [ -d /opt/dda ];
+	then rm -r /opt/dda
+fi
+
+mkdir -p /opt/dda
+cd /opt/dda
+
+echo "Downloading rsp-services-csparql-0.4.6.2-modaclouds..."
+wget --quiet -O rsp-services-csparql-0.4.6.2-modaclouds-distribution.tar.gz https://github.com/deib-polimi/rsp-services-csparql/releases/download/0.4.6.2-modaclouds/rsp-services-csparql-0.4.6.2-modaclouds-distribution.tar.gz
+tar -xvzf rsp-services-csparql-0.4.6.2-modaclouds-distribution.tar.gz -C .
+chmod +x rsp-services-csparql-0.4.6.2-modaclouds/rsp-services-csparql
