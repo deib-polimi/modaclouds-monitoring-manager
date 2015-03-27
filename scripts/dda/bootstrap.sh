@@ -15,6 +15,8 @@
 #    limitations under the License.
 #
 
+VERSION='0.4.6.3-modaclouds'
+
 if [ -d /opt/dda ];
 	then rm -r /opt/dda
 fi
@@ -22,7 +24,7 @@ fi
 mkdir -p /opt/dda
 cd /opt/dda
 
-echo "Downloading rsp-services-csparql-0.4.6.2-modaclouds..."
-wget --quiet -O rsp-services-csparql-0.4.6.2-modaclouds-distribution.tar.gz https://github.com/deib-polimi/rsp-services-csparql/releases/download/0.4.6.2-modaclouds/rsp-services-csparql-0.4.6.2-modaclouds-distribution.tar.gz
-tar -xvzf rsp-services-csparql-0.4.6.2-modaclouds-distribution.tar.gz -C .
-chmod +x rsp-services-csparql-0.4.6.2-modaclouds/rsp-services-csparql
+echo "Downloading rsp-services-csparql-${VERSION}..."
+wget --quiet -O rsp-services-csparql-${VERSION}-distribution.tar.gz https://github.com/deib-polimi/rsp-services-csparql/releases/download/${VERSION}/rsp-services-csparql-${VERSION}-distribution.tar.gz
+tar -xvzf rsp-services-csparql-${VERSION}-distribution.tar.gz -C .
+chmod +x rsp-services-csparql-${VERSION}/rsp-services-csparql

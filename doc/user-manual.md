@@ -6,7 +6,15 @@
 
 If you installed [Vagrant](http://www.vagrantup.com) on your machine, you can simply have a ready to go monitoring platform by extracting the latest release package (for versions >= 1.6) and run `vagrant up`.
 
-The platform will be up and running with KB, DDA and Monitoring Manager configured with the default configuration.
+The platform will be up and running with KB, DDA and Monitoring Manager configured with the [default configuration](#default-configuration).
+
+For testing purpose two observers where included in the package. Run `START_TEST_OBSERVERS='true' vagrant up` for having vagrant start also such observers:
+	* `localhost:8000/simpleobserver/data` will print the received monitoring data as it comes (json/rdf format)
+	* `localhost:8000/csvobserver/data` will print received monitoring data in csv format (resourceId,metric,value,timestamp).
+
+A logs folder will be created automatically, where all components log files will be available.
+
+Use `vagrant reload` instead of `vagrant up` if you want to restart the machine. Use `vagrant halt` to stop the machine. Use `vagrant destroy` to destroy the virtual machine. Check out [Vagrant official documentation](https://docs.vagrantup.com/v2/) for further details.
 
 ## Monitoring Manager configuration
 

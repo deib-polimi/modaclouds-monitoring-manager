@@ -30,12 +30,13 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 public class MultipleResourcesDataServer extends ServerResource {
 
 	private Logger logger = LoggerFactory
 			.getLogger(MultipleResourcesDataServer.class);
-	
+
 	@Get
 	public void getResources() {
 		try {
@@ -69,15 +70,20 @@ public class MultipleResourcesDataServer extends ServerResource {
 			Gson gson = new Gson();
 			Model deserialised = gson.fromJson(payload, Model.class);
 
-			// update model and responde to the post request
 			manager.updateModel(deserialised);
 			this.getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 
+		} catch (JsonSyntaxException e) {
+			logger.error("Error while adding components: {}", e.getMessage());
+			this.getResponse().setStatus(Status.CLIENT_ERROR_BAD_REQUEST, e);
+			this.getResponse().setEntity(
+					"Error while adding components: " + e.getMessage(),
+					MediaType.TEXT_PLAIN);
 		} catch (Exception e) {
 			logger.error("Error while adding components", e);
 			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL, e);
 			this.getResponse().setEntity(
-					"Error while adding components:\n"
+					"Error while adding components: "
 							+ Throwables.getStackTraceAsString(e),
 					MediaType.TEXT_PLAIN);
 		} finally {
@@ -104,12 +110,18 @@ public class MultipleResourcesDataServer extends ServerResource {
 			manager.uploadModel(deserialised);
 			this.getResponse().setStatus(Status.SUCCESS_NO_CONTENT);
 
+		} catch (JsonSyntaxException e) {
+			logger.error("Error while uploading the model: {}", e.getMessage());
+			this.getResponse().setStatus(Status.CLIENT_ERROR_BAD_REQUEST, e);
+			this.getResponse().setEntity(
+					"Error while uploading the model: " + e.getMessage(),
+					MediaType.TEXT_PLAIN);
 		} catch (Exception e) {
 			logger.error("Error while uploading the model", e);
 			this.getResponse().setStatus(Status.SERVER_ERROR_INTERNAL,
 					e.getMessage());
 			this.getResponse().setEntity(
-					"Error while uploading the model: \n"
+					"Error while uploading the model: "
 							+ Throwables.getStackTraceAsString(e),
 					MediaType.TEXT_PLAIN);
 		} finally {

@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<mo:monitoringRules xmlns:mo="http://www.modaclouds.eu/xsd/1.0/monitoring_rules_schema">
+  <mo:monitoringRule id="35c19584-2cca-40ad-8a42-7e522a35f85f_af54b44f-2f93-408b-87d4-f3540fdc49a5_2468ecf1-18e3-42ef-af4b-a94e3d78d823_6ca5e99c-0e39-4d9f-a599-fc110246361e_seff" label="ResponseTime_gui_listOfPatients" relatedQosConstraintId="af54b44f-2f93-408b-87d4-f3540fdc49a5_2468ecf1-18e3-42ef-af4b-a94e3d78d823_6ca5e99c-0e39-4d9f-a599-fc110246361e_seff" startEnabled="true" timeStep="10" timeWindow="10">
+    <mo:collectedMetric metricName="ResponseTime">
+		<mo:parameter name="samplingProbability">1</mo:parameter>
+	</mo:collectedMetric>
+    <mo:monitoredTargets>
+      <mo:monitoredTarget class="Method" type="2468ecf1-18e3-42ef-af4b-a94e3d78d823_6ca5e99c-0e39-4d9f-a599-fc110246361e_seff"/>
+    </mo:monitoredTargets>
+    <mo:metricAggregation aggregateFunction="Average" groupingClass="Method"/>
+    <mo:condition>METRIC &gt; 2500.0</mo:condition>
+    <mo:actions>
+      <mo:action name="OutputMetric">
+        <mo:parameter name="metric">gui_listOfPatients_violated</mo:parameter>
+        <mo:parameter name="value">METRIC</mo:parameter>
+        <mo:parameter name="resourceId">ID</mo:parameter>
+      </mo:action>
+    </mo:actions>
+  </mo:monitoringRule>
+  <mo:monitoringRule id="4d1ad207-6b4d-4aed-bee1-cb0fcb1629dc_79127a7e-c2d9-4463-93de-20e422a2d4be_2468ecf1-18e3-42ef-af4b-a94e3d78d823_b780c3f4-298c-4114-8d86-074b81374b4c_seff" label="GenericRTQoS_gui_changeTaskStatus" relatedQosConstraintId="79127a7e-c2d9-4463-93de-20e422a2d4be_2468ecf1-18e3-42ef-af4b-a94e3d78d823_b780c3f4-298c-4114-8d86-074b81374b4c_seff" startEnabled="true" timeStep="10" timeWindow="10">
+    <mo:collectedMetric metricName="ResponseTime">
+		<mo:parameter name="samplingProbability">1</mo:parameter>
+	</mo:collectedMetric>
+    <mo:monitoredTargets>
+      <mo:monitoredTarget class="Method" type="2468ecf1-18e3-42ef-af4b-a94e3d78d823_b780c3f4-298c-4114-8d86-074b81374b4c_seff"/>
+    </mo:monitoredTargets>
+    <mo:metricAggregation aggregateFunction="Average" groupingClass="Method"/>
+    <mo:condition>METRIC &gt; 5000.0</mo:condition>
+    <mo:actions>
+      <mo:action name="OutputMetric">
+        <mo:parameter name="metric">gui_changeTaskStatus_violated</mo:parameter>
+        <mo:parameter name="value">METRIC</mo:parameter>
+        <mo:parameter name="resourceId">ID</mo:parameter>
+      </mo:action>
+    </mo:actions>
+  </mo:monitoringRule>
+  <mo:monitoringRule id="10e329e8-65f0-484c-988d-d73caea2caa6_05dffc5d-738c-4a90-a07c-09c477eb0d3e_2468ecf1-18e3-42ef-af4b-a94e3d78d823_e8b7b353-ca00-459b-ab54-1357c65b2f6c_seff" label="ResponseTime1s_gui_login" relatedQosConstraintId="05dffc5d-738c-4a90-a07c-09c477eb0d3e_2468ecf1-18e3-42ef-af4b-a94e3d78d823_e8b7b353-ca00-459b-ab54-1357c65b2f6c_seff" startEnabled="true" timeStep="10" timeWindow="10">
+    <mo:collectedMetric metricName="ResponseTime">
+		<mo:parameter name="samplingProbability">1</mo:parameter>
+	</mo:collectedMetric>
+    <mo:monitoredTargets>
+      <mo:monitoredTarget class="Method" type="2468ecf1-18e3-42ef-af4b-a94e3d78d823_e8b7b353-ca00-459b-ab54-1357c65b2f6c_seff"/>
+    </mo:monitoredTargets>
+   <mo:metricAggregation aggregateFunction="Average" groupingClass="Method"/>
+    <mo:condition>METRIC &gt; 1000.0</mo:condition>
+    <mo:actions>
+      <mo:action name="OutputMetric">
+        <mo:parameter name="metric">gui_login_violated</mo:parameter>
+        <mo:parameter name="value">METRIC</mo:parameter>
+        <mo:parameter name="resourceId">ID</mo:parameter>
+      </mo:action>
+    </mo:actions>
+  </mo:monitoringRule>
+  <mo:monitoringRule id="30424d7c-6c4e-4ad5-a450-3252f153c7cd_05dffc5d-738c-4a90-a07c-09c477eb0d3e_2468ecf1-18e3-42ef-af4b-a94e3d78d823_29af5b75-9bc6-4adc-9710-0bed88817d7c_seff" label="ResponseTime1s_gui_auth" relatedQosConstraintId="05dffc5d-738c-4a90-a07c-09c477eb0d3e_2468ecf1-18e3-42ef-af4b-a94e3d78d823_29af5b75-9bc6-4adc-9710-0bed88817d7c_seff" startEnabled="true" timeStep="10" timeWindow="10">
+    <mo:collectedMetric metricName="ResponseTime">
+		<mo:parameter name="samplingProbability">1</mo:parameter>
+	</mo:collectedMetric>
+    <mo:monitoredTargets>
+      <mo:monitoredTarget class="Method" type="2468ecf1-18e3-42ef-af4b-a94e3d78d823_29af5b75-9bc6-4adc-9710-0bed88817d7c_seff"/>
+    </mo:monitoredTargets>
+    <mo:metricAggregation aggregateFunction="Average" groupingClass="Method"/>
+    <mo:condition>METRIC &gt; 1000.0</mo:condition>
+    <mo:actions>
+      <mo:action name="OutputMetric">
+        <mo:parameter name="metric">gui_auth_violated</mo:parameter>
+       <mo:parameter name="value">METRIC</mo:parameter>
+        <mo:parameter name="resourceId">ID</mo:parameter>
+      </mo:action>
+    </mo:actions>
+  </mo:monitoringRule>
+  <mo:monitoringRule id="83b95a28-36b6-4aa9-9898-91cc59abaecd_af54b44f-2f93-408b-87d4-f3540fdc49a5_2468ecf1-18e3-42ef-af4b-a94e3d78d823_25e0a89b-b713-420c-8858-7c345caa7385_seff" label="ResponseTime_gui_getEhealthParameters" relatedQosConstraintId="af54b44f-2f93-408b-87d4-f3540fdc49a5_2468ecf1-18e3-42ef-af4b-a94e3d78d823_25e0a89b-b713-420c-8858-7c345caa7385_seff" startEnabled="true" timeStep="10" timeWindow="10">
+    <mo:collectedMetric metricName="ResponseTime">
+		<mo:parameter name="samplingProbability">1</mo:parameter>
+	</mo:collectedMetric>
+    <mo:monitoredTargets>
+      <mo:monitoredTarget class="Method" type="2468ecf1-18e3-42ef-af4b-a94e3d78d823_25e0a89b-b713-420c-8858-7c345caa7385_seff"/>
+    </mo:monitoredTargets>
+    <mo:metricAggregation aggregateFunction="Average" groupingClass="Method"/>
+    <mo:condition>METRIC &gt; 2500.0</mo:condition>
+    <mo:actions>
+      <mo:action name="OutputMetric">
+        <mo:parameter name="metric">gui_getEhealthParameters_violated</mo:parameter>
+        <mo:parameter name="value">METRIC</mo:parameter>
+        <mo:parameter name="resourceId">ID</mo:parameter>
+      </mo:action>
+    </mo:actions>
+  </mo:monitoringRule>
+  <mo:monitoringRule id="c7e5630d-66f6-4fda-b423-2b61886d779c_af54b44f-2f93-408b-87d4-f3540fdc49a5_2468ecf1-18e3-42ef-af4b-a94e3d78d823_9a052fcb-15e4-4b65-a137-cafe311a030d_seff" label="ResponseTime_gui_listOfClinicians" relatedQosConstraintId="af54b44f-2f93-408b-87d4-f3540fdc49a5_2468ecf1-18e3-42ef-af4b-a94e3d78d823_9a052fcb-15e4-4b65-a137-cafe311a030d_seff" startEnabled="true" timeStep="10" timeWindow="10">
+   <mo:collectedMetric metricName="ResponseTime">
+		<mo:parameter name="samplingProbability">1</mo:parameter>
+	</mo:collectedMetric>
+    <mo:monitoredTargets>
+      <mo:monitoredTarget class="Method" type="2468ecf1-18e3-42ef-af4b-a94e3d78d823_9a052fcb-15e4-4b65-a137-cafe311a030d_seff"/>
+    </mo:monitoredTargets>
+    <mo:metricAggregation aggregateFunction="Average" groupingClass="Method"/>
+    <mo:condition>METRIC &gt; 2500.0</mo:condition>
+    <mo:actions>
+      <mo:action name="OutputMetric">
+        <mo:parameter name="metric">gui_listOfClinicians_violated</mo:parameter>
+        <mo:parameter name="value">METRIC</mo:parameter>
+        <mo:parameter name="resourceId">ID</mo:parameter>
+      </mo:action>
+    </mo:actions>
+  </mo:monitoringRule>
+  <mo:monitoringRule id="bf37923c-e849-46e2-a8ba-67edd15363bc_af54b44f-2f93-408b-87d4-f3540fdc49a5_2468ecf1-18e3-42ef-af4b-a94e3d78d823_8b8d0b0e-a166-41a3-a743-aec124629f5d_seff" label="ResponseTime_gui_getEhealthRoles" relatedQosConstraintId="af54b44f-2f93-408b-87d4-f3540fdc49a5_2468ecf1-18e3-42ef-af4b-a94e3d78d823_8b8d0b0e-a166-41a3-a743-aec124629f5d_seff" startEnabled="true" timeStep="10" timeWindow="10">
+   <mo:collectedMetric metricName="ResponseTime">
+		<mo:parameter name="samplingProbability">1</mo:parameter>
+	</mo:collectedMetric>
+    <mo:monitoredTargets>
+      <mo:monitoredTarget class="Method" type="2468ecf1-18e3-42ef-af4b-a94e3d78d823_8b8d0b0e-a166-41a3-a743-aec124629f5d_seff"/>
+    </mo:monitoredTargets>
+   <mo:metricAggregation aggregateFunction="Average" groupingClass="Method"/>
+    <mo:condition>METRIC &gt; 2500.0</mo:condition>
+    <mo:actions>
+      <mo:action name="OutputMetric">
+        <mo:parameter name="metric">gui_getEhealthRoles_violated</mo:parameter>
+        <mo:parameter name="value">METRIC</mo:parameter>
+        <mo:parameter name="resourceId">ID</mo:parameter>
+      </mo:action>
+    </mo:actions>
+  </mo:monitoringRule>
+  <mo:monitoringRule id="02f209c8-3b4a-4dfb-bc13-fa942e275338_af54b44f-2f93-408b-87d4-f3540fdc49a5_2468ecf1-18e3-42ef-af4b-a94e3d78d823_6f19176e-113a-439e-8f0a-ad405fb59506_seff" label="ResponseTime_gui_getStatus" relatedQosConstraintId="af54b44f-2f93-408b-87d4-f3540fdc49a5_2468ecf1-18e3-42ef-af4b-a94e3d78d823_6f19176e-113a-439e-8f0a-ad405fb59506_seff" startEnabled="true" timeStep="10" timeWindow="10">
+    <mo:collectedMetric metricName="ResponseTime">
+		<mo:parameter name="samplingProbability">1</mo:parameter>
+	</mo:collectedMetric>
+    <mo:monitoredTargets>
+      <mo:monitoredTarget class="Method" type="2468ecf1-18e3-42ef-af4b-a94e3d78d823_6f19176e-113a-439e-8f0a-ad405fb59506_seff"/>
+    </mo:monitoredTargets>
+   <mo:metricAggregation aggregateFunction="Average" groupingClass="Method"/>
+    <mo:condition>METRIC &gt; 2500.0</mo:condition>
+    <mo:actions>
+      <mo:action name="OutputMetric">
+        <mo:parameter name="metric">gui_getStatus_violated</mo:parameter>
+        <mo:parameter name="value">METRIC</mo:parameter>
+        <mo:parameter name="resourceId">ID</mo:parameter>
+      </mo:action>
+    </mo:actions>
+  </mo:monitoringRule>
+</mo:monitoringRules>

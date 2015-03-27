@@ -42,12 +42,12 @@ None
 {
 	"observers": [
 		{
-			"id"="109384935893",
-			"callbackUrl"="http://url.to.observer.1:9999/path"
+			"id": "109384935893",
+			"callbackUrl": "http://url.to.observer.1:9999/path"
 		},
 		{
-			"id"="109384314891",
-			"callbackUrl"="http://url.to.observer.2:9999/another/path"
+			"id": "109384314891",
+			"callbackUrl": "http://url.to.observer.2:9999/another/path"
 		},
 	]
 }

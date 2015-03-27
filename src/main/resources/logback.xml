@@ -12,7 +12,7 @@
 	<logger name="it.polimi.modaclouds.qos_models.monitoring_rules.actions" level="INFO" />
 	
 
-	<root level="OFF">
+	<root level="ERROR">
 		<appender-ref ref="STDERR" />
 	</root>
 </configuration>

@@ -20,6 +20,7 @@ import it.polimi.modaclouds.monitoring.monitoring_manager.MetricDoesNotExistExce
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
 import it.polimi.modaclouds.monitoring.monitoring_manager.Observer;
 
+import java.net.MalformedURLException;
 import java.util.Set;
 
 import org.restlet.data.MediaType;
@@ -36,7 +37,7 @@ import com.google.gson.JsonObject;
 
 public class MultipleObserversDataServer extends ServerResource {
 	
-	private Logger logger = LoggerFactory.getLogger(SingleMetricDataServer.class
+	private Logger logger = LoggerFactory.getLogger(MultipleObserversDataServer.class
 			.getName());
 	
 	@Post
@@ -50,10 +51,16 @@ public class MultipleObserversDataServer extends ServerResource {
 			this.getResponse().setStatus(Status.SUCCESS_CREATED);
 			this.getResponse().setEntity(observerId, MediaType.TEXT_PLAIN);
 		} catch (MetricDoesNotExistException e) {
-			logger.error("The metric does not exist", e);
+			logger.error(e.getMessage());
 			this.getResponse().setStatus(Status.CLIENT_ERROR_NOT_FOUND,
-					"The metric does not exist");
-			this.getResponse().setEntity("The metric does not exist",
+					e.getMessage());
+			this.getResponse().setEntity(e.getMessage(),
+					MediaType.TEXT_PLAIN);
+		} catch (MalformedURLException e) {
+			logger.error(e.getMessage());
+			this.getResponse().setStatus(Status.CLIENT_ERROR_BAD_REQUEST,
+					e.getMessage());
+			this.getResponse().setEntity(e.getMessage(),
 					MediaType.TEXT_PLAIN);
 		} catch (Exception e) {
 			logger.error("Error while adding observer", e);

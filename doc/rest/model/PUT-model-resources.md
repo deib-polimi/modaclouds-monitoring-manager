@@ -34,7 +34,7 @@ A JSON containing the new model that must be uploaded on the knowledge base
 
 ## Errors
 
-* **505 error while uploading the model** - The model was not valid
+* **400 Bad Request** - The model was not valid
 
 ***
 

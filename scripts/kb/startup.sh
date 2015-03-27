@@ -16,7 +16,7 @@
 #    limitations under the License.
 #
 
-pkill fuseki-server
+pkill -f 'java.*fuseki-server'
 
 if [ ! -d /opt/fuseki/ds ];
 	then mkdir -p /opt/fuseki/ds

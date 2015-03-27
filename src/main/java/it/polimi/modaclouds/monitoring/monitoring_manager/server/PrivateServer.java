@@ -16,15 +16,12 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
-import it.polimi.modaclouds.monitoring.monitoring_manager.ConfigurationException;
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
 import it.polimi.modaclouds.monitoring.monitoring_manager.configuration.ManagerConfig;
 
-import org.apache.jena.atlas.web.HttpException;
 import org.restlet.Application;
 import org.restlet.Component;
 import org.restlet.Restlet;
-import org.restlet.data.Protocol;
 import org.restlet.routing.Router;
 import org.restlet.routing.Template;
 import org.slf4j.Logger;

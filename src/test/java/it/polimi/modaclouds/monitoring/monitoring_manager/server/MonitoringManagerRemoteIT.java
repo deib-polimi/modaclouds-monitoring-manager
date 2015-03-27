@@ -157,6 +157,22 @@ public class MonitoringManagerRemoteIT {
 	}
 
 	@Test
+	public void atosRulesShouldBeInstalledAndUninstalledCorrectlyThroughREST()
+			throws Exception {
+		given().port(MM_PORT)
+				.body(IOUtils
+						.toString(getResourceAsStream("AtosMonitoringRules.xml")))
+				.post("/v1/monitoring-rules").then().assertThat()
+				.statusCode(204);
+		given().port(MM_PORT)
+				.delete("/v1/monitoring-rules/4d1ad207-6b4d-4aed-bee1-cb0fcb1629dc_79127a7e-c2d9-4463-93de-20e422a2d4be_2468ecf1-18e3-42ef-af4b-a94e3d78d823_b780c3f4-298c-4114-8d86-074b81374b4c_seff")
+				.then().assertThat().statusCode(204);
+		given().port(MM_PORT)
+				.delete("/v1/monitoring-rules/4d1ad207-6b4d-4aed-bee1-cb0fcb1629dc_79127a7e-c2d9-4463-93de-20e422a2d4be_2468ecf1-18e3-42ef-af4b-a94e3d78d823_b780c3f4-298c-4114-8d86-074b81374b4c_seff")
+				.then().assertThat().statusCode(404);
+	}
+
+	@Test
 	public void observersShouldBeAddedAndDeletedThroughREST() throws Exception {
 		given().port(MM_PORT)
 				.body(IOUtils
@@ -275,6 +291,19 @@ public class MonitoringManagerRemoteIT {
 				.body("$", emptyIterable());
 		given().port(DDA_PORT).get("/streams").then()
 				.body("$", emptyIterable());
+	}
+
+	@Test
+	public void registeringWrongObserverUrlShouldFail() throws Exception {
+		given().port(MM_PORT)
+				.body(IOUtils
+						.toString(getResourceAsStream("AvgResponseTimeRule.xml")))
+				.post("/v1/monitoring-rules").then().assertThat()
+				.statusCode(204);
+		String callbackurl = "localhost/null";
+		given().port(MM_PORT).body(callbackurl)
+				.post("/v1/metrics/AverageResponseTime/observers").then()
+				.assertThat().statusCode(400);
 	}
 
 }

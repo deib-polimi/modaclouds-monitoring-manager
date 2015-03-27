@@ -123,7 +123,9 @@ public class CSPARQLEngineManager {
 			// TODO temp implementation for actions
 			AbstractAction actionImpl = AbstractAction.getActionInstance(rule
 					.getActions().getActions().get(0));
-			if (actionImpl != null) {
+			if (actionImpl != null
+					&& !actionImpl.getName().equalsIgnoreCase(
+							OutputMetric.class.getSimpleName())) {
 				String queryUri = getQueryUriFromQueryId(queryIdByRuleId
 						.get(rule.getId()));
 				csparqlAPI.addObserver(queryUri, actionsExecutorUrl);
@@ -218,11 +220,11 @@ public class CSPARQLEngineManager {
 
 	public String addObserver(String metricname, String callbackUrl)
 			throws MetricDoesNotExistException, ServerErrorException,
-			ObserverErrorException, InternalErrorException {
+			ObserverErrorException, InternalErrorException, MalformedURLException {
 		metricname = metricname.toLowerCase();
 		String queryUri = getQueryUriFromMetric(metricname);
 		String returnedObserverUri = csparqlAPI.addObserver(queryUri,
-				callbackUrl);
+				new URL(callbackUrl).toString());
 		String observerId = returnedObserverUri.substring(returnedObserverUri
 				.lastIndexOf("/") + 1);
 		Set<Observer> observers = observersByMetric.get(metricname);
@@ -630,10 +632,10 @@ public class CSPARQLEngineManager {
 				throw new RuleInstallationException(
 						"Could not register stream " + streamName);
 			}
-			streamsByRuleId.put(rule.getId(), streamName);
 		} else {
 			logger.debug("Stream {} already registered", streamName);
 		}
+		streamsByRuleId.put(rule.getId(), streamName);
 		return streamName;
 	}
 

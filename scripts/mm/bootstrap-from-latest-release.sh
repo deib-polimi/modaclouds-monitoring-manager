@@ -16,14 +16,16 @@
 #    limitations under the License.
 #
 
+VERSION='1.6'
+
 if [ -d /opt/mm ];
 	then rm -r /opt/mm
 fi
 mkdir -p /opt/mm
 cd /opt/mm
 
-echo "Downloading monitoring-manager-1.5..."
-wget --quiet -O monitoring-manager.tar.gz https://github.com/deib-polimi/modaclouds-monitoring-manager/releases/download/v1.5/monitoring-manager-1.5-distribution.tar.gz
+echo "Downloading monitoring-manager latest release (v${VERSION})..."
+wget --quiet -O monitoring-manager.tar.gz https://github.com/deib-polimi/modaclouds-monitoring-manager/releases/download/v${VERSION}/monitoring-manager-${VERSION}-distribution.tar.gz
 tar -xvzf monitoring-manager.tar.gz -C .
 cd monitoring-manager*
 chmod +x monitoring-manager

@@ -9,6 +9,7 @@ Version 1
 ### Monitoring Rules
 
 - **[<code>GET</code> /monitoring-rules](rest/monitoring-rules/GET-monitoring-rules.md)**
+- **[<code>GET</code> /monitoring-rules/:id](rest/monitoring-rules/GET-monitoring-rules-id.md)**
 - **[<code>POST</code> /monitoring-rules](rest/monitoring-rules/POST-monitoring-rules.md)**
 - **[<code>DELETE</code> /monitoring-rules/:id](rest/monitoring-rules/DELETE-monitoring-rules-id.md)**
 
@@ -23,6 +24,7 @@ Version 1
 
 - **[<code>POST</code> /model/resources](rest/model/POST-model-resources.md)**
 - **[<code>PUT</code> /model/resources](rest/model/PUT-model-resources.md)**
+- **[<code>GET</code> /model/resources](rest/model/GET-model-resources.md)**
 - **[<code>DELETE</code> /model/resources/:id](rest/model/DELETE-model-resources-id.md)**
 - **[<code>GET</code> /model/resources/:id](rest/model/GET-model-resources-id.md)**
 

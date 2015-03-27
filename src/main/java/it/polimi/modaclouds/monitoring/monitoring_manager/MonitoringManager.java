@@ -33,6 +33,7 @@ import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
 import it.polimi.modaclouds.qos_models.util.Config;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -81,8 +82,8 @@ public class MonitoringManager {
 
 	public synchronized void installRules(MonitoringRules rules)
 			throws RuleInstallationException {
-		logger.info("Rules to install received.");
-		logger.info("Validating rules.");
+		logger.info("{} rule(s) to install", rules.getMonitoringRules().size());
+		logger.info("Validating rules");
 		validate(rules);
 		String installedRules = "";
 		try {
@@ -128,15 +129,26 @@ public class MonitoringManager {
 		}
 	}
 
-	public synchronized void uninstallRule(String id) {
+	public synchronized void uninstallRule(String id)
+			throws RuleDoesNotExistException {
+		logger.info("Uninstalling rule {}", id);
 		MonitoringRule rule = installedRules.get(id);
 		if (rule != null) {
 			dcFactoriesManager.uninstallRule(id);
 			csparqlEngineManager.uninstallRule(id);
 			installedRules.remove(id);
 		} else {
-			logger.warn("Rule {} does not exist, nothing was uninstalled", id);
+			throw new RuleDoesNotExistException();
 		}
+	}
+
+	public MonitoringRule getMonitoringRule(String id)
+			throws RuleDoesNotExistException {
+		MonitoringRule rule = installedRules.get(id);
+		if (rule == null) {
+			throw new RuleDoesNotExistException();
+		}
+		return rule;
 	}
 
 	private void installRule(MonitoringRule rule)
@@ -176,7 +188,9 @@ public class MonitoringManager {
 
 	public String addObserver(String metricname, String callbackUrl)
 			throws MetricDoesNotExistException, ServerErrorException,
-			ObserverErrorException, InternalErrorException {
+			ObserverErrorException, InternalErrorException, MalformedURLException {
+		logger.info("Adding observer with callbackURL {} to metric {}",
+				callbackUrl, metricname);
 		String observerId = csparqlEngineManager.addObserver(metricname,
 				callbackUrl);
 		return observerId;
@@ -191,22 +205,27 @@ public class MonitoringManager {
 	public void removeObserver(String metricName, String observerId)
 			throws ServerErrorException, ObserverErrorException,
 			MetricDoesNotExistException {
+		logger.info("Removing observer {} from metric {}", observerId,
+				metricName);
 		csparqlEngineManager.removeObserver(metricName, observerId);
 	}
 
 	public void deleteInstance(String id) throws SerializationException {
+		logger.info("Deleting instance {} from the model in the KB", id);
 		knowledgeBase.deleteEntitiesByPropertyValue(id,
 				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 	}
 
 	public void uploadModel(Model update) throws SerializationException,
 			DeserializationException {
+		logger.info("Uploading model in the KB");
 		knowledgeBase.clearGraph(MODEL_GRAPH_NAME);
 		updateModel(update);
 	}
 
 	public void updateModel(Model update) throws SerializationException,
 			DeserializationException {
+		logger.info("Updating model in the KB");
 		knowledgeBase.add(update.getResources(),
 				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 	}

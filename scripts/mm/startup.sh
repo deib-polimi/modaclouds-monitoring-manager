@@ -16,7 +16,7 @@
 #    limitations under the License.
 #
 
-pkill monitoring-manager
+pkill -f 'java.*monitoring-manager'
 
 cd /opt/mm/monitoring-manager*
 mkdir -p /vagrant/logs

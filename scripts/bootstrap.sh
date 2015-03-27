@@ -16,4 +16,4 @@
 #
 
 apt-get update
-apt-get install -y tar openjdk-7-jdk maven
+apt-get install -y tar openjdk-7-jdk maven git

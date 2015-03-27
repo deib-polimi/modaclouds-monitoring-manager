@@ -16,9 +16,9 @@
 #    limitations under the License.
 #
 
-pkill rsp-services-csparql
+pkill -f 'java.*rsp-services-csparql'
 
-cd /opt/dda/rsp-services-csparql-0.4.6.2-modaclouds
+cd /opt/dda/rsp-services-csparql*
 mkdir -p /vagrant/logs
 echo "Starting dda..."
 ./rsp-services-csparql > /vagrant/logs/dda.log 2>&1 &

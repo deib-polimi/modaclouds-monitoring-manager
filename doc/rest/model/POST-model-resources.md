@@ -35,7 +35,7 @@ A JSON containing all the resources that must be added to the knowledge base.
 
 ## Errors
 
-* **505 error while adding resources** - One or more resources were not valid
+* **400 Bad Request** - One or more resources were not valid
 
 ***
 

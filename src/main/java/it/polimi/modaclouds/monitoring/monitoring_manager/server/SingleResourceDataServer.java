@@ -16,14 +16,11 @@
  */
 package it.polimi.modaclouds.monitoring.monitoring_manager.server;
 
-import java.util.List;
-
 import it.polimi.modaclouds.monitoring.monitoring_manager.MonitoringManager;
 import it.polimi.modaclouds.qos_models.monitoring_ontology.Resource;
 
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
-import org.restlet.representation.Representation;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
@@ -35,7 +32,7 @@ import com.google.gson.Gson;
 public class SingleResourceDataServer extends ServerResource {
 
 	private Logger logger = LoggerFactory
-			.getLogger(SingleMetricDataServer.class.getName());
+			.getLogger(SingleResourceDataServer.class.getName());
 
 	@Delete
 	public void deleteInstance() {

@@ -21,6 +21,21 @@ Take a look at the [documentation table of contents](doc/TOC.md).
 
 ## Change List
 
+v1.6:
+* added a Vagrantfile in the root of the repo for testing purpose, see the developer manual
+* added a Vagrantfile in the released assembly for launching the entire monitoring platform using Vagrant, see the user manual
+* fixed problem that did not prevent attaching observers with malformed URL
+* added initial structure for the webapp
+* fixed problem which did not exclude OutputMetric actions from new actions
+* improved logging and error messages
+* improved validation when updating/uploading the deployment model
+* added API for retrieving a single rule
+* fixed problem that caused errors when uninstalling rules that were using the same input metric
+* implemented test observers and included in the released assembly, see the developer manual and user manual
+* updated to [knowledge-base-api 2.3.1](https://github.com/deib-polimi/modaclouds-knowledge-base-api/releases/tag/v2.3.1)
+* updatad to [data-collector-factory 0.3.3](https://github.com/deib-polimi/modaclouds-data-collector-factory/releases/tag/v0.3.3)
+* updated to [qos-models 2.4.1](https://github.com/deib-polimi/modaclouds-qos-models/releases/tag/v2.4.1)
+
 v1.5:
 * integrated with [qos-models 2.4](https://github.com/deib-polimi/modaclouds-qos-models/releases/tag/v2.4) for actions execution
 * a private endpoint was implemented for internal communication and the port can be specified through the configuration, see the user manual

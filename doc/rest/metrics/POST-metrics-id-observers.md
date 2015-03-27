@@ -31,6 +31,7 @@ the callback url of the observer.
 
 ## Errors
 
+* **400 Bad Request** - the callback url is not valid.
 * **404 Resource not found** - The metric does not exist.
 
 ***
