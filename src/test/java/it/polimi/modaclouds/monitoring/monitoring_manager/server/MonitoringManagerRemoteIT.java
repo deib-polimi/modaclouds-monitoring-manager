@@ -33,6 +33,7 @@ import it.polimi.modaclouds.qos_models.schema.MonitoringRule;
 import it.polimi.modaclouds.qos_models.schema.MonitoringRules;
 import it.polimi.modaclouds.qos_models.util.XMLHelper;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -180,20 +181,21 @@ public class MonitoringManagerRemoteIT {
 				.post("/v1/monitoring-rules").then().assertThat()
 				.statusCode(204);
 		String callbackurl = "http://127.0.0.1/null";
-		String observerId = given().port(MM_PORT).body(callbackurl)
+		Observer registeredObserver = given().port(MM_PORT).body(callbackurl)
 				.post("/v1/metrics/AverageResponseTime/observers").andReturn()
-				.body().asString();
+				.body().as(Observer.class);
 		String jsonObservers = given().port(MM_PORT)
 				.get("/v1/metrics/AverageResponseTime/observers").asString();
 		List<Observer> observers = getListFromJsonField(jsonObservers,
 				Observer.class, "observers");
-		assertEquals(observers.get(0).getId(), observerId);
+		assertEquals(observers.get(0).getId(), registeredObserver.getId());
 		assertEquals(observers.get(0).getCallbackUrl(), callbackurl);
 		assertNull(observers.get(0).getQueryUri());
 		assertEquals(observers.size(), 1);
 		given().port(MM_PORT)
 				.delete("/v1/metrics/AverageResponseTime/observers/"
-						+ observerId).then().assertThat().statusCode(204);
+						+ registeredObserver.getId()).then().assertThat()
+				.statusCode(204);
 		given().port(MM_PORT).get("/v1/metrics/AverageResponseTime/observers")
 				.then().assertThat()
 				.body(equalToIgnoringWhiteSpace("{\"observers\":[]}"));
@@ -304,6 +306,15 @@ public class MonitoringManagerRemoteIT {
 		given().port(MM_PORT).body(callbackurl)
 				.post("/v1/metrics/AverageResponseTime/observers").then()
 				.assertThat().statusCode(400);
+	}
+
+	@Test
+	public void correctModelShouldBeUploaded() throws Exception {
+		given().port(MM_PORT)
+				.body(IOUtils
+						.toString(getResourceAsStream("mic-deployment.json")))
+				.post("/v1/model/resources").then().assertThat()
+				.statusCode(204);
 	}
 
 }

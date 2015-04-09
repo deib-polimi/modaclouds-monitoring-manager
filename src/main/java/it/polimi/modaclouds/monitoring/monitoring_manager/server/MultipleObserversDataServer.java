@@ -47,9 +47,10 @@ public class MultipleObserversDataServer extends ServerResource {
 					.getAttributes().get("manager");
 			String metricname = (String) this.getRequest().getAttributes().get("metricname");
 			String callbackUrl = rep.getText();
-			String observerId = manager.addObserver(metricname, callbackUrl);
+			Observer observer = manager.addObserver(metricname, callbackUrl);
+			String json = new Gson().toJson(observer);
 			this.getResponse().setStatus(Status.SUCCESS_CREATED);
-			this.getResponse().setEntity(observerId, MediaType.TEXT_PLAIN);
+			this.getResponse().setEntity(json, MediaType.APPLICATION_JSON);
 		} catch (MetricDoesNotExistException e) {
 			logger.error(e.getMessage());
 			this.getResponse().setStatus(Status.CLIENT_ERROR_NOT_FOUND,

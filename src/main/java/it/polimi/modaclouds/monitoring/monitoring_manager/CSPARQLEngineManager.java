@@ -218,7 +218,7 @@ public class CSPARQLEngineManager {
 		}
 	}
 
-	public String addObserver(String metricname, String callbackUrl)
+	public Observer addObserver(String metricname, String callbackUrl)
 			throws MetricDoesNotExistException, ServerErrorException,
 			ObserverErrorException, InternalErrorException, MalformedURLException {
 		metricname = metricname.toLowerCase();
@@ -232,8 +232,9 @@ public class CSPARQLEngineManager {
 			observers = new HashSet<Observer>();
 			observersByMetric.put(metricname, observers);
 		}
-		observers.add(new Observer(observerId, callbackUrl, queryUri));
-		return observerId;
+		Observer observer = new Observer(observerId, callbackUrl, queryUri);
+		observers.add(observer);
+		return observer;
 	}
 
 	public Set<Observer> getObservers(String metricname)

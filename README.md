@@ -21,6 +21,12 @@ Take a look at the [documentation table of contents](doc/TOC.md).
 
 ## Change List
 
+v1.7:
+* the rest api for attaching observers (`POST /metrics/:id/observers`) now returns a json object instead of plain text with more information, see the doc
+* bug fix
+* updated to [knowledge-base-api 2.3.2](https://github.com/deib-polimi/modaclouds-knowledge-base-api/releases/tag/v2.3.2)
+* updatad to [data-collector-factory 0.3.4](https://github.com/deib-polimi/modaclouds-data-collector-factory/releases/tag/v0.3.4)
+
 v1.6:
 * added a Vagrantfile in the root of the repo for testing purpose, see the developer manual
 * added a Vagrantfile in the released assembly for launching the entire monitoring platform using Vagrant, see the user manual
@@ -29,7 +35,6 @@ v1.6:
 * fixed problem which did not exclude OutputMetric actions from new actions
 * improved logging and error messages
 * improved validation when updating/uploading the deployment model
-* added API for retrieving a single rule
 * fixed problem that caused errors when uninstalling rules that were using the same input metric
 * implemented test observers and included in the released assembly, see the developer manual and user manual
 * updated to [knowledge-base-api 2.3.1](https://github.com/deib-polimi/modaclouds-knowledge-base-api/releases/tag/v2.3.1)

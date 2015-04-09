@@ -186,14 +186,14 @@ public class MonitoringManager {
 		return rules;
 	}
 
-	public String addObserver(String metricname, String callbackUrl)
+	public Observer addObserver(String metricname, String callbackUrl)
 			throws MetricDoesNotExistException, ServerErrorException,
 			ObserverErrorException, InternalErrorException, MalformedURLException {
 		logger.info("Adding observer with callbackURL {} to metric {}",
 				callbackUrl, metricname);
-		String observerId = csparqlEngineManager.addObserver(metricname,
+		Observer observer = csparqlEngineManager.addObserver(metricname,
 				callbackUrl);
-		return observerId;
+		return observer;
 	}
 
 	public Set<Observer> getObservers(String metricname)
@@ -218,9 +218,11 @@ public class MonitoringManager {
 
 	public void uploadModel(Model update) throws SerializationException,
 			DeserializationException {
-		logger.info("Uploading model in the KB");
+		logger.info("Clearing existing model if any");
 		knowledgeBase.clearGraph(MODEL_GRAPH_NAME);
-		updateModel(update);
+		logger.info("Uploading model in the KB");
+		knowledgeBase.add(update.getResources(),
+				MOVocabulary.resourceIdParameterName, MODEL_GRAPH_NAME);
 	}
 
 	public void updateModel(Model update) throws SerializationException,

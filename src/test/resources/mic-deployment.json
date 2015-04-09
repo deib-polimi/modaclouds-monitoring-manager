@@ -1,0 +1,38 @@
+{
+  "internalComponents": [
+    {
+      "id": "mic3", 
+      "providedMethods": [
+        "mic3-register", 
+        "mic3-answerQuestions", 
+        "mic3-saveAnswers"
+      ], 
+      "requiredComponents": [
+        "frontend3"
+      ], 
+      "type": "Mic"
+    }
+  ], 
+  "methods": [
+    {
+      "id": "mic3-answerQuestions", 
+      "type": "answerQuestions"
+    }, 
+    {
+      "id": "mic3-saveAnswers", 
+      "type": "saveAnswers"
+    }, 
+    {
+      "id": "mic3-register", 
+      "type": "register"
+    }
+  ], 
+  "vMs": [
+    {
+      "cloudProvider": "amazon", 
+      "id": "frontend3", 
+      "numberOfCPUs": 2, 
+      "type": "Frontend"
+    }
+  ]
+}

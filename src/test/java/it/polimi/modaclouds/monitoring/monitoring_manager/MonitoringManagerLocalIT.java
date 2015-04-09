@@ -114,12 +114,12 @@ public class MonitoringManagerLocalIT {
 		assertEquals(mm.getMetrics().size(), 1);
 		assertThat(mm.getMetrics().iterator().next(),
 				equalToIgnoringCase("AverageResponseTime"));
-		String observerId = mm.addObserver("AverageResponseTime",
+		Observer observer = mm.addObserver("AverageResponseTime",
 				"http://127.0.0.1/null");
 		Set<Observer> observers = mm.getObservers("AverageResponseTime");
-		assertEquals(observers.iterator().next().getId(), observerId);
+		assertEquals(observers.iterator().next().getId(), observer.getId());
 		assertEquals(observers.size(), 1);
-		mm.removeObserver("AverageResponseTime", observerId);
+		mm.removeObserver("AverageResponseTime", observer.getId());
 		assertTrue(mm.getObservers("AverageResponseTime").isEmpty());
 	}
 

@@ -9,7 +9,6 @@ Version 1
 ### Monitoring Rules
 
 - **[<code>GET</code> /monitoring-rules](rest/monitoring-rules/GET-monitoring-rules.md)**
-- **[<code>GET</code> /monitoring-rules/:id](rest/monitoring-rules/GET-monitoring-rules-id.md)**
 - **[<code>POST</code> /monitoring-rules](rest/monitoring-rules/POST-monitoring-rules.md)**
 - **[<code>DELETE</code> /monitoring-rules/:id](rest/monitoring-rules/DELETE-monitoring-rules-id.md)**
 

@@ -25,7 +25,7 @@ the callback url of the observer.
 
 **Status:** **201 Created**
 
-**Body:** the observer id.
+**Body:** a json object containing information about the observer just registered.
 
 ***
 
@@ -42,13 +42,16 @@ the callback url of the observer.
 	POST v1/metrics/ResponseTime/observers
 	
 ```
-http://url.to.observer.1:8176/ResponseTime
+http://url.to.observer.1:9999/path
 ```
 
 **Response**
 
 	Status: 201 Created
 
-```
-observer-id
+``` json
+{
+	"id": "109384935893",
+	"callbackUrl": "http://url.to.observer.1:9999/path"
+}
 ```
