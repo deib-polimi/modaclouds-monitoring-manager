@@ -16,7 +16,7 @@
 #    limitations under the License.
 #
 
-VERSION='1.6'
+VERSION='1.7'
 
 if [ -d /opt/mm ];
 	then rm -r /opt/mm
